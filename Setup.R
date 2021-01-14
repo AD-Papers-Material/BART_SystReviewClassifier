@@ -7,7 +7,8 @@ if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
 library(librarian)
 shelf(dplyr, stringr, readr, readxl, lubridate, Matrix, igraph, pbapply,
-			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, scales, patchwork)
+			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel,
+			scales, patchwork)
 
 required.pkgs <- setdiff(c('purrr', 'WriteXLS', 'tictoc', 'tidyr', 'arm', 'parallel'), installed.packages())
 
@@ -277,6 +278,15 @@ fix_duplicated_records <- function(Records) {
 
 	bind_rows(unique_sources, dup_sources) %>% select(-UID)
 }
+
+summarise_by_source <- function(file) {
+	data <- read_excel(file)
+
+	sources <- data$Source %>% str_split(., '; ') %>% unlist() %>% table()
+
+	c(setNames(as.vector(sources), names(sources)), Total = nrow(data))
+}
+
 
 
 # NLP ---------------------------------------------------------------------
