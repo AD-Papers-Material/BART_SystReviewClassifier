@@ -1,13 +1,41 @@
 ---
 title: "Manuscript"
 author: "Angelo D'Ambrosio"
-date: "14/1/2021"
-output: word_document
+date: "12/1/2021"
+output:
+  github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, message = F, warning = F, error = F, dpi = 400)
+```{r Setup, include=FALSE, cache=TRUE, cache.vars='annotation_summary'}
+knitr::opts_knit$set(root.dir = ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd()))
+
+print(getwd())
+
+knitr::opts_chunk$set(
+	echo = F,
+	error = F,
+	message = FALSE,
+	warning = FALSE,
+	dpi = 400
+)
+source('Setup.R')
+
+annotation_summary <- summarise_annotations(annotation.folder = "Annotations", plot = F)
 ```
 
 ## Results
 
+```{r Results}
+
+first_query_file <- file.path("Annotations", "Records_2020-12-11", "Records_11.12.20.xlsx")
+
+sources_first_query <- summarise_by_source(first_query_file) %>% as.list()
+
+first_annotation_results <- annotation_summary %>% filter(Ord == 1, str_detect(Label,'Reviewed')) %>% {
+    df <- .
+    df$Value %>% setNames(make.names(df$Label)) %>% as.list()
+}
+```
+
+The first batch of searches, performed with the two manually curated input queries, returned `r sources_first_query$Total` unique results, specifically `r sources_first_query$Pubmed` unique results from Pubmed, `r sources_first_query$WOS` from Web of Science, and `r sources_first_query$IEEE` from IEEE.\
+Of the records retrieved using the input queries, `r first_annotation_results$Reviewed` were manually labeled as relevant or not for the topic of the systematic review. Of these `r with(first_annotation_results, sprintf('%d (%s)', Reviewed.positive, percent(Reviewed.positive/Reviewed)))` were labelled as positive, and `r with(first_annotation_results, sprintf('%d (%s)', Reviewed.negative, percent(Reviewed.negative/Reviewed)))` as negative.
