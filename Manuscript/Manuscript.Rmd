@@ -1,0 +1,13 @@
+---
+title: "Manuscript"
+author: "Angelo D'Ambrosio"
+date: "14/1/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F, error = F, dpi = 400)
+```
+
+## Results
+
