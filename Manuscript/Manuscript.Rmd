@@ -6,21 +6,26 @@ output:
   github_document
 ---
 
-```{r Setup, include=FALSE, cache=TRUE, cache.vars='annotation_summary'}
+```{r Setup, include=FALSE, cache.vars='annotation_summary'}
+
 knitr::opts_knit$set(root.dir = ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd()))
 
-print(getwd())
-
 knitr::opts_chunk$set(
-	echo = F,
-	error = F,
-	message = FALSE,
+	echo = FALSE,
+	error = FALSE,
+	message = T,
 	warning = FALSE,
 	dpi = 400
 )
+
 source('Setup.R')
 
-annotation_summary <- summarise_annotations(annotation.folder = "Annotations", plot = F)
+if (!file.exists('annotation_summary.rds')) {
+	annotation_summary <- summarise_annotations(annotation.folder = "Annotations", plot = F)
+	
+	saveRDS(annotation_summary, 'annotation_summary.rds')
+} else annotation_summary <- readRDS('annotation_summary.rds')
+
 ```
 
 ## Results
@@ -31,11 +36,65 @@ first_query_file <- file.path("Annotations", "Records_2020-12-11", "Records_11.1
 
 sources_first_query <- summarise_by_source(first_query_file) %>% as.list()
 
-first_annotation_results <- annotation_summary %>% filter(Ord == 1, str_detect(Label,'Reviewed')) %>% {
-    df <- .
-    df$Value %>% setNames(make.names(df$Label)) %>% as.list()
-}
+first_annotation_results <- annotation_summary %>%
+	filter(Ord == 1, str_detect(Label,'Reviewed')) %>% {
+		df <- .
+		df$Value %>% setNames(df$Label) %>% as.list()
+	}
+
+summary_table <- bind_rows(
+    annotation_summary %>%  filter(Ord == 1) %>% mutate(Ord = 0, File = 'Input_P_R', Value = replace(Value, !str_detect(Label, 'Reviewed'), 0)),
+    annotation_summary 
+) %>% 
+    filter(Label != 'Discordant') %>% 
+    mutate(
+        Task = case_when(str_detect(File, 'P_R') ~ 'R', T ~ 'P'),
+        Ord = Ord + 1
+    ) %>% 
+    select(Ord, Value, Total_records, Label, Task, Batch) %>% 
+    tidyr::pivot_wider(names_from = Label, values_from = Value) %>% 
+    transmute(
+        Task = Ord,
+        Task_type = .$Task,
+        across(c(Reviewed_positive, Reviewed_negative), ~ sapply(Task, function(i) {
+            ret = ''
+            if (Task_type[i] == 'R' & i != 1) {
+                prev.i <- max(Task[Task < i])
+                
+                diff <- .x[i] - .x[prev.i]
+                
+                if (diff != 0) ret <- paste0(' ', ifelse(diff > 0, '+', ''), diff)
+            }
+            ret
+        }), .names = "new_{.col}"),
+        Uncertain = ifelse(
+            Task_type == 'R',
+            '',
+            sprintf('%d (%s)%s', Uncertain, percent(Uncertain/Total_records), ifelse(New_uncertain > 0 , paste0(' +', New_uncertain), ''))
+        ),
+        Positive = ifelse(
+            Task_type == 'R',
+            sprintf('%d (%s)%s', Reviewed_positive, percent(Reviewed_positive/Total_records), new_Reviewed_positive),
+            sprintf('%d (%s)%s', Positive, percent(Positive/Total_records), ifelse(New_positive > 0, paste0(' +', New_positive), ''))
+        ),
+        Negative = ifelse(
+            Task_type == 'R',
+            sprintf('%d (%s)%s', Reviewed_negative, percent(Reviewed_negative/Total_records), new_Reviewed_negative),
+            sprintf('%d (%s)', Negative, percent(Negative/Total_records))
+        ),
+        Reviewed = ifelse(Task_type == 'R', Reviewed, ''),
+        Batch = factor(Batch) %>% as.numeric(),
+        New_rev_pos = NULL
+    ) %>% select(-matches('new')) %>% rename(`Task type` = Task_type) %>% group_split(Batch) %>% lapply(function(df) select(df, -Batch))
 ```
 
+### First search session
+
 The first batch of searches, performed with the two manually curated input queries, returned `r sources_first_query$Total` unique results, specifically `r sources_first_query$Pubmed` unique results from Pubmed, `r sources_first_query$WOS` from Web of Science, and `r sources_first_query$IEEE` from IEEE.\
-Of the records retrieved using the input queries, `r first_annotation_results$Reviewed` were manually labeled as relevant or not for the topic of the systematic review. Of these `r with(first_annotation_results, sprintf('%d (%s)', Reviewed.positive, percent(Reviewed.positive/Reviewed)))` were labelled as positive, and `r with(first_annotation_results, sprintf('%d (%s)', Reviewed.negative, percent(Reviewed.negative/Reviewed)))` as negative.
+Of the records retrieved using the input queries, `r first_annotation_results$Reviewed` were manually labeled as relevant or not for the topic of the systematic review. Of these `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_positive, percent(Reviewed_positive/Reviewed)))` were labeled as positive, and `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_negative, percent(Reviewed_negative/Reviewed)))` as negative.
+
+Subsequently, cycles of prediction/review tasks were performed, in which manually reviewed records (R tasks) were used to train the ML classification algorithm which is used then to reclassify all records (P tasks).
+
+`r knitr::kable(summary_table[[1]], caption = 'Table 1. Prediction (P) / review (R) tasks\' results after the first query was performed. The Uncertain column shows the number of new labeled records not already reviewed in the precedent tasks and the possible increment compared to the previous P task. The Positive column has different meaning for the type of task: for the P tasks is the number of positevely labeled records followed by the number of new positives not previously reviewed, if any; for the R task, the cumulative number of positive and its increment, if any. The same interpretation stands for the Negative column, albeit increments are not shown for the R tasks, since the negative predictions are not reviewed. All values are also shown as percentege over total of records available when the task was performed.')`
+
+### Second search session
