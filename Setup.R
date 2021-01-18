@@ -8,7 +8,7 @@ if (!('librarian' %in% installed.packages())) install.packages('librarian')
 library(librarian)
 shelf(dplyr, stringr, readr, readxl, lubridate, Matrix, igraph, pbapply,
 			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel,
-			scales, patchwork)
+			patchwork)
 
 required.pkgs <- setdiff(c('purrr', 'WriteXLS', 'tictoc', 'tidyr', 'arm', 'parallel'), installed.packages())
 
@@ -28,6 +28,10 @@ if (bart_machine_num_cores() != parallel::detectCores()) {
 
 `%nin%` <- function (x, table) {
 	!(match(x, table, nomatch = 0L) > 0L)
+}
+
+percent <- function(x) {
+	sapply(x, function(x) if (!is.na(x)) {if (abs(x * 100) < 1) sprintf('%s%%', signif(x * 100, 2)) else sprintf('%s%%', signif(x * 100, 3))} else NA)
 }
 
 
@@ -1454,11 +1458,10 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 				Positive = sum(Predicted %in% 'y'),
 				Negative = sum(Predicted %in% 'n'),
 				New_positive = sum(Predicted %in% 'y' & is.na(Manual)),
-				New_negative = sum(Predicted %in% 'y' & is.na(Manual)),
+				#New_negative = sum(Predicted %in% 'n' & is.na(Manual)),
 				New_uncertain = with(Annotated_data, sum(Predicted_label == 'unk' & is.na(Rev_prediction))),
 				Reviewed_positive = sum(Manual %in% 'y'),
 				Reviewed_negative = sum(Manual %in% 'n'),
-				#Reviewed = sum(!is.na(Annotated_data$Rev_prediction)),
 				Reviewed = sum(!is.na(Manual)),
 				Discordant = sum(Predicted == 'check'),
 				False_positive = sum(Predicted %in% 'y' & Manual %in% 'n')
