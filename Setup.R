@@ -1458,7 +1458,7 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 				Positive = sum(Predicted %in% 'y'),
 				Negative = sum(Predicted %in% 'n'),
 				New_positive = sum(Predicted %in% 'y' & is.na(Manual)),
-				#New_negative = sum(Predicted %in% 'n' & is.na(Manual)),
+				New_negative = sum(Predicted %in% 'n' & is.na(Manual)),
 				New_uncertain = with(Annotated_data, sum(Predicted_label == 'unk' & is.na(Rev_prediction))),
 				Reviewed_positive = sum(Manual %in% 'y'),
 				Reviewed_negative = sum(Manual %in% 'n'),
@@ -1478,8 +1478,7 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 			)
 		}) %>% bind_rows() %>% arrange(Date) %>%
 		mutate(
-			Ord = factor(paste(Date, str_detect(File, '_R_')), levels = unique(paste(Date, str_detect(File, '_R_')))) %>% as.numeric,
-			Label = str_replace_all(Label, c('_' = ' ', 'unc$' = 'uncertains'))
+			Ord = factor(paste(Date, str_detect(File, '_R_')), levels = unique(paste(Date, str_detect(File, '_R_')))) %>% as.numeric
 		) %>%
 		arrange(Ord)
 
