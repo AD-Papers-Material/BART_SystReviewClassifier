@@ -15,9 +15,13 @@ labeled as relevant or not for the topic of the systematic review. Of
 these 51 (5.07%) were labeled as positive, and 955 (94.9%) as negative.
 
 Subsequently, cycles of prediction/review tasks were performed, in which
-manually reviewed records (R task) were used to train the ML
+manually reviewed records (R tasks) were used to train the ML
 classification algorithm which is used then to reclassify all records (P
-task).
+tasks). In total 5 review tasks were required in addition to the initial
+one (tab. 1), for a total of 94 extra reviewed articles (90 predicted as
+uncertain and 4 as positive). After task 11, the two susbsequent P tasks
+returned no uncertain or positive prediction which were not already
+reviewed and therefore the first cycle was termined.
 
 | Task | Task type | Uncertain      | Positive       | Negative        | Reviewed |
 |-----:|:----------|:---------------|:---------------|:----------------|:---------|
@@ -40,11 +44,11 @@ query was performed. The Uncertain column shows the number of new
 labeled records not already reviewed in the precedent tasks and the
 possible increment compared to the previous P task. The Positive column
 has different meaning for the type of task: for the P tasks is the
-number positevely labeled records followed by the number of new
+number of positevely labeled records followed by the number of new
 positives not previously reviewed, if any; for the R task, the
 cumulative number of positive and its increment, if any. The same
 interpretation stands for the Negative column, albeit increments are not
-shown for the R task, since the negative predictions are not reviewed.
+shown for the R tasks, since the negative predictions are not reviewed.
 All values are also shown as percentege over total of records available
 when the task was performed.
 

@@ -6,7 +6,7 @@ output:
   github_document
 ---
 
-```{r Setup, include=FALSE, cache.vars='annotation_summary'}
+```{r Setup, include=FALSE}
 
 knitr::opts_knit$set(root.dir = ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd()))
 
@@ -31,16 +31,6 @@ if (!file.exists('annotation_summary.rds')) {
 ## Results
 
 ```{r Results}
-
-first_query_file <- file.path("Annotations", "Records_2020-12-11", "Records_11.12.20.xlsx")
-
-sources_first_query <- summarise_by_source(first_query_file) %>% as.list()
-
-first_annotation_results <- annotation_summary %>%
-	filter(Ord == 1, str_detect(Label,'Reviewed')) %>% {
-		df <- .
-		df$Value %>% setNames(df$Label) %>% as.list()
-	}
 
 summary_table <- bind_rows(
     annotation_summary %>%  filter(Ord == 1) %>% mutate(Ord = 0, File = 'Input_P_R', Value = replace(Value, !str_detect(Label, 'Reviewed'), 0)),
@@ -90,10 +80,32 @@ summary_table <- bind_rows(
 
 ### First search session
 
-The first batch of searches, performed with the two manually curated input queries, returned `r sources_first_query$Total` unique results, specifically `r sources_first_query$Pubmed` unique results from Pubmed, `r sources_first_query$WOS` from Web of Science, and `r sources_first_query$IEEE` from IEEE.\
-Of the records retrieved using the input queries, `r first_annotation_results$Reviewed` were manually labeled as relevant or not for the topic of the systematic review. Of these `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_positive, percent(Reviewed_positive/Reviewed)))` were labeled as positive, and `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_negative, percent(Reviewed_negative/Reviewed)))` as negative.
+```{r Result 1}
 
-Subsequently, cycles of prediction/review tasks were performed, in which manually reviewed records (R tasks) were used to train the ML classification algorithm which is used then to reclassify all records (P tasks).
+first_batch <- "Records_2020-12-11"
+
+first_query_file <- file.path("Annotations", first_batch, "Records_11.12.20.xlsx")
+
+sources_first_query <- summarise_by_source(first_query_file) %>% as.list()
+
+first_annotation_results <- annotation_summary %>%
+	filter(Ord == 1, str_detect(Label,'Reviewed')) %>% {
+		df <- .
+		df$Value %>% setNames(df$Label) %>% as.list()
+	}
+
+new_uncertains <- annotation_summary %>% filter(Batch == first_batch & Label == 'New_uncertain') %>% pull(Value) %>% sum
+
+new_positives <- annotation_summary %>% filter(Batch == first_batch & Label == 'New_positive') %>% pull(Value) %>% sum
+
+task_table <- summary_table[[1]]$`Task type` %>% table
+```
+
+
+The first batch of searches, performed with the two manually curated input queries, returned `r sources_first_query$Total` unique results, specifically `r sources_first_query$Pubmed` unique results from Pubmed, `r sources_first_query$WOS` from Web of Science, and `r sources_first_query$IEEE` from IEEE.\
+Of these records, `r first_annotation_results$Reviewed` were manually labeled as relevant or not for the topic of the systematic review. Of these `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_positive, percent(Reviewed_positive/Reviewed)))` were labeled as positive, and `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_negative, percent(Reviewed_negative/Reviewed)))` as negative.
+
+Subsequently, cycles of prediction/review tasks were performed, in which manually reviewed records (R tasks) were used to train the ML classification algorithm which is used then to reclassify all records (P tasks). In total `r task_table[['R']] - 1` review tasks were required in addition to the initial one (tab. 1), for a total of `r sum(new_uncertains, new_positives)` extra reviewed articles (`r new_uncertains` predicted as uncertain and `r new_positives` as positive). After task 11, the two susbsequent P tasks returned no uncertain or positive prediction which were not already reviewed and therefore the first cycle was termined.
 
 `r knitr::kable(summary_table[[1]], caption = 'Table 1. Prediction (P) / review (R) tasks\' results after the first query was performed. The Uncertain column shows the number of new labeled records not already reviewed in the precedent tasks and the possible increment compared to the previous P task. The Positive column has different meaning for the type of task: for the P tasks is the number of positevely labeled records followed by the number of new positives not previously reviewed, if any; for the R task, the cumulative number of positive and its increment, if any. The same interpretation stands for the Negative column, albeit increments are not shown for the R tasks, since the negative predictions are not reviewed. All values are also shown as percentege over total of records available when the task was performed.')`
 
