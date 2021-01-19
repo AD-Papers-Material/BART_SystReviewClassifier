@@ -1,9 +1,5 @@
 *.Rproj
-.RData
-.Rhistory
-.Rproj.user
-.Ruserdata
-*.DS_Store
+.DS_Store
 .R*
 Annotations
 Documentation
@@ -12,4 +8,4 @@ Records
 Model_backup.rds
 scrapbook.R
 Manuscript_cache*
-*.rds
+~*
