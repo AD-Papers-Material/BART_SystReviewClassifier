@@ -1215,7 +1215,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	out$Prediction_matrix <- avg_preds
 	out$DTM <- DTM
 
-	readr::write_rds(out, file.path('Models', paste0('Results_', time_stamp, '.rds')))
+	readr::write_rds(out, file.path('Models', paste0('Results_', time_stamp, '.rds')), compress = 'gz', )
 	tictoc::toc()
 
 	invisible(out)
@@ -1446,8 +1446,18 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 		pbmclapply(function(file) {
 
 			Annotated_data <- read_excel(file.path('Annotations', file))
+
 			Performance <- read_excel(file.path('Annotations', file), sheet = 'Out_of_sample_perf')
 			Performance <- as.list(Performance$Value) %>% setNames(Performance$Indicator)
+
+			Var_imp <- read_excel(file.path('Annotations', file), sheet = 'Variable_importance') %>%
+				filter(!str_detect(Term, 'MESH|KEYS')) %>%
+				mutate(Term = str_remove(Term, '.+__')) %>%
+				group_by(Term) %>% slice_max(order_by = Score) %>% ungroup() %>%
+				arrange(desc(Score)) %>% pull(Term) %>% head(15) %>%
+				str_replace('^\\w', str_to_upper) %>%
+				str_replace_all(c('\\._\\.' = ' ', '\\.' = ' OR ', '_' = ' ')) %>%
+				paste(collapse =', ')
 
 			Predicted <- Annotated_data$Predicted_label
 			Manual <- with(Annotated_data, case_when(
@@ -1470,7 +1480,8 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 				False_positive = sum(Predicted %in% 'y' & Manual %in% 'n'),
 				AUC = Performance$AUC,
 				Sensitivity = Performance$Sens,
-				Specificity = Performance$Spec
+				Specificity = Performance$Spec,
+				Important_vars = Var_imp
 			)
 
 			data.frame(

@@ -31,7 +31,12 @@ to the initial manual classification).
 The ML algorithm showed a gradually improving out-of-bag performance,
 ranging from 91.5% \[90.2%, 92.5%\] for the first predictive task to
 94.52% \[93.94%, 94.99%\] for the last, with the sensitivity always
-keeping an edge over the specificity, as per the model intentions.
+keeping an edge over the specificity, as per the model intentions.  
+The 15 most important keywords for the ML algorithm at the end of the
+session were: *Transfer, Network, Regional, Movement, Patient, Effort,
+Donker T, Hospital patient, Methicillin OR resistant methicillin OR
+methicillin aureus staphylococcus, Resistant, Facility, Share,
+California, Offer, Patient infection use model*.
 
 | Task | Task type | Uncertain      | Positive       | Negative        | Reviewed | AUC \[98% Cr.I.\]         | Sensitivity \[98% Cr.I.\] | Specificity \[98% Cr.I.\] |
 |-----:|:----------|:---------------|:---------------|:----------------|:---------|:--------------------------|:--------------------------|:--------------------------|
