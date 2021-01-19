@@ -1444,7 +1444,10 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 	Res <- list.files(annotation.folder, recursive = T, pattern = 'Records_P') %>%
 		str_subset('~\\$', negate = T) %>%
 		pbmclapply(function(file) {
+
 			Annotated_data <- read_excel(file.path('Annotations', file))
+			Performance <- read_excel(file.path('Annotations', file), sheet = 'Out_of_sample_perf')
+			Performance <- as.list(Performance$Value) %>% setNames(Performance$Indicator)
 
 			Predicted <- Annotated_data$Predicted_label
 			Manual <- with(Annotated_data, case_when(
@@ -1464,7 +1467,10 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 				Reviewed_negative = sum(Manual %in% 'n'),
 				Reviewed = sum(!is.na(Manual)),
 				Discordant = sum(Predicted == 'check'),
-				False_positive = sum(Predicted %in% 'y' & Manual %in% 'n')
+				False_positive = sum(Predicted %in% 'y' & Manual %in% 'n'),
+				AUC = Performance$AUC,
+				Sensitivity = Performance$Sens,
+				Specificity = Performance$Spec
 			)
 
 			data.frame(
