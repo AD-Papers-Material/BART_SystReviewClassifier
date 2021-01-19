@@ -94,19 +94,27 @@ first_annotation_results <- annotation_summary %>%
 		df$Value %>% setNames(df$Label) %>% as.list()
 	}
 
-new_uncertains <- annotation_summary %>% filter(Batch == first_batch & Label == 'New_uncertain') %>% pull(Value) %>% sum
+new_uncertains <- annotation_summary %>% filter(Batch == first_batch & Label == 'New_uncertain') %>% pull(Value) %>% sum()
 
-new_positives <- annotation_summary %>% filter(Batch == first_batch & Label == 'New_positive') %>% pull(Value) %>% sum
+new_positives <- annotation_summary %>% filter(Batch == first_batch & Label == 'New_positive') %>% pull(Value) %>% sum()
 
-task_table <- summary_table[[1]]$`Task type` %>% table
+all_unique_reviews <- annotation_summary %>% filter(Batch == first_batch & Label == 'Reviewed') %>% pull(Value) %>% max()
+
+task_table <- summary_table[[1]]$`Task type` %>% table()
+
+final_positives <- annotation_summary %>% filter(Batch == first_batch & Label == 'Reviewed_positive') %>% pull(Value) %>% max()
 ```
 
 
-The first batch of searches, performed with the two manually curated input queries, returned `r sources_first_query$Total` unique results, specifically `r sources_first_query$Pubmed` unique results from Pubmed, `r sources_first_query$WOS` from Web of Science, and `r sources_first_query$IEEE` from IEEE.\
+The first session of searches, performed using the two manually curated input queries, returned `r sources_first_query$Total` unique results, specifically `r sources_first_query$Pubmed` unique results for Pubmed, `r sources_first_query$WOS` for Web of Science, and `r sources_first_query$IEEE` for IEEE.\
 Of these records, `r first_annotation_results$Reviewed` were manually labeled as relevant or not for the topic of the systematic review. Of these `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_positive, percent(Reviewed_positive/Reviewed)))` were labeled as positive, and `r with(first_annotation_results, sprintf('%d (%s)', Reviewed_negative, percent(Reviewed_negative/Reviewed)))` as negative.
 
-Subsequently, cycles of prediction/review tasks were performed, in which manually reviewed records (R tasks) were used to train the ML classification algorithm which is used then to reclassify all records (P tasks). In total `r task_table[['R']] - 1` review tasks were required in addition to the initial one (tab. 1), for a total of `r sum(new_uncertains, new_positives)` extra reviewed articles (`r new_uncertains` predicted as uncertain and `r new_positives` as positive). After task 11, the two susbsequent P tasks returned no uncertain or positive prediction which were not already reviewed and therefore the first cycle was termined.
+Subsequently, cycles of prediction/review tasks were performed, in which manually reviewed records (R tasks) were used to train the ML classification algorithm which is then used to reclassify all records (P tasks). After task 11, two susbsequent P tasks returned no uncertain or positive unreviewed predictions, therefore the first session was termined. In total `r task_table[['R']] - 1` review tasks were required in addition to the initial manual classification (tab. 1), for a total of `r sum(new_uncertains, new_positives)` extra reviewed articles (`r new_uncertains` predicted as uncertain and `r new_positives` as positive).\
+Overall `r new_uncertains + new_positives + first_annotation_results$Reviewed` classification/review actions on `r all_unique_reviews` records were required, that is the `r percent((new_uncertains + new_positives + first_annotation_results$Reviewed)/sources_first_query$Total)` of the total number of records (`r sources_first_query$Total`) collected in the first session, while the rest was classified automatically as non-relevant.
+The dataset at the end of the session contained a total of `r final_positives` positive records (+`r final_positives - first_annotation_results$Reviewed_positive` positive records compared to the initial manual classification). 
 
-`r knitr::kable(summary_table[[1]], caption = 'Table 1. Prediction (P) / review (R) tasks\' results after the first query was performed. The Uncertain column shows the number of new labeled records not already reviewed in the precedent tasks and the possible increment compared to the previous P task. The Positive column has different meaning for the type of task: for the P tasks is the number of positevely labeled records followed by the number of new positives not previously reviewed, if any; for the R task, the cumulative number of positive and its increment, if any. The same interpretation stands for the Negative column, albeit increments are not shown for the R tasks, since the negative predictions are not reviewed. All values are also shown as percentege over total of records available when the task was performed.')`
+`r knitr::kable(summary_table[[1]], caption = 'Table 1. Prediction (P) / review (R) tasks\' results after the first query was performed. The Uncertain column shows the number of new labeled records not already reviewed in the precedent tasks and the possible increment compared to the previous P task. The Positive column has different meaning for the type of task: for the P tasks is the number of positevely labeled records followed by the number of new positives not previously reviewed, if any; for the R task, the cumulative number of positive and its increment, if any. The same interpretation stands for the Negative column, albeit increments are not shown for the R tasks, since the negative predictions are not reviewed. All values are also shown as percentege over total of records available in the session.')`
+
+
 
 ### Second search session

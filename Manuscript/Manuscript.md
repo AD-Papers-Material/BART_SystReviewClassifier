@@ -7,21 +7,27 @@ Angelo D’Ambrosio
 
 ### First search session
 
-The first batch of searches, performed with the two manually curated
+The first session of searches, performed using the two manually curated
 input queries, returned 9016 unique results, specifically 8867 unique
-results from Pubmed, 467 from Web of Science, and 48 from IEEE.  
-Of the records retrieved using the input queries, 1006 were manually
-labeled as relevant or not for the topic of the systematic review. Of
-these 51 (5.07%) were labeled as positive, and 955 (94.9%) as negative.
+results for Pubmed, 467 for Web of Science, and 48 for IEEE.  
+Of these records, 1006 were manually labeled as relevant or not for the
+topic of the systematic review. Of these 51 (5.07%) were labeled as
+positive, and 955 (94.9%) as negative.
 
 Subsequently, cycles of prediction/review tasks were performed, in which
 manually reviewed records (R tasks) were used to train the ML
-classification algorithm which is used then to reclassify all records (P
-tasks). In total 5 review tasks were required in addition to the initial
-one (tab. 1), for a total of 94 extra reviewed articles (90 predicted as
-uncertain and 4 as positive). After task 11, the two susbsequent P tasks
-returned no uncertain or positive prediction which were not already
-reviewed and therefore the first cycle was termined.
+classification algorithm which is then used to reclassify all records (P
+tasks). After task 11, two susbsequent P tasks returned no uncertain or
+positive unreviewed predictions, therefore the first session was
+termined. In total 5 review tasks were required in addition to the
+initial manual classification (tab. 1), for a total of 94 extra reviewed
+articles (90 predicted as uncertain and 4 as positive).  
+Overall 1100 classification/review actions on 1054 records were
+required, that is the 12.2% of the total number of records (9016)
+collected in the first session, while the rest was classified
+automatically as non-relevant. The dataset at the end of the session
+contained a total of 62 positive records (+11 positive records compared
+to the initial manual classification).
 
 | Task | Task type | Uncertain      | Positive       | Negative        | Reviewed |
 |-----:|:----------|:---------------|:---------------|:----------------|:---------|
@@ -50,6 +56,6 @@ cumulative number of positive and its increment, if any. The same
 interpretation stands for the Negative column, albeit increments are not
 shown for the R tasks, since the negative predictions are not reviewed.
 All values are also shown as percentege over total of records available
-when the task was performed.
+in the session.
 
 ### Second search session
