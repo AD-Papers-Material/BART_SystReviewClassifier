@@ -26,14 +26,18 @@ if (bart_machine_num_cores() != parallel::detectCores()) {
 	options(mc.cores = parallel::detectCores())
 }
 
+# Quite a useful one
 `%nin%` <- function (x, table) {
 	!(match(x, table, nomatch = 0L) > 0L)
 }
 
+
+# Nicer output than scales::percent()
 percent <- function(x) {
 	sapply(x, function(x) if (!is.na(x)) {if (abs(x * 100) < 1) sprintf('%s%%', signif(x * 100, 2)) else sprintf('%s%%', signif(x * 100, 3))} else NA)
 }
 
+# A file path friendly lubridate::now()
 safe_now <- function() str_replace_all(now(), c(' ' = 'T', ':' = '.'))
 
 
