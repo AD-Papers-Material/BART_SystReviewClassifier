@@ -26,7 +26,7 @@ if (bart_machine_num_cores() != parallel::detectCores()) {
 	options(mc.cores = parallel::detectCores())
 }
 
-# Quite a useful one
+# Easier to use than !(a %in% b)
 '%nin%' <- Negate('%in%')
 
 

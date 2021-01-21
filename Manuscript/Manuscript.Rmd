@@ -127,3 +127,4 @@ The 15 most important keywords for the ML algorithm at the end of the session we
 
 
 ### Second search session
+The model trained on the last review task record was used to create new, data-driven, search queries to collect more results missed by the first batch of queries. As described in the methods, 2 slightly different query-generation algorithms were used and to both resulting string we added a further constrain to focus the results on "antimicrobial drug resistance" and "healthcare associated infections". 
