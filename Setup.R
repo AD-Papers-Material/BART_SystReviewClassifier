@@ -6,7 +6,7 @@ options(java.parameters = "-Xmx12g")
 if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
 library(librarian)
-shelf(dplyr, stringr, readr, readxl, lubridate, Matrix, igraph, pbapply,
+shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
 			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel,
 			patchwork)
 
@@ -34,11 +34,139 @@ percent <- function(x) {
 	sapply(x, function(x) if (!is.na(x)) {if (abs(x * 100) < 1) sprintf('%s%%', signif(x * 100, 2)) else sprintf('%s%%', signif(x * 100, 3))} else NA)
 }
 
+safe_now <- function() str_replace_all(now(), c(' ' = 'T', ':' = '.'))
+
 
 # Article data management -------------------------------------------------
 
+search_wos <- function(query, year_query = NULL, additional_fields = NULL,
+											 default_field = 'TS', api_key = options('wos_api_key'),
+											 parallel = T, query.name = NULL, parse_query = T, ...) {
 
-read_bib <- function(files) {
+	if ('wosr' %nin% installed.packages()) {
+		warning('Required wosr package will be installed.')
+		install.packages('wosr')
+	}
+
+	if (is.null(query.name)) query.name <- glue('WOS_{safe_now()}.api')
+
+	if (parallel) { ## Use mclapply which is faster
+		pull_records <- function (query, editions = c("SCI", "SSCI", "AHCI", "ISTP",
+																									"ISSHP", "BSCI", "BHCI", "IC", "CCR", "ESCI"), sid = auth(Sys.getenv("WOS_USERNAME"),
+																																																						Sys.getenv("WOS_PASSWORD")), ...)
+		{
+			parse_wos <- function (all_resps)
+			{
+				pbmcapply::pbmclapply(all_resps, wosr:::one_parse)
+			}
+
+			qr_out <- wosr:::query_wos(query, editions = editions, sid = sid,
+																 ...)
+			if (qr_out$rec_cnt == 0) {
+				dfs <- unique(schema$df)
+				wos_unenforced <- vector("list", length = length(dfs))
+				names(wos_unenforced) <- dfs
+			}
+			else {
+				message("Downloading data\n")
+				all_resps <- wosr:::download_wos(qr_out, ...)
+				all_resps <- all_resps[vapply(all_resps, length, numeric(1)) >
+															 	1]
+				message("\nParsing XML\n")
+				parse_list <- parse_wos(all_resps)
+				df_list <- wosr:::data_frame_wos(parse_list)
+				wos_unenforced <- wosr:::process_wos_apply(df_list)
+			}
+			wos_data <- wosr:::enforce_schema(wos_unenforced)
+			wosr:::append_class(wos_data, "wos_data")
+		}
+	} else pull_records <- wosr::pull_wos
+
+
+	if (parse_query) {
+		query <- str_squish(query)
+
+		if (str_detect(query, '^\\w+ ?= ?')) {
+			pieces <- str_split(query, '( ?AND ?)?\\w{2} ?= ?') %>% unlist() %>%
+				str_squish() %>% str_subset('^$', negate = T)
+
+			fields <- str_extract_all(query, '\\w{2} ?= ?') %>% unlist() %>%
+				str_squish() %>% str_remove(' ?= ?')
+
+			query <- setNames(pieces, fields)
+
+		} else {
+			query <- setNames(glue('{query}'), default_field)
+		}
+
+		if (is.character(year_query)) {
+			year_query <- str_remove_all(year_query, '\\s+|^\\(|\\)$')
+
+			if (!str_detect(year_query, '^(\\d{4}-|(<|<=|>=|>))\\d{4}$')) {
+				stop('Year filter query is malformed.')
+			}
+
+			if (str_detect(query, 'PY ?=')) {
+				warning('Year filter both passed as an argument and in query. The latter will be ignored')
+			}
+
+			if (!str_detect(year_query, '-')) {
+				pieces <- str_split(year_query, '\\b') %>% unlist
+				comparator <- pieces[1]
+				year_piece <- as.numeric(pieces[2])
+
+				year_query <- switch(comparator,
+														 '>' = glue('{year_piece + 1}-{year(today())}'),
+														 '>=' = glue('{year_piece}-{year(today())}'),
+														 '<=' = glue('1985-{year_piece}'),
+														 '<' = glue('1985-{year_piece - 1}')
+				)
+			}
+
+			additional_fields <- c(
+				setNames(year_query, 'PY'),
+				additional_fields[names(additional_fields) %nin% 'PY']
+			)
+		}
+
+		query <- c(query, additional_fields)
+		query <- paste(
+			glue('{names(query)} = ({query})'),
+			collapse = ' AND '
+		)
+	}
+
+	records_list <- tryCatch(
+		pull_records(query, sid = api_key, ...),
+		error = function(e) stop(e, glue("\n\nquery: {query}"))
+	)
+
+	records <- records_list$publication %>%
+		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract, DOI = doi,
+							Journal = journal, N_citations = tot_cites,
+							Published = format(ymd(date),'%b %Y'), Source = 'WOS',
+							File = query.name)
+
+	additional_infos <- list(
+		authors = records_list$author %>% group_by(ID = ut) %>%
+			summarise(Authors = paste(display_name, collapse = '; ')),
+		topics = records_list$jsc %>% group_by(ID = ut) %>%
+			summarise(Topic = paste(jsc, collapse = '; ')),
+		art_type = records_list$doc_type %>% group_by(ID = ut) %>%
+			summarise(Article_type = paste(doc_type, collapse = '; ')),
+		auth_keys = records_list$keyword %>% group_by(ID = ut) %>%
+			summarise(Author_keywords = paste(keyword, collapse = '; ')),
+		keys = records_list$keywords_plus %>% group_by(ID = ut) %>%
+			summarise(Keywords = paste(keywords_plus, collapse = '; '))
+	)
+
+	for (info in additional_infos) records <- left_join(records, info, by = 'ID')
+
+	records
+}
+
+
+read_bib_files <- function(files) {
 
 	pblapply(files, function(file) {
 
@@ -246,7 +374,7 @@ update_annotation_file <- function(sources = NULL, source_folder = 'Records', re
 
 	message('- saving records...')
 
-	file <- file.path('Annotations', paste0('Records_', str_replace_all(now(), c(' ' = 'T', ':' = '.')), '.', out_type))
+	file <- file.path('Annotations', paste0('Records_', safe_now(), '.', out_type))
 
 	if (out_type == 'xlsx') {
 		WriteXLS::WriteXLS(joined_sources, ExcelFileName = file)
@@ -1206,7 +1334,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	tictoc::tic()
 
-	time_stamp <- str_replace_all(now(), c(' ' = 'T', ':' = '.'))
+	time_stamp <- safe_now()
 
 	WriteXLS::WriteXLS(out, ExcelFileName = file.path('Annotations', paste0('Records_P_', time_stamp, '.xlsx')))
 	tictoc::toc()
