@@ -111,14 +111,15 @@ clean_date_filter_arg <- function(year_query, cases,
 
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 default_field = 'TS', api_key = options('wos_api_key'),
-											 parallel = T, query_name = NULL, parse_query = T, ...) {
+											 parallel = T, parse_query = T,
+											 query_name = glue('WOS_{safe_now()}'), save = T, ...) {
 
 	if ('wosr' %nin% installed.packages()) {
 		warning('Required wosr package will be installed.')
 		install.packages('wosr')
 	}
 
-	if (is.null(query_name)) query_name <- glue('WOS_{safe_now()}.api')
+	if (is.null(query_name)) query_name <- glue('WOS_{safe_now()}')
 
 	if (parallel) { ## Use mclapply which is faster
 		pull_records <- function (query, editions = c("SCI", "SSCI", "AHCI", "ISTP",
@@ -216,6 +217,8 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 	)
 
 	for (info in additional_infos) records <- left_join(records, info, by = 'ID')
+
+	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
 	records
 }
