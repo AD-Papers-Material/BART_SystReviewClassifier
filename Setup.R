@@ -41,6 +41,65 @@ safe_now <- function() str_replace_all(lubridate::now(), c(' ' = 'T', ':' = '.')
 
 # Article data management -------------------------------------------------
 
+clean_date_filter_arg <- function(year_query, cases,
+																	arg_in_query_test = NULL, query = NULL) {
+
+	if (class(year_query) %nin% c('NULL', 'character') | length(year_query) > 1) {
+		stop('Year filter query should be a single character string or NULL')
+	}
+
+	if (is.character(year_query)) {
+
+		year_query <- str_remove_all(year_query, '\\s+|^\\(|\\)$')
+
+		if (!is.null(arg_in_query_test) & !is.null(query)) {
+			if (str_detect(query, 'PY ?=')) {
+				warning('Year filter already in query. The query will be used')
+				year_query <- NULL
+			}
+		}
+
+		if (str_detect(year_query, '^\\d{4}-\\d{4}$')) { # range
+
+			year_piece <- str_split(year_query, '-') %>% unlist
+
+			if (year_piece[2] < year_piece[1]) warning('Years\' order seems wrong, please check it.')
+
+			year_query <- glue(cases$range)
+
+		} else if (str_detect(year_query, '^(<|<=|>=|>)\\d{4}$')) { # boundary
+
+			pieces <- str_split(year_query, '\\b') %>% unlist
+			comparator <- pieces[1]
+			year_piece <- as.numeric(pieces[2])
+
+			year_query <- switch(
+				comparator,
+				'>' = glue(cases$gt),
+				'>=' = glue(cases$ge),
+				'<=' = glue(cases$le),
+				'<' = glue(cases$lt)
+			)
+		} else if (str_detect(year_query, '^\\d{4}$')) {
+
+				year_piece <- year_query
+				year_query <- glue(cases$eq)
+
+		} else {
+			stop('Year filter query is malformed. Possible patterns are:
+	gt: > Year;
+	ge: >= Year;
+	lt: < Year;
+	le: <= Year;
+	eq: Year;
+	range: Year1 - Year2')
+		}
+	}
+
+	year_query
+
+}
+
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 default_field = 'TS', api_key = options('wos_api_key'),
 											 parallel = T, query.name = NULL, parse_query = T, ...) {
@@ -102,28 +161,12 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 		}
 
 		if (is.character(year_query)) {
-			year_query <- str_remove_all(year_query, '\\s+|^\\(|\\)$')
 
-			if (!str_detect(year_query, '^(\\d{4}-|(<|<=|>=|>))\\d{4}$')) {
-				stop('Year filter query is malformed.')
-			}
-
-			if (str_detect(query, 'PY ?=')) {
-				warning('Year filter both passed as an argument and in query. The latter will be ignored')
-			}
-
-			if (!str_detect(year_query, '-')) {
-				pieces <- str_split(year_query, '\\b') %>% unlist
-				comparator <- pieces[1]
-				year_piece <- as.numeric(pieces[2])
-
-				year_query <- switch(comparator,
-														 '>' = glue('{year_piece + 1}-{year(today())}'),
-														 '>=' = glue('{year_piece}-{year(today())}'),
-														 '<=' = glue('1985-{year_piece}'),
-														 '<' = glue('1985-{year_piece - 1}')
-				)
-			}
+			year_query <- clean_date_filter_arg(year_query, cases = list(
+				gt = '{year_piece + 1}-{year(today())}', ge = '{year_piece}-{year(today())}',
+				eq = '{year_piece}-{year_piece}', le = '1985-{year_piece}',
+				range = '{year_piece[1]}-{year_piece[2]}', lt = '1985-{year_piece - 1}'),
+				arg_in_query_test = 'PY ?=', query = query)
 
 			additional_fields <- c(
 				setNames(year_query, 'PY'),
@@ -132,6 +175,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 		}
 
 		query <- c(query, additional_fields)
+
 		query <- paste(
 			glue('{names(query)} = ({query})'),
 			collapse = ' AND '
