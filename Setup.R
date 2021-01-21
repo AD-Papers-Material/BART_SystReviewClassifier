@@ -27,9 +27,7 @@ if (bart_machine_num_cores() != parallel::detectCores()) {
 }
 
 # Quite a useful one
-`%nin%` <- function (x, table) {
-	!(match(x, table, nomatch = 0L) > 0L)
-}
+'%nin%' <- Negate('%in%')
 
 
 # Nicer output than scales::percent()
