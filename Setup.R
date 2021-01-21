@@ -36,7 +36,7 @@ percent <- function(x) {
 }
 
 # A file path friendly lubridate::now()
-safe_now <- function() str_replace_all(now(), c(' ' = 'T', ':' = '.'))
+safe_now <- function() str_replace_all(lubridate::now(), c(' ' = 'T', ':' = '.'))
 
 
 # Article data management -------------------------------------------------
