@@ -91,8 +91,8 @@ clean_date_filter_arg <- function(year_query, cases,
 			)
 		} else if (str_detect(year_query, '^\\d{4}$')) {
 
-				year_piece <- year_query
-				year_query <- glue(cases$eq)
+			year_piece <- year_query
+			year_query <- glue(cases$eq)
 
 		} else {
 			stop('Year filter query is malformed. Possible patterns are:
@@ -222,6 +222,145 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 
 	records
 }
+
+search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
+													api_key = options('ncbi_api_key'),
+													query_name = glue('Pubmed_{safe_now()}'), save = T,
+													...) {
+
+	if ('pubmedR' %nin% installed.packages()) {
+		warning('Required package pubmedR will be installed.')
+		install.packages('pubmedR')
+	}
+
+	query <- str_squish(query)
+
+	year_query <- clean_date_filter_arg(year_query, cases = list(
+		gt = '{year_piece + 1}[PDAT]:{year(today())}[PDAT]',
+		ge = '{year_piece}[PDAT]:{year(today())}[PDAT]',
+		eq = '{year_piece}[PDAT]:{year_piece}[PDAT]', le = '1000[PDAT]:{year_piece}[PDAT]',
+		range = '{year_piece[1]}:[PDAT]{year_piece[2]}[PDAT]',
+		lt = '1000[PDAT]:{year_piece - 1}[PDAT]'),
+		arg_in_query_test = '[PDAT]', query = query)
+
+	year_query <- glue('({year_query})')
+
+	if (!is.null(additional_fields)) {
+		additional_fields <- paste(glue('({additional_fields})[{names(additional_fields)}]'), collapse = ' AND ')
+	}
+
+	query <- paste(query, year_query, additional_fields, collapse = ' AND ') %>% str_squish()
+
+	total_count <- pmQueryTotalCount(query, api_key = api_key)
+
+	message('Fetching Pubmed results')
+	records <- pmApiRequest(query = query, limit = res$total_count, api_key = api_key)$data
+
+	message('- Analysing')
+	records <- pbmclapply(records, function(item) {
+		if ('MedlineCitation' %in% names(item)) medData <- item$MedlineCitation
+		else if ('BookDocument' %in% names(item)) {
+			medData <- item$BookDocument
+			medData$Article$Abstract <- item$BookDocument$Abstract
+			medData$Article$ArticleTitle <- if (!is.null(item$BookDocument$ArticleTitle$text)) {
+				item$BookDocument$ArticleTitle$text
+				} else item$BookDocument$Book$BookTitle$text
+			item$PubmedData$ArticleIdList <- item$BookDocument$ArticleIdList
+			medData$Article$AuthorList <- item$BookDocument$AuthorList
+			medData$Article$Journal$Title <- if (!is.null(item$BookDocument$Book$CollectionTitle)) {
+				item$BookDocument$Book$CollectionTitle$text
+			} else item$BookDocument$Book$BookTitle$text
+			medData$Article$Journal$ISOAbbreviation <- NA
+			medData$Article$PublicationTypeList$PublicationType$text <- paste('Book -', item$BookDocument$PublicationType$text)
+			medData$Article$ArticleDate <- item$BookDocument$Book$PubDate
+			item$PubmedData <- item$PubmedBookData
+		}
+
+		data.frame(
+			ID = medData$PMID$text,
+			Title = medData$Article$ArticleTitle %>% paste(collapse = ' '),
+			Abstract = medData$Article$Abstract %>% {
+				vals <- unlist(.)
+				nms <- names(vals)
+				vals[str_detect(nms, 'AbstractText') & str_detect(nms, '..attrs', negate = T)]
+			} %>% paste(collapse = ' '),
+			DOI = item$PubmedData$ArticleIdList %>%
+				lapply(function(x) if (x$.attrs == 'doi') x$text) %>%
+				unlist() %>% ifelse(is.null(.), NA, .),
+			Authors = medData$Article$AuthorList %>% {.[names(.) == 'Author']} %>%
+				sapply(function(AU) paste0(AU$LastName, ', ', AU$ForeName)) %>%
+				paste(collapse = '; '),
+			Journal = medData$Article$Journal$Title,
+			Journal_short = medData$Article$Journal$ISOAbbreviation,
+			Article_type = medData$Article$PublicationTypeList$PublicationType$text,
+			Mesh = medData$MeshHeadingList %>% unlist %>% {
+				v <- .[!grepl('attrs.UI|attrs.Type', names(.))]
+				v.nms <- names(v)
+
+				is.term <- grepl('.text', v.nms, fixed = T)
+				i.term <- which(is.term)
+				i.maj <- which(!is.term)
+
+				v[v == 'Y' & !is.term] <- '*'
+				v[v == 'N' & !is.term] <- ''
+
+				v <- setNames(paste0(v[i.maj], v[i.term]), v.nms[i.term])
+				v.nms <- names(v)
+
+				i <- grepl('QualifierName.text', v.nms, fixed = T)
+				v[i] <- paste0('/', v[i])
+
+				i <- which(!grepl('QualifierName.text', v.nms, fixed = T))[-1]
+				v[i] <- paste0('; ', v[i])
+
+				v
+
+			} %>% paste(collapse = ''),
+			# Mesh = medData$MeshHeadingList %>% sapply(function(mesh) {
+			#
+			# 	ret <- mesh$DescriptorName$text
+			# 	if (mesh$DescriptorName$.attrs['MajorTopicYN'] == 'Y') {
+			# 		ret <- paste0('*', ret)
+			# 	}
+			#
+			# 	quals <- sapply(mesh[names(mesh) %in% 'QualifierName'], function(qual) {
+			# 		if (qual$.attrs['MajorTopicYN'] == 'Y') ret <- paste0('*', qual$text)
+			# 		else qual$text
+			# 	}) %>% paste(collapse = '/')
+			#
+			# 	ifelse(quals != '', paste0(ret, '/', quals), ret)
+			#
+			# }) %>% paste(collapse = '; '),
+			Author_keywords = medData$KeywordList %>% unlist %>%
+				{.[names(.) == 'Keyword.text']} %>%
+				paste(collapse = '; '),
+			Published = {
+				if (!is.null(medData$Article$ArticleDate)) {
+					date <- medData$Article$ArticleDate
+				} else {
+					date <- medData$DateRevised
+				}
+
+				paste(month.abb[as.numeric(date$Month)], date$Year)
+			}
+		)
+	}) %>%
+		bind_rows() %>%
+		mutate(
+			Order = 1:n(),
+			across(where(is.character), ~ replace(.x, .x == '', NA)),
+			across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';')),
+			Source = 'Pubmed',
+			File = query_name
+		) %>% select(Order, everything())
+
+
+	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
+
+	records
+
+}
+
 
 read_bib_files <- function(files) {
 
