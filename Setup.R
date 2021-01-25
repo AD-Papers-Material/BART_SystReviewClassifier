@@ -118,7 +118,7 @@ clean_date_filter_arg <- function(year_query, cases,
 		year_query <- str_remove_all(year_query, '\\s+|^\\(|\\)$')
 
 		if (!is.null(arg_in_query_test) & !is.null(query)) {
-			if (str_detect(query, 'PY ?=')) {
+			if (str_detect(query, arg_in_query_test)) {
 				warning('Year filter already in query. The query will be used')
 				year_query <- NULL
 			}
@@ -385,6 +385,8 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	records
 
 }
+
+
 
 read_bib_files <- function(files) {
 
