@@ -7,10 +7,12 @@ if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
 library(librarian)
 shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
-			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel,
+			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri
 			patchwork)
 
-required.pkgs <- setdiff(c('purrr', 'WriteXLS', 'tictoc', 'tidyr', 'arm', 'parallel'), installed.packages())
+# Packages required but not loaded
+required.pkgs <- setdiff(c('purrr', 'WriteXLS', 'tictoc', 'tidyr', 'arm',
+													 'parallel', 'jsonlite'), installed.packages())
 
 if (length(required.pkgs) > 0) install.packages(required.pkgs)
 
@@ -274,6 +276,11 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 
 	for (info in additional_infos) records <- left_join(records, info, by = 'ID')
 
+	records <- mutate(records,
+		across(where(is.character), ~ replace(.x, .x == '', NA)),
+		across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+	)
+
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
 	records
@@ -437,7 +444,10 @@ read_bib_files <- function(files) {
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
 				File = basename(file)
-			) %>% mutate(across(where(is.character), str_squish))
+			) %>% mutate(
+				across(where(is.character), ~ replace(.x, .x == '', NA)),
+				across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+			)
 		}
 
 		else if (type == 'ieee') {
