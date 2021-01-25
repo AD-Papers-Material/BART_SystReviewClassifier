@@ -223,6 +223,45 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 	records
 }
 
+parse_medline <- function(entries, query_name = glue('Pubmed_{safe_now()}')) {
+	entries <- entries %>%
+		str_remove_all('\\r') %>%
+		str_replace_all('\\n\\s\\s+', ' ') %>%
+		str_trim() %>%
+		str_split('\\n+(?=PMID-)') %>% unlist
+
+	tags <- c('TI', 'BTI', 'AB', 'JT', 'TA', 'DP')
+	info <- lapply(tags, function(tag) {
+		str_extract(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% str_remove('[A-Z]+ *- ')
+	}) %>% setNames(tags) %>% bind_cols()
+
+	tags <- c('FAU', 'PT', 'MH', 'OT')
+	info <- cbind(info, lapply(tags, function(tag) {
+		str_extract_all(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; '))
+	}) %>% setNames(tags) %>% bind_cols())
+
+	tags <- c('LID', 'AID')
+	info <- cbind(info, lapply(tags, function(tag) {
+		str_extract(entries, sprintf('(?<=\\n)%s *- .+(?= \\[doi\\])', tag)) %>% str_remove('[A-Z]+ *- ')
+	}) %>% setNames(tags) %>% bind_cols())
+
+	info$PMID = paste0('PMID:', str_extract(entries, '(?<=PMID- )\\d+'))
+
+	info %>% transmute(
+		Order = 1:n(),
+		ID = PMID, Title = ifelse(is.na(TI), BTI, TI),
+		Abstract = AB, DOI = ifelse(is.na(LID), AID, LID),
+		Authors = FAU, Journal = JT, Journal_short = TA,
+		Article_type = PT, Mesh = MH, Author_keywords = OT, Published = DP,
+		Source = 'Pubmed',
+		File = query_name
+	) %>% mutate(
+		across(where(is.character), ~ replace(.x, .x == '', NA)),
+		across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+	)
+}
+
+
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = options('ncbi_api_key'),
 													query_name = glue('Pubmed_{safe_now()}'), save = T,
@@ -232,6 +271,8 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		warning('Required package pubmedR will be installed.')
 		install.packages('pubmedR')
 	}
+
+	if (is.null(api_key)) warning('NCBI API key is not set.')
 
 	query <- str_squish(query)
 
@@ -251,115 +292,44 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 	query <- paste(query, year_query, additional_fields, collapse = ' AND ') %>% str_squish()
 
-	total_count <- pmQueryTotalCount(query, api_key = api_key)
+	res <- pmQueryTotalCount(query, api_key = api_key)
 
-	message('Fetching Pubmed results')
-	records <- pmApiRequest(query = query, limit = res$total_count, api_key = api_key)$data
+	message(paste('Fetching', res$total_count, 'Pubmed results:'))
 
-	message('- Analysing')
-	records <- pbmclapply(records, function(item) {
-		if ('MedlineCitation' %in% names(item)) medData <- item$MedlineCitation
-		else if ('BookDocument' %in% names(item)) {
-			medData <- item$BookDocument
-			medData$Article$Abstract <- item$BookDocument$Abstract
-			medData$Article$ArticleTitle <- if (!is.null(item$BookDocument$ArticleTitle$text)) {
-				item$BookDocument$ArticleTitle$text
-				} else item$BookDocument$Book$BookTitle$text
-			item$PubmedData$ArticleIdList <- item$BookDocument$ArticleIdList
-			medData$Article$AuthorList <- item$BookDocument$AuthorList
-			medData$Article$Journal$Title <- if (!is.null(item$BookDocument$Book$CollectionTitle)) {
-				item$BookDocument$Book$CollectionTitle$text
-			} else item$BookDocument$Book$BookTitle$text
-			medData$Article$Journal$ISOAbbreviation <- NA
-			medData$Article$PublicationTypeList$PublicationType$text <- paste('Book -', item$BookDocument$PublicationType$text)
-			medData$Article$ArticleDate <- item$BookDocument$Book$PubDate
-			item$PubmedData <- item$PubmedBookData
-		}
+	steps <- floor(res$total_count / min(res$total_count, 200))
 
-		data.frame(
-			ID = medData$PMID$text,
-			Title = medData$Article$ArticleTitle %>% paste(collapse = ' '),
-			Abstract = medData$Article$Abstract %>% {
-				vals <- unlist(.)
-				nms <- names(vals)
-				vals[str_detect(nms, 'AbstractText') & str_detect(nms, '..attrs', negate = T)]
-			} %>% paste(collapse = ' '),
-			DOI = item$PubmedData$ArticleIdList %>%
-				lapply(function(x) if (x$.attrs == 'doi') x$text) %>%
-				unlist() %>% ifelse(is.null(.), NA, .),
-			Authors = medData$Article$AuthorList %>% {.[names(.) == 'Author']} %>%
-				sapply(function(AU) paste0(AU$LastName, ', ', AU$ForeName)) %>%
-				paste(collapse = '; '),
-			Journal = medData$Article$Journal$Title,
-			Journal_short = medData$Article$Journal$ISOAbbreviation,
-			Article_type = medData$Article$PublicationTypeList$PublicationType$text,
-			Mesh = medData$MeshHeadingList %>% unlist %>% {
-				v <- .[!grepl('attrs.UI|attrs.Type', names(.))]
-				v.nms <- names(v)
+	# ~ 20x faster than pubmedR::pmApiRequest plus xml parsing
+	records <- pbmclapply(0:steps, function(step) {
+		print(paste(step * 200))
+		try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
+															retstart = step * 200, retmax = 200,
+															rettype = 'medline', parsed = F,
+															api_key = options('ncbi_api_key')), silent = T)
+	})
 
-				is.term <- grepl('.text', v.nms, fixed = T)
-				i.term <- which(is.term)
-				i.maj <- which(!is.term)
+	failed.steps <- sapply(records, function(x) class(x) == 'try-error') %>% which
 
-				v[v == 'Y' & !is.term] <- '*'
-				v[v == 'N' & !is.term] <- ''
+	if (length(failed.steps) > 0) {
+		message(paste('Repeating', length(failed.steps), 'failed fetch tentatives:'))
+		refetched <- pblapply(failed.steps, function(step) {
+			rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
+														retstart = step * 200, retmax = 200, rettype = 'medline', parsed = F, api_key = options('ncbi_api_key'))
+		})
 
-				v <- setNames(paste0(v[i.maj], v[i.term]), v.nms[i.term])
-				v.nms <- names(v)
+		records[failed.steps] <- refetched
+	}
 
-				i <- grepl('QualifierName.text', v.nms, fixed = T)
-				v[i] <- paste0('/', v[i])
 
-				i <- which(!grepl('QualifierName.text', v.nms, fixed = T))[-1]
-				v[i] <- paste0('; ', v[i])
+	message('- Parsing')
 
-				v
-
-			} %>% paste(collapse = ''),
-			# Mesh = medData$MeshHeadingList %>% sapply(function(mesh) {
-			#
-			# 	ret <- mesh$DescriptorName$text
-			# 	if (mesh$DescriptorName$.attrs['MajorTopicYN'] == 'Y') {
-			# 		ret <- paste0('*', ret)
-			# 	}
-			#
-			# 	quals <- sapply(mesh[names(mesh) %in% 'QualifierName'], function(qual) {
-			# 		if (qual$.attrs['MajorTopicYN'] == 'Y') ret <- paste0('*', qual$text)
-			# 		else qual$text
-			# 	}) %>% paste(collapse = '/')
-			#
-			# 	ifelse(quals != '', paste0(ret, '/', quals), ret)
-			#
-			# }) %>% paste(collapse = '; '),
-			Author_keywords = medData$KeywordList %>% unlist %>%
-				{.[names(.) == 'Keyword.text']} %>%
-				paste(collapse = '; '),
-			Published = {
-				if (!is.null(medData$Article$ArticleDate)) {
-					date <- medData$Article$ArticleDate
-				} else {
-					date <- medData$DateRevised
-				}
-
-				paste(month.abb[as.numeric(date$Month)], date$Year)
-			}
-		)
-	}) %>%
-		bind_rows() %>%
-		mutate(
-			Order = 1:n(),
-			across(where(is.character), ~ replace(.x, .x == '', NA)),
-			across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';')),
-			Source = 'Pubmed',
-			File = query_name
-		) %>% select(Order, everything())
-
+	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n'))
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
 	records
 
 }
+
 
 
 read_bib_files <- function(files) {
@@ -389,64 +359,7 @@ read_bib_files <- function(files) {
 
 		if (type == 'nbib') {
 
-			entries <- entries %>%
-				str_remove_all('\\r') %>%
-				str_replace_all('\\n\\s\\s+', ' ') %>%
-				str_split(fixed('\n\n')) %>% unlist
-
-			# print(system.time(paste0('PMID:', str_extract(entries, '(?<=PMID- )\\d+')))) #0.012
-			# print(system.time(str_extract(entries, '(?<=\\n)PMID- \\d+') %>% str_replace('- ', ':'))) # 0.242
-			# print(system.time(str_extract(entries, '(?<=\\nTI  - ).+'))) # 0.605
-			# print(system.time(str_extract(entries, '(?<=\\n)TI  - .+') %>% str_remove('[A-Z]+ *- '))) # 0.048
-			# print(system.time(str_extract(entries, '(?<=\\nBTI - ).+'))) # 19.4
-			# print(system.time(str_extract(entries, '(?<=\\n)BTI - .+') %>% str_remove('[A-Z]+ *- '))) # 0.218
-			# print(system.time(str_extract(entries, '(?<=\\nAB  - ).+'))) # 1.553
-			# print(system.time(str_extract(entries, '(?<=\\n)AB  - .+') %>% str_remove('[A-Z]+ *- '))) # 0.286
-			# print(system.time(str_extract(entries, '(?<=\\nLID - ).*(?= \\[doi\\])'))) # 2.019
-			# print(system.time(str_extract(entries, '(?<=\\n)LID - .+') %>% str_remove('[A-Z]+ *- '))) # 0.044
-			# print(system.time(str_extract_all(entries, '(?<=FAU - ).+') %>% sapply(paste0, collapse = '; '))) # 17.182
-			# print(system.time(str_extract_all(entries, '(?<=\\n)FAU - .+') %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; ')))) # 2.368
-			# print(system.time(str_extract(entries, '(?<=\\nJT  - ).*'))) # 15.591
-			# print(system.time(str_extract(entries, '(?<=\\n)JT  - .+') %>% str_remove('[A-Z]+ *- '))) # 0.188
-			# print(system.time(str_extract(entries, '(?<=\\nTA  - ).*'))) # 15.576
-			# print(system.time(str_extract(entries, '(?<=\\n)TA  - .+') %>% str_remove('[A-Z]+ *- '))) # 0.245
-			# print(system.time(str_extract(entries, '(?<=\\nPT  - ).*'))) # 15.654
-			# print(system.time(str_extract(entries, '(?<=\\n)PT  - .+') %>% str_remove('[A-Z]+ *- '))) # 0.180
-			# print(system.time(str_extract(entries, '(?<=\\nDP  - ).*'))) # 0.557
-			# print(system.time(str_extract(entries, '(?<=\\n)DP  - .+') %>% str_remove('[A-Z]+ *- '))) # 0.018
-			# print(system.time(str_extract_all(entries, '(?<=\\nMH  - ).+') %>% sapply(paste0, collapse = '; '))) # 19.050
-			# print(system.time(str_extract_all(entries, '(?<=\\n)MH - .+') %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; ')))) # 1.780
-			# print(system.time(str_extract_all(entries, '(?<=\\nOT  - ).+') %>% sapply(paste0, collapse = '; '))) # 20.488
-			# print(system.time(str_extract_all(entries, '(?<=\\n)OT - .+') %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; ')))) # 1.743
-
-			tags <- c('TI', 'BTI', 'AB', 'JT', 'TA', 'DP')
-			info <- lapply(tags, function(tag) {
-				str_extract(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% str_remove('[A-Z]+ *- ')
-			}) %>% setNames(tags) %>% bind_cols()
-
-			tags <- c('FAU', 'PT', 'MH', 'OT')
-			info <- cbind(info, lapply(tags, function(tag) {
-				str_extract_all(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; '))
-			}) %>% setNames(tags) %>% bind_cols())
-
-			tags <- c('LID', 'AID')
-			info <- cbind(info, lapply(tags, function(tag) {
-				str_extract(entries, sprintf('(?<=\\n)%s *- .+(?= \\[doi\\])', tag)) %>% str_remove('[A-Z]+ *- ')
-			}) %>% setNames(tags) %>% bind_cols())
-
-			info$PMID = paste0('PMID:', str_extract(entries, '(?<=PMID- )\\d+'))
-
-			info %>% transmute(
-				Order = 1:n(),
-				ID = PMID, Title = ifelse(is.na(TI), BTI, TI),
-				Abstract = AB, DOI = ifelse(is.na(LID), AID, LID),
-				Authors = FAU, Journal = JT, Journal_short = TA,
-				Article_type = PT, Mesh = MH, Author_keywords = OT, Published = DP,
-				Source = 'Pubmed',
-				File = basename(file)
-			) %>% mutate(
-				across(where(is.character), str_squish),
-			)
+			entries <- parse_medline(entries)
 		}
 
 		else if (type == 'wos') {
