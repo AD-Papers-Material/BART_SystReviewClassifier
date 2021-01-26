@@ -47,7 +47,7 @@ percent <- function(x) {
 
 # Tool to grab XHR messages from dynamic websites
 get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
-																	urlPattern = '*', wait_for = 20,
+																	wait_for = 20,
 																	n_of_resources = NULL, interactive = F) {
 
 	crrri::perform_with_chrome(function(client) {
@@ -64,7 +64,7 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 		out$pr <- promises::promise(function(resolve, reject) {
 			out$resolve_function <- resolve
 
-			Fetch$enable(patterns = list(list(urlPattern = urlPattern, requestStage = "Response"))) %...>% {
+			Fetch$enable(patterns = list(list(urlPattern="*", requestStage="Response"))) %...>% {
 				Fetch$requestPaused(callback = function(params) {
 
 					if (str_detect(params$request$url, url_filter) & str_detect(params$resourceType, type_filter)) {
