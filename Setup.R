@@ -124,7 +124,7 @@ clean_date_filter_arg <- function(year_query, cases,
 		if (!is.null(arg_in_query_test) & !is.null(query)) {
 			if (str_detect(query, arg_in_query_test)) {
 				warning('Year filter already in query. The query will be used')
-				year_query <- NULL
+				return(NULL)
 			}
 		}
 
@@ -360,7 +360,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 	#res <- pmQueryTotalCount(query, api_key = api_key)
 	res <- rentrez::entrez_search(db = "pubmed", term = query, retmax = 0,
-								api_key = api_key, use_history = T)
+																api_key = api_key, use_history = T)
 
 	total_count <- min(res$count, record_limit)
 
@@ -403,61 +403,52 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 												api_key = options('ieee_api_key'), allow_web_scraping = F,
 												query_name = glue('IEEE_{safe_now()}'), save = T,
-												wait_for = 20) {
-
-	query <- str_squish(query)
-
-	default_fields <- c(
-		#contentType = 'periodicals',
-		highlight = 'false',
-		returnFacets = 'ALL',
-		returnType = 'json',
-		matchPubs = 'true',
-		rowsPerPage = '100',
-		pageNumber = '1'
-	)
-
-	year_arg <- clean_date_filter_arg(year_query, cases = list(
-		gt = '{year_piece + 1}_{year(today())}',
-		ge = '{year_piece}_{year(today())}',
-		eq = '{year_piece}_{year_piece}',
-		range = '{year_piece[1]}_{year_piece[2]}',
-		le = '1900_{year_piece}',
-		lt = '1900_{year_piece - 1}'),
-		arg_in_query_test = '_Year', query = query)
-
-	year_arg <- glue('{year_arg}_Year')
-
-	if (length(year_arg) > 0) default_fields <- c(default_fields, ranges = year_arg)
+												wait_for = 20, record_limit = NULL) {
 
 	if (!is.null(additional_fields) & length(additional_fields) > 0) {
 
-		additional_fields <- unlist(additional_fields)
+		if (!is.list(additional_fields)) stop('additional_fields must be a list.')
 
-		additional_fields <- case_when(
-			additional_fields == 'TRUE' ~ 'true',
-			additional_fields == 'FALSE' ~ 'false',
-			T ~ additional_fields
-		)
-
-		default_fields <- default_fields[
-			names(default_fields) %nin% names(additional_fields)
-		]
+		additional_fields <- lapply(additional_fields, function(el) {
+			if (el == TRUE) 'true' else if (el == FALSE) 'false'
+			else el
+		})
 	}
-
-	additional_fields <- c(default_fields, additional_fields)
 
 	if (is.null(api_key[[1]])) {
 		warning('IEEE API key is not set, defaulting to webscraping.')
 
 		if (!allow_web_scraping) stop('If API key is not present web scraping must be allowed.')
 
-		entry_point <- 'https://ieeexplore.ieee.org/search/searchresult.jsp?'
-		args <- c(queryText = URLencode(query), additional_fields)
+		default_fields <- c(
+			rowsPerPage = 100
+		)
 
-		arg_query <- paste(glue('{names(args)}={args}'), collapse = '&')
+		default_fields <- default_fields[
+			names(default_fields) %nin% names(additional_fields)
+		]
 
-		url <- paste0(entry_point, arg_query)
+		additional_fields <- c(default_fields, additional_fields)
+
+		if ('ranges' %nin% names(additional_fields) & !is.null(year_query)) {
+			year_arg <- clean_date_filter_arg(year_query, cases = list(
+				gt = '{year_piece + 1}_{year(today())}',
+				ge = '{year_piece}_{year(today())}',
+				eq = '{year_piece}_{year_piece}',
+				range = '{year_piece[1]}_{year_piece[2]}',
+				le = '1800_{year_piece}',
+				lt = '1800_{year_piece - 1}'))
+
+			additional_fields['ranges'] <- glue('{year_arg}_Year')
+		}
+
+		endpoint <-  httr::parse_url('https://ieeexplore.ieee.org/search/searchresult.jsp?')
+
+		endpoint$query <- c(queryText = query, additional_fields) %>% lapply(str_squish)
+
+		endpoint$query$rowsPerPage <- min(as.numeric(endpoint$query$rowsPerPage), record_limit)
+
+		url <- httr::build_url(endpoint)
 
 		message('Fetching records')
 		response <- get_website_resources(url = url, url_filter = 'rest/search',
@@ -479,13 +470,21 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 			if (response$totalPages > 100) warning('Only results up to page 100 are available')
 
 			other_pages <- pblapply(2:min(response$totalPages, 100), function(page) {
-				additional_fields['pageNumber'] <- page
+				# additional_fields['pageNumber'] <- page
+				#
+				# args <- c(queryText = URLencode(query), additional_fields)
+				#
+				# arg_query <- paste(glue('{names(args)}={args}'), collapse = '&')
+				#
+				# url <- paste0(endpoint, arg_query)
 
-				args <- c(queryText = URLencode(query), additional_fields)
+				endpoint$query$pageNumber <- page
 
-				arg_query <- paste(glue('{names(args)}={args}'), collapse = '&')
+				if (page * endpoint$query$pageNumber > record_limit) {
+					endpoint$query$rowsPerPage <- record_limit - ((page - 1) * endpoint$query$rowsPerPage)
+				}
 
-				url <- paste0(entry_point, arg_query)
+				url <- httr::build_url(endpoint)
 
 				response <- get_website_resources(url = url, url_filter = 'rest/search',
 																					type_filter = 'XHR', wait_for = wait_for)
@@ -510,7 +509,9 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 				Source = 'IEEE',
 				File = query_name
 			)
-#browser()
+
+		if (!is.null(record_limit)) records <- head(records, record_limit)
+
 		message('Fetching individual article data')
 		article_data <- pbmclapply(records$URL, function(URL) {
 			data <- read_file(URL) %>%
@@ -542,6 +543,39 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 								 Article_type, Author_keywords, Keywords, Mesh, N_citations,
 								 Published, Source, File)
+	}
+	else {
+		default_fields <- c(
+			rowsPerPage = 200
+		)
+
+		default_fields <- default_fields[
+			names(default_fields) %nin% names(additional_fields)
+		]
+
+		additional_fields <- c(default_fields, additional_fields)
+
+		if ('ranges' %nin% names(additional_fields) & !is.null(year_query)) {
+			year_arg <- clean_date_filter_arg(year_query, cases = list(
+				gt = '{year_piece + 1}_{year(today())}',
+				ge = '{year_piece}_{year(today())}',
+				eq = '{year_piece}_{year_piece}',
+				range = '{year_piece[1]}_{year_piece[2]}',
+				le = '1800_{year_piece}',
+				lt = '1800_{year_piece - 1}'))
+
+			additional_fields['ranges'] <- glue('{year_arg}_Year')
+		}
+
+		endpoint <-  httr::parse_url('https://ieeexplore.ieee.org/search/searchresult.jsp?')
+
+		endpoint$query <- c(queryText = query, additional_fields) %>% lapply(str_squish)
+
+		endpoint$query$rowsPerPage <- min(as.numeric(endpoint$query$rowsPerPage), record_limit)
+
+		url <- httr::build_url(endpoint)
+
+		message('Fetching records')
 	}
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
