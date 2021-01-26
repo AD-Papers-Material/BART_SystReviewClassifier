@@ -45,6 +45,9 @@ percent <- function(x) {
 	})
 }
 
+today <- function() as_date(Sys.time())
+now <- function() Sys.time()
+
 # Tool to grab XHR messages from dynamic websites
 get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 																	wait_for = 20,
