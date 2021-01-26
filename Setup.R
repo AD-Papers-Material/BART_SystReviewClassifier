@@ -7,7 +7,7 @@ if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
 library(librarian)
 shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
-			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri
+			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri,
 			patchwork)
 
 # Packages required but not loaded
@@ -277,8 +277,8 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 	for (info in additional_infos) records <- left_join(records, info, by = 'ID')
 
 	records <- mutate(records,
-		across(where(is.character), ~ replace(.x, .x == '', NA)),
-		across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+										across(where(is.character), ~ replace(.x, .x == '', NA)),
+										across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
 	)
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
@@ -347,7 +347,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		lt = '1000[PDAT]:{year_piece - 1}[PDAT]'),
 		arg_in_query_test = '[PDAT]', query = query)
 
-	year_query <- glue('({year_query})')
+	year_query <- glue('({year_query})') # adding parenthesis around the dates
 
 	if (!is.null(additional_fields)) {
 		additional_fields <- paste(glue('({additional_fields})[{names(additional_fields)}]'), collapse = ' AND ')
@@ -393,6 +393,154 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 }
 
+search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
+												api_key = options('ieee_api_key'), allow_web_scraping = F,
+												query_name = glue('IEEE_{safe_now()}'), save = T,
+												wait_for = 10) {
+
+	query <- str_squish(query)
+
+	default_fields <- c(
+		contentType = 'periodicals',
+		highlight = 'false',
+		returnFacets = 'ALL',
+		returnType = 'json',
+		matchPubs = 'true',
+		rowsPerPage = '100',
+		pageNumber = '1'
+	)
+
+	year_arg <- clean_date_filter_arg(year_query, cases = list(
+		gt = '{year_piece + 1}_{year(today())}',
+		ge = '{year_piece}_{year(today())}',
+		eq = '{year_piece}_{year_piece}',
+		range = '{year_piece[1]}_{year_piece[2]}',
+		le = '1900_{year_piece}',
+		lt = '1900_{year_piece - 1}'),
+		arg_in_query_test = '_Year', query = query)
+
+	year_arg <- glue('{year_arg}_Year')
+
+	if (length(year_arg) > 0) default_fields <- c(default_fields, ranges = year_arg)
+
+	if (!is.null(additional_fields) & length(additional_fields) > 0) {
+
+		additional_fields <- unlist(additional_fields)
+
+		additional_fields <- case_when(
+			additional_fields == 'TRUE' ~ 'true',
+			additional_fields == 'FALSE' ~ 'false',
+			T ~ additional_fields
+		)
+
+		default_fields <- default_fields[
+			names(default_fields) %nin% names(additional_fields)
+		]
+	}
+
+	additional_fields <- c(default_fields, additional_fields)
+
+	if (is.null(api_key[[1]])) {
+		warning('IEEE API key is not set, defaulting to webscraping.')
+
+		if (!allow_web_scraping) stop('If API key is not present web scraping must be allowed.')
+
+		entry_point <- 'https://ieeexplore.ieee.org/search/searchresult.jsp?'
+		args <- c(queryText = URLencode(query), additional_fields)
+
+		arg_query <- paste(glue('{names(args)}={args}'), collapse = '&')
+
+		url <- paste0(entry_point, arg_query)
+
+		message('Fetching records')
+		response <- get_website_resources(url = url, url_filter = 'rest/search',
+																			type_filter = 'XHR', wait_for = wait_for)
+
+		if (length(response) == 0) {
+			stop('No results were scraped. Try using a longer wait_time to allow for more time to load results.')
+		}
+
+		response <- jsonlite::fromJSON(response[[1]]$response$body)
+
+		message('Found ', response$totalRecords, ' records')
+
+		records <- response$records
+
+		if (response$totalPages > 1) {
+			message('Fetching the remaining ', response$totalPages - 1, ' result pages')
+
+			if (response$totalPages > 100) warning('Only results up to page 100 are available')
+
+			other_pages <- pblapply(2:min(response$totalPages, 100), function(page) {
+				additional_fields['pageNumber'] <- page
+
+				args <- c(queryText = URLencode(query), additional_fields)
+
+				arg_query <- paste(glue('{names(args)}={args}'), collapse = '&')
+
+				url <- paste0(entry_point, arg_query)
+
+				response <- get_website_resources(url = url, url_filter = 'rest/search',
+																					type_filter = 'XHR', wait_for = wait_for)
+
+				response$records
+			})
+
+			records <- bind_rows(records, other_pages)
+		}
+
+		records <- response$records %>%
+			transmute(
+				Order = 1:n(),
+				ID = paste0('IEEE:', articleNumber),
+				Title = articleTitle,
+				DOI = doi, URL = paste0('https://ieeexplore.ieee.org/document/', articleNumber),
+				Authors = authors %>% sapply(function(df) paste(df$normalizedName, collapse = '; ')),
+				Journal = publicationTitle,
+				Article_type = str_remove(`contentType`, '(IEEE|OUP) '), #there may be more...
+				N_citations = citationCount,
+				Published = publicationDate,
+				Source = 'IEEE',
+				File = query_name
+			)
+browser()
+		message('Fetching individual article data')
+		article_data <- pbmclapply(records$URL, function(URL) {
+			data <- read_file(URL) %>%
+				str_extract('(?<=xplGlobal\\.document\\.metadata=).+') %>%
+				str_remove(';$') %>% jsonlite::fromJSON()
+
+			Keys <- data$keywords %>%
+				group_by(type = case_when(
+					str_detect(type, 'MeSH') ~ 'Mesh',
+					str_detect(type, 'Author') ~ 'Author',
+					T ~ 'IEEE'
+				)) %>%
+				summarise(kwd = paste(unlist(kwd), collapse = '; '))
+
+			Keys <- setNames(as.list(Keys$kwd), Keys$type)
+
+			bind_cols(
+				URL = URL,
+				Abstract = data$abstract,
+				Keywords = Keys$IEEE,
+				Mesh = Keys$Mesh,
+				Author_keywords = Keys$Author,
+			)
+		}) %>% bind_rows()
+
+		records <- left_join(records, article_data, by = 'URL') %>% mutate(
+			across(where(is.character), ~ replace(.x, .x == '', NA)),
+			across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+		) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
+								 Article_type, Author_keywords, Keywords, Mesh, N_citations,
+								 Published, Source, File, )
+	}
+
+	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
+
+	records
+}
 
 
 read_bib_files <- function(files) {
