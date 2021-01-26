@@ -615,7 +615,10 @@ read_bib_files <- function(files) {
 				Published = `Online Date`,
 				Source = 'IEEE',
 				File = basename(file)
-			) %>% mutate(across(where(is.character), str_squish))
+			) %>% mutate(
+				across(where(is.character), ~ replace(.x, .x == '', NA)),
+				across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+			)
 		}
 	}) %>% setNames(basename(files))
 }
