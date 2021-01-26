@@ -403,12 +403,12 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 												api_key = options('ieee_api_key'), allow_web_scraping = F,
 												query_name = glue('IEEE_{safe_now()}'), save = T,
-												wait_for = 10) {
+												wait_for = 20) {
 
 	query <- str_squish(query)
 
 	default_fields <- c(
-		contentType = 'periodicals',
+		#contentType = 'periodicals',
 		highlight = 'false',
 		returnFacets = 'ALL',
 		returnType = 'json',
@@ -510,7 +510,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 				Source = 'IEEE',
 				File = query_name
 			)
-browser()
+#browser()
 		message('Fetching individual article data')
 		article_data <- pbmclapply(records$URL, function(URL) {
 			data <- read_file(URL) %>%
@@ -541,7 +541,7 @@ browser()
 			across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
 		) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 								 Article_type, Author_keywords, Keywords, Mesh, N_citations,
-								 Published, Source, File, )
+								 Published, Source, File)
 	}
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
