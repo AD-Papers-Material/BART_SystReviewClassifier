@@ -46,7 +46,9 @@ percent <- function(x) {
 }
 
 # Tool to grab XHR messages from dynamic websites
-get_website_resources <- function(url, url_filter = '.*', type_filter = '.*', wait_for = 20, n_of_resources = NULL, interactive = F) {
+get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
+																	urlPattern = '*', wait_for = 20,
+																	n_of_resources = NULL, interactive = F) {
 
 	crrri::perform_with_chrome(function(client) {
 		Fetch <- client$Fetch
@@ -62,7 +64,7 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*', wa
 		out$pr <- promises::promise(function(resolve, reject) {
 			out$resolve_function <- resolve
 
-			Fetch$enable(patterns = list(list(urlPattern="*", requestStage="Response"))) %...>% {
+			Fetch$enable(patterns = list(list(urlPattern = urlPattern, requestStage = "Response"))) %...>% {
 				Fetch$requestPaused(callback = function(params) {
 
 					if (str_detect(params$request$url, url_filter) & str_detect(params$resourceType, type_filter)) {
@@ -328,9 +330,10 @@ parse_medline <- function(entries, query_name = glue('Pubmed_{safe_now()}')) {
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = options('ncbi_api_key'),
 													query_name = glue('Pubmed_{safe_now()}'), save = T,
+													record_limit = numeric(),
 													...) {
 
-	if ('pubmedR' %nin% installed.packages()) {
+	if ('rentrez' %nin% installed.packages()) {
 		warning('Required package pubmedR will be installed.')
 		install.packages('pubmedR')
 	}
@@ -355,17 +358,21 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 	query <- paste(query, year_query, additional_fields, collapse = ' AND ') %>% str_squish()
 
-	res <- pmQueryTotalCount(query, api_key = api_key)
+	#res <- pmQueryTotalCount(query, api_key = api_key)
+	res <- rentrez::entrez_search(db = "pubmed", term = query, retmax = 0,
+								api_key = api_key, use_history = T)
 
-	message(paste('Fetching', res$total_count, 'Pubmed results:'))
+	total_count <- min(res$count, record_limit)
 
-	steps <- floor(res$total_count / min(res$total_count, 200))
+	message('Fetching ', total_count, ifelse(length(record_limit) > 0, glue(' (of {res$count})'), ''), ' Pubmed results:')
+
+	steps <- floor((total_count - 1) / min(total_count, 200))
 
 	# ~ 20x faster than pubmedR::pmApiRequest plus xml parsing
 	records <- pbmclapply(0:steps, function(step) {
 		print(paste(step * 200))
 		try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
-															retstart = step * 200, retmax = 200,
+															retstart = step * 200, retmax = min(200, total_count - step * 200),
 															rettype = 'medline', parsed = F,
 															api_key = options('ncbi_api_key')), silent = T)
 	})
