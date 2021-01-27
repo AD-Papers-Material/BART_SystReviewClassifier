@@ -108,7 +108,7 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 
 
 # A file path friendly lubridate::now()
-safe_now <- function() str_replace_all(lubridate::now(), c(' ' = 'T', ':' = '.'))
+safe_now <- function() str_replace_all(now(), c(' ' = 'T', ':' = '.'))
 
 
 # Article data management -------------------------------------------------
@@ -404,7 +404,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
-												api_key = options('ieee_api_key'), allow_web_scraping = F,
+												api_key = options('ieee_api_key')[[1]], allow_web_scraping = F,
 												query_name = glue('IEEE_{safe_now()}'), save = T,
 												wait_for = 20, record_limit = NULL) {
 
@@ -423,15 +423,15 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 
 		if (!allow_web_scraping) stop('If API key is not present web scraping must be allowed.')
 
-		default_fields <- c(
+		default_fields <- list(
 			rowsPerPage = 100
 		)
 
-		default_fields <- default_fields[
-			names(default_fields) %nin% names(additional_fields)
-		]
+		default_fields[names(additional_fields)] <- NULL
 
 		additional_fields <- c(default_fields, additional_fields)
+
+		additional_fields$rowsPerPage <- min(as.numeric(additional_fields$rowsPerPage), record_limit)
 
 		if ('ranges' %nin% names(additional_fields) & !is.null(year_query)) {
 			year_arg <- clean_date_filter_arg(year_query, cases = list(
@@ -442,14 +442,12 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 				le = '1800_{year_piece}',
 				lt = '1800_{year_piece - 1}'))
 
-			additional_fields['ranges'] <- glue('{year_arg}_Year')
+			additional_fields$ranges <- glue('{year_arg}_Year')
 		}
 
 		endpoint <-  httr::parse_url('https://ieeexplore.ieee.org/search/searchresult.jsp?')
 
 		endpoint$query <- c(queryText = query, additional_fields) %>% lapply(str_squish)
-
-		endpoint$query$rowsPerPage <- min(as.numeric(endpoint$query$rowsPerPage), record_limit)
 
 		url <- httr::build_url(endpoint)
 
@@ -468,18 +466,10 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		records <- response$records
 
 		if (response$totalPages > 1) {
-			message('Fetching the remaining ', response$totalPages - 1, ' result pages')
 
 			if (response$totalPages > 100) warning('Only results up to page 100 are available')
 
 			other_pages <- pblapply(2:min(response$totalPages, 100), function(page) {
-				# additional_fields['pageNumber'] <- page
-				#
-				# args <- c(queryText = URLencode(query), additional_fields)
-				#
-				# arg_query <- paste(glue('{names(args)}={args}'), collapse = '&')
-				#
-				# url <- paste0(endpoint, arg_query)
 
 				endpoint$query$pageNumber <- page
 
@@ -508,78 +498,144 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 				Journal = publicationTitle,
 				Article_type = str_remove(`contentType`, '(IEEE|OUP) '), #there may be more...
 				N_citations = citationCount,
-				Published = publicationDate,
-				Source = 'IEEE',
-				File = query_name
+				Published = publicationDate
 			)
 
-		if (!is.null(record_limit)) records <- head(records, record_limit)
+		#if (!is.null(record_limit)) records <- head(records, record_limit)
 
-		message('Fetching individual article data')
-		article_data <- pbmclapply(records$URL, function(URL) {
-			data <- read_file(URL) %>%
-				str_extract('(?<=xplGlobal\\.document\\.metadata=).+') %>%
-				str_remove(';$') %>% jsonlite::fromJSON()
-
-			Keys <- data$keywords %>%
-				group_by(type = case_when(
-					str_detect(type, 'MeSH') ~ 'Mesh',
-					str_detect(type, 'Author') ~ 'Author',
-					T ~ 'IEEE'
-				)) %>%
-				summarise(kwd = paste(unlist(kwd), collapse = '; '))
-
-			Keys <- setNames(as.list(Keys$kwd), Keys$type)
-
-			bind_cols(
-				URL = URL,
-				Abstract = data$abstract,
-				Keywords = Keys$IEEE,
-				Mesh = Keys$Mesh,
-				Author_keywords = Keys$Author,
-			)
-		}) %>% bind_rows()
-
-		records <- left_join(records, article_data, by = 'URL') %>% mutate(
-			across(where(is.character), ~ replace(.x, .x == '', NA)),
-			across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
-		) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
-								 Article_type, Author_keywords, Keywords, Mesh, N_citations,
-								 Published, Source, File)
 	}
 	else {
-		default_fields <- c(
-			rowsPerPage = 200
+		default_fields <- list(
+			max_records = 200
 		)
 
-		default_fields <- default_fields[
-			names(default_fields) %nin% names(additional_fields)
-		]
+		default_fields[names(additional_fields)] <- NULL
 
 		additional_fields <- c(default_fields, additional_fields)
 
-		if ('ranges' %nin% names(additional_fields) & !is.null(year_query)) {
+		additional_fields$max_records <- min(as.numeric(additional_fields$max_records), record_limit)
+
+		if (all(c('start_year', 'end_year') %nin% names(additional_fields)) & !is.null(year_query)) {
 			year_arg <- clean_date_filter_arg(year_query, cases = list(
-				gt = '{year_piece + 1}_{year(today())}',
-				ge = '{year_piece}_{year(today())}',
+				gt = '{year_piece + 1}_x',
+				ge = '{year_piece}_x',
 				eq = '{year_piece}_{year_piece}',
 				range = '{year_piece[1]}_{year_piece[2]}',
-				le = '1800_{year_piece}',
-				lt = '1800_{year_piece - 1}'))
+				le = 'x_{year_piece}',
+				lt = 'x_{year_piece - 1}')) %>% str_split('_') %>%
+				unlist() %>% setNames(c('start_year', 'end_year')) %>%
+				Filter(f = function(el) el != 'x')
 
-			additional_fields['ranges'] <- glue('{year_arg}_Year')
+			additional_fields <- c(additional_fields, year_arg)
 		}
 
-		endpoint <-  httr::parse_url('https://ieeexplore.ieee.org/search/searchresult.jsp?')
+		endpoint <-  'http://ieeexploreapi.ieee.org/api/v1/search/articles'
 
-		endpoint$query <- c(queryText = query, additional_fields) %>% lapply(str_squish)
-
-		endpoint$query$rowsPerPage <- min(as.numeric(endpoint$query$rowsPerPage), record_limit)
-
-		url <- httr::build_url(endpoint)
+		query <- c(querytext = query, additional_fields,
+							 apikey = api_key, format = 'json') %>% lapply(str_squish)
 
 		message('Fetching records')
+
+		response <- httr::GET(url = endpoint, query = query)
+
+		if (response$status_code != 200) {
+			stop('Error fetching results, with code', response$status_code, '
+
+					 ', httr::content(response, 'text'))
+		}
+
+		results <- httr::content(response, 'text') %>% jsonlite::fromJSON()
+
+		records <- results$articles
+
+		max_records <- additional_fields$max_records
+
+		if (results$total_records > max_records) {
+			total_count <- min(results$total_records, record_limit)
+
+			steps <- floor((total_count - 1) / min(total_count, max_records))
+
+			other_pages <- pblapply(1:steps, function(step) {
+				print(paste(step * max_records + 1))
+
+				query$start_record <- step * max_records + 1
+				query$max_records <- min(max_records, total_count - step * max_records)
+
+				response <- httr::GET(url = endpoint, query = query)
+
+				if (response$status_code != 200) {
+					stop('Error fetching results, with code', response$status_code, '
+
+					 ', httr::content(response, 'text'))
+				}
+				else {
+					results <- httr::content(response, 'text') %>% jsonlite::fromJSON()
+
+					results$articles
+				}
+			}) %>% bind_rows()
+		}
+
+		records <- bind_rows(records, other_pages) %>%
+			transmute(
+				ID = paste0('IEEE:', publication_number),
+				Title = title,
+				Abstract = abstract,
+				DOI = doi,
+				URL = articles$abstract_url,
+				Journal = publication_title,
+				Article_type = content_type,
+				N_citations = citing_paper_count,
+				Published = publication_date,
+			)
 	}
+
+	message('Fetching individual article data')
+	article_data <- pbmclapply(records$URL, function(URL) {
+		data <- read_file(URL) %>%
+			str_extract('(?<=xplGlobal\\.document\\.metadata=).+') %>%
+			str_remove(';$') %>% jsonlite::fromJSON()
+
+		Keys <- data$keywords %>%
+			group_by(type = case_when(
+				str_detect(type, 'MeSH') ~ 'Mesh',
+				str_detect(type, 'Author') ~ 'Author',
+				T ~ 'IEEE'
+			)) %>%
+			summarise(kwd = paste(unlist(kwd), collapse = '; '))
+
+		Keys <- setNames(as.list(Keys$kwd), Keys$type)
+
+		ret <- bind_cols(
+			URL = URL,
+			Abstract = data$abstract,
+			Keywords = Keys$IEEE,
+			Mesh = Keys$Mesh,
+			Author_keywords = Keys$Author,
+		)
+
+		if ('Authors' %nin% names(records)) {
+			ret$Authors <- data$authors %>% as.data.frame() %>%
+				with(paste(
+					str_replace_all(firstName, '\\b(\\w)\\w*', '\\1.'),
+					lastName,
+					collapse = '; '))
+
+		}
+
+		ret
+	}) %>% bind_rows()
+
+	records <- left_join(records, article_data, by = 'URL') %>% mutate(
+		across(where(is.character), ~ replace(.x, .x == '', NA)),
+		across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';')),
+		Source = 'IEEE',
+		File = query_name
+	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
+							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
+							 Published, Source, File)
+
+	message('Collected ', nrow(records),' records')
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
@@ -651,10 +707,10 @@ read_bib_files <- function(files) {
 				Abstract, DOI, URL = `PDF Link`,
 				Authors, Journal = `Publication Title`,
 				Author_keywords = `Author Keywords`,
-				Article_type = str_remove(`Document Identifier`, 'IEEE '),
 				Keywords = cbind(`IEEE Terms`, `INSPEC Controlled Terms`, `INSPEC Non-Controlled Terms`) %>%
 					apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA),
 				Mesh = Mesh_Terms,
+				Article_type = str_remove(`Document Identifier`, 'IEEE '),
 				N_citations = `Article Citation Count`,
 				Published = `Online Date`,
 				Source = 'IEEE',
