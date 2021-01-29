@@ -12,7 +12,8 @@ shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
 
 # Packages required but not loaded
 required.pkgs <- setdiff(c('purrr', 'WriteXLS', 'tictoc', 'tidyr', 'arm',
-													 'parallel', 'jsonlite'), installed.packages())
+													 'parallel', 'jsonlite', 'rentrez',
+													 'wosr'), installed.packages())
 
 if (length(required.pkgs) > 0) install.packages(required.pkgs)
 
@@ -177,12 +178,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 parallel = T, parse_query = T,
 											 query_name = glue('WOS_{safe_now()}'), save = T, ...) {
 
-	if ('wosr' %nin% installed.packages()) {
-		warning('Required wosr package will be installed.')
-		install.packages('wosr')
-	}
-
-	if (is.null(query_name)) query_name <- glue('WOS_{safe_now()}')
+	message('Searching WOS...')
 
 	if (parallel) { ## Use mclapply which is faster
 		pull_records <- function (query, editions = c("SCI", "SSCI", "AHCI", "ISTP",
@@ -202,11 +198,11 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 				names(wos_unenforced) <- dfs
 			}
 			else {
-				message("Downloading data\n")
+				message("- fetching records")
 				all_resps <- wosr:::download_wos(qr_out, ...)
 				all_resps <- all_resps[vapply(all_resps, length, numeric(1)) >
 															 	1]
-				message("\nParsing XML\n")
+				message("- parsing results")
 				parse_list <- parse_wos(all_resps)
 				df_list <- wosr:::data_frame_wos(parse_list)
 				wos_unenforced <- wosr:::process_wos_apply(df_list)
@@ -286,6 +282,8 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 										across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
 	)
 
+	message('...found ', nrow(records), ' records.')
+
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
 	records
@@ -336,10 +334,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													record_limit = numeric(),
 													...) {
 
-	if ('rentrez' %nin% installed.packages()) {
-		warning('Required package pubmedR will be installed.')
-		install.packages('pubmedR')
-	}
+	message('Searching Pubmed...')
 
 	if (is.null(api_key)) warning('NCBI API key is not set.')
 
@@ -361,19 +356,18 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 	query <- paste(query, year_query, additional_fields, collapse = ' AND ') %>% str_squish()
 
-	#res <- pmQueryTotalCount(query, api_key = api_key)
 	res <- rentrez::entrez_search(db = "pubmed", term = query, retmax = 0,
 																api_key = api_key, use_history = T)
 
 	total_count <- min(res$count, record_limit)
 
-	message('Fetching ', total_count, ifelse(length(record_limit) > 0, glue(' (of {res$count})'), ''), ' Pubmed results:')
+	message('- fetching records')
 
 	steps <- floor((total_count - 1) / min(total_count, 200))
 
 	# ~ 20x faster than pubmedR::pmApiRequest plus xml parsing
 	records <- pbmclapply(0:steps, function(step) {
-		print(paste(step * 200))
+		#print(paste(step * 200))
 		try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
 															retstart = step * 200, retmax = min(200, total_count - step * 200),
 															rettype = 'medline', parsed = F,
@@ -383,7 +377,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	failed.steps <- sapply(records, function(x) class(x) == 'try-error') %>% which
 
 	if (length(failed.steps) > 0) {
-		message(paste('Repeating', length(failed.steps), 'failed fetch tentatives:'))
+		message(paste('- repeating', length(failed.steps), 'failed fetch tentatives'))
 		refetched <- pblapply(failed.steps, function(step) {
 			rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
 														retstart = step * 200, retmax = 200, rettype = 'medline', parsed = F, api_key = options('ncbi_api_key'))
@@ -392,10 +386,11 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		records[failed.steps] <- refetched
 	}
 
-
-	message('- Parsing')
+	message('- parsing results')
 
 	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n'))
+
+	message('...found ', nrow(records), ' records.')
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
@@ -404,9 +399,10 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
-												api_key = options('ieee_api_key')[[1]], allow_web_scraping = F,
+												api_key = options('ieee_api_key')[[1]], allow_web_scraping = T,
 												query_name = glue('IEEE_{safe_now()}'), save = T,
 												wait_for = 20, record_limit = NULL) {
+	message('Searching Pubmed...')
 
 	if (!is.null(additional_fields) & length(additional_fields) > 0) {
 
@@ -451,7 +447,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 
 		url <- httr::build_url(endpoint)
 
-		message('Fetching records')
+		message('- fetching records')
 		response <- get_website_resources(url = url, url_filter = 'rest/search',
 																			type_filter = 'XHR', wait_for = wait_for)
 
@@ -460,8 +456,6 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		}
 
 		response <- jsonlite::fromJSON(response[[1]]$response$body)
-
-		message('Found ', response$totalRecords, ' records')
 
 		records <- response$records
 
@@ -534,7 +528,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		query <- c(querytext = query, additional_fields,
 							 apikey = api_key, format = 'json') %>% lapply(str_squish)
 
-		message('Fetching records')
+		message('- fetching records')
 
 		response <- httr::GET(url = endpoint, query = query)
 
@@ -590,7 +584,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 			)
 	}
 
-	message('Fetching individual article data')
+	message('- fetching individual article data')
 	article_data <- pbmclapply(records$URL, function(URL) {
 		data <- read_file(URL) %>%
 			str_extract('(?<=xplGlobal\\.document\\.metadata=).+') %>%
@@ -635,7 +629,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
 							 Published, Source, File)
 
-	message('Collected ', nrow(records),' records')
+	message('...found ', nrow(records), ' records.')
 
 	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
 
