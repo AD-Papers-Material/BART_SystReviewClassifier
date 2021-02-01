@@ -692,8 +692,9 @@ read_bib_files <- function(files, session = NA, query = NA) {
 				File = basename(file),
 				Session, Query
 			) %>% mutate(
-				across(where(is.character), ~ replace(.x, .x == '', NA)),
-				across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
+							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+							 	str_squish(.x))
 			)
 		}
 
@@ -717,8 +718,9 @@ read_bib_files <- function(files, session = NA, query = NA) {
 				File = basename(file),
 				Session, Query
 			) %>% mutate(
-				across(where(is.character), ~ replace(.x, .x == '', NA)),
-				across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
+							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+							 	str_squish(.x))
 			)
 		}
 	}) %>% setNames(basename(files))
