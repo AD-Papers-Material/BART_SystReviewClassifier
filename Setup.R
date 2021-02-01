@@ -342,7 +342,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		gt = '{year_piece + 1}[PDAT]:{year(today())}[PDAT]',
 		ge = '{year_piece}[PDAT]:{year(today())}[PDAT]',
 		eq = '{year_piece}[PDAT]:{year_piece}[PDAT]', le = '1000[PDAT]:{year_piece}[PDAT]',
-		range = '{year_piece[1]}:[PDAT]{year_piece[2]}[PDAT]',
+		range = '{year_piece[1]}[PDAT]:{year_piece[2]}[PDAT]',
 		lt = '1000[PDAT]:{year_piece - 1}[PDAT]'),
 		arg_in_query_test = '[PDAT]', query = query)
 
