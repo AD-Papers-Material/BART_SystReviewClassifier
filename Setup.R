@@ -563,9 +563,11 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 					results$articles
 				}
 			}) %>% bind_rows()
+
+			records <- bind_rows(records, other_pages)
 		}
 
-		records <- bind_rows(records, other_pages) %>%
+		records <- records %>%
 			transmute(
 				ID = paste0('IEEE:', publication_number),
 				Title = title,
