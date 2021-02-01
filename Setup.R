@@ -643,7 +643,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 
 	pblapply(files, function(file) {
 
-		print(basename(file))
+		message('Parsing ', basename(file), '...')
 
 		type <- NULL
 
