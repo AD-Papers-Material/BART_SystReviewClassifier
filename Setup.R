@@ -639,7 +639,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 
-read_bib_files <- function(files, session = NA, query = NA) {
+read_bib_files <- function(files) {
 
 	pblapply(files, function(file) {
 
@@ -667,7 +667,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 		if (type == 'nbib') {
 
 			parse_medline(entries) %>%
-				mutate(Source_type = 'parsed', File = basename(file), Session, Query)
+				mutate(Source_type = 'parsed', File = basename(file))
 		}
 
 		else if (type == 'wos') {
@@ -689,8 +689,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
 				Source_type = 'parsed',
-				File = basename(file),
-				Session, Query
+				File = basename(file)
 			) %>% mutate(
 				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
@@ -715,8 +714,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 				Published = `Online Date`,
 				Source = 'IEEE',
 				Source_type = 'parsed',
-				File = basename(file),
-				Session, Query
+				File = basename(file)
 			) %>% mutate(
 				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
