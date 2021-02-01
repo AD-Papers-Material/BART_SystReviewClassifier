@@ -260,7 +260,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract, DOI = doi,
 							Journal = journal, N_citations = tot_cites,
 							Published = format(ymd(date),'%b %Y'), Source = 'WOS',
-							File = file_name)
+							File = file_name, Source_type = 'API')
 
 	additional_infos <- list(
 		authors = records_list$author %>% group_by(ID = ut) %>%
@@ -389,7 +389,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	message('- parsing results')
 
 	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n')) %>%
-		mutate(File = file_name)
+		mutate(File = file_name, Source_type = 'API')
 
 	message('...found ', nrow(records), ' records.')
 
@@ -626,10 +626,10 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
 					 	str_squish(.x)),
 		Source = 'IEEE',
-		File = file_name
+		File = file_name, Source_type = 'API'
 	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
-							 Published, Source, File)
+							 Published, Source, Source_type, File)
 
 	message('...found ', nrow(records), ' records.')
 
@@ -667,7 +667,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 		if (type == 'nbib') {
 
 			parse_medline(entries) %>%
-				mutate(Session, Query)
+				mutate(Source_type = 'parsed', File = basename(file), Session, Query)
 		}
 
 		else if (type == 'wos') {
@@ -688,6 +688,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 				Published = paste(`Publication Date`, `Publication Year`),
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
+				Source_type = 'parsed',
 				File = basename(file),
 				Session, Query
 			) %>% mutate(
@@ -712,6 +713,7 @@ read_bib_files <- function(files, session = NA, query = NA) {
 				N_citations = `Article Citation Count`,
 				Published = `Online Date`,
 				Source = 'IEEE',
+				Source_type = 'parsed',
 				File = basename(file),
 				Session, Query
 			) %>% mutate(
