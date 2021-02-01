@@ -175,8 +175,7 @@ clean_date_filter_arg <- function(year_query, cases,
 
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 default_field = 'TS', api_key = options('wos_api_key'),
-											 parallel = T, parse_query = T,
-											 file_name = glue('WOS_{safe_now()}'), save = T, ...) {
+											 parallel = T, parse_query = T, ...) {
 
 	message('Searching WOS...')
 
@@ -260,7 +259,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract, DOI = doi,
 							Journal = journal, N_citations = tot_cites,
 							Published = format(ymd(date),'%b %Y'), Source = 'WOS',
-							File = file_name, Source_type = 'API')
+							Source_type = 'API')
 
 	additional_infos <- list(
 		authors = records_list$author %>% group_by(ID = ut) %>%
@@ -283,8 +282,6 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 													 	str_squish(.x)))
 
 	message('...found ', nrow(records), ' records.')
-
-	if (save) write_rds(records, file.path('Records', paste0(file_name, '.rds')))
 
 	records
 }
@@ -330,7 +327,6 @@ parse_medline <- function(entries) {
 
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = options('ncbi_api_key'),
-													file_name = glue('Pubmed_{safe_now()}'), save = T,
 													record_limit = numeric(),
 													...) {
 
@@ -389,11 +385,9 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	message('- parsing results')
 
 	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n')) %>%
-		mutate(File = file_name, Source_type = 'API')
+		mutate(Source_type = 'API')
 
 	message('...found ', nrow(records), ' records.')
-
-	if (save) write_rds(records, file.path('Records', paste0(file_name, '.rds')))
 
 	records
 
@@ -625,15 +619,12 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
 					 	str_squish(.x)),
-		Source = 'IEEE',
-		File = file_name, Source_type = 'API'
+		Source = 'IEEE', Source_type = 'API'
 	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
-							 Published, Source, Source_type, File)
+							 Published, Source, Source_type)
 
 	message('...found ', nrow(records), ' records.')
-
-	if (save) write_rds(records, file.path('Records', paste0(file_name, '.rds')))
 
 	records
 }
@@ -667,7 +658,7 @@ read_bib_files <- function(files) {
 		if (type == 'nbib') {
 
 			parse_medline(entries) %>%
-				mutate(Source_type = 'parsed', File = basename(file))
+				mutate(Source_type = 'parsed')
 		}
 
 		else if (type == 'wos') {
@@ -689,7 +680,6 @@ read_bib_files <- function(files) {
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
 				Source_type = 'parsed',
-				File = basename(file)
 			) %>% mutate(
 				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
@@ -714,7 +704,6 @@ read_bib_files <- function(files) {
 				Published = `Online Date`,
 				Source = 'IEEE',
 				Source_type = 'parsed',
-				File = basename(file)
 			) %>% mutate(
 				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
@@ -736,7 +725,7 @@ join_sources <- function(source.list) {
 			Mesh = if (exists('Mesh')) Mesh else NA,
 			Article_type,
 			N_citations = if (exists('N_citations')) N_citations else NA,
-			Source, File
+			Source, Source_type, FileID
 		)
 	}) %>% bind_rows() %>%
 		mutate(
@@ -759,7 +748,9 @@ update_annotation_file <- function(sources = NULL, source_folder = 'Records', re
 
 	out_type <- match.arg(out_type)
 
-	if (is.null(sources) & is.null(source_folder)) stop('Either parsed sources or sources path are needed')
+	if (is.null(sources) & is.null(source_folder)) {
+		stop('Either parsed sources or sources path are needed')
+	}
 
 	if (is.null(sources) & !is.null(source_folder)) {
 		message('- parsing sources...')
@@ -826,7 +817,7 @@ fix_duplicated_records <- function(Records) {
 			Order = min(Order),
 			across(any_of(c('Title', 'Abstract', 'Authors', 'Journal', 'Journal_short', 'Year',
 											"Pred_delta", "Pred_Med", "Pred_Low", "Pred_Up")), ~ last(na.omit(.x))),
-			across(any_of(c('ID', 'DOI', 'Mesh', 'Article_type', 'Source', 'File',
+			across(any_of(c('ID', 'DOI', 'Mesh', 'Article_type', 'Source', 'Source_type', 'FileID',
 											"Rev_title", "Rev_abstract", "Rev_prediction",
 											"Rev_text", "Predicted_label")), ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
 			Keywords = Keywords %>% str_split('; ') %>% unlist() %>% na.omit() %>% unique() %>%
