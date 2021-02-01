@@ -569,6 +569,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 
 		records <- records %>%
 			transmute(
+				Order = 1:n(),
 				ID = paste0('IEEE:', publication_number),
 				Title = title,
 				Abstract = abstract,
@@ -582,7 +583,12 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	}
 
 	message('- fetching individual article data')
+
 	article_data <- pbmclapply(records$URL, function(URL) {
+		if (!str_detect(URL, fixed('https://ieeexplore.ieee.org/document/'))) {
+			return(NULL)
+		}
+
 		data <- read_file(URL) %>%
 			str_extract('(?<=xplGlobal\\.document\\.metadata=).+') %>%
 			str_remove(';$') %>% jsonlite::fromJSON()
@@ -599,16 +605,23 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 
 		ret <- bind_cols(
 			URL = URL,
-			Abstract = data$abstract,
 			Keywords = Keys$IEEE,
 			Mesh = Keys$Mesh,
 			Author_keywords = Keys$Author,
 		)
 
 		if ('Authors' %nin% names(records)) {
+
 			ret$Authors <- data$authors %>% as.data.frame() %>%
+				transmute(
+					firstName = if (exists('firstName')) firstName else NA,
+					lastName = if (exists('lastName')) lastName else NA,
+					across(c(firstName, lastName), ~ replace(.x, is.na(.x), ''))
+				) %>%
 				with(paste(
-					str_replace_all(firstName, '\\b(\\w)\\w*', '\\1.'),
+					str_replace_all(firstName, c(
+						'[^\\w]+' = ' ',
+						'\\b(\\w)\\w*' = '\\1.')),
 					lastName,
 					collapse = '; '))
 
@@ -620,7 +633,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	records <- left_join(records, article_data, by = 'URL') %>% mutate(
 		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-					 	str_squish(.x)),
+					 	str_squish()),
 		Source = 'IEEE', Source_type = 'API'
 	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
@@ -933,7 +946,7 @@ tokenize_authors <- function(corpus) {
 
 	with.comma <- str_detect(corpus, ',')
 
-	corpus <- corpus %>% str_to_title() %>% str_squish()
+	corpus <- corpus %>% str_squish()
 
 	output <- mclapply(1:length(corpus), function(i) {
 		if (is.na(with.comma[i])) NA # No authors listed
@@ -945,9 +958,9 @@ tokenize_authors <- function(corpus) {
 				}) %>% str_replace_all(',', '_') %>% str_remove_all(' +')
 		} else { # IEEE style author list
 			corpus[i] %>%
-				str_remove_all('[^\\w\\.;]') %>%
-				str_replace_all('[^;]+(?:(?=;)|$)', function(x) {
-					str_replace(x, '([\\w \\.]+)\\.([\\w ]+)', '\\2_\\1')
+				str_remove_all('[^\\w\\.;]') %>% # remove non letters and other characters
+				str_replace_all('[^;]+(?:(?=;)|$)', function(x) { # extract names between ;
+					str_replace(x, '([\\w \\.]+)\\.([\\w ]+)', '\\2_\\1') #use the rightmost dot to separate first and last names
 				}) %>% str_remove_all('\\.')
 		}
 	}, mc.cores = 8) %>% unlist %>%
