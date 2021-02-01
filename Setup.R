@@ -176,7 +176,7 @@ clean_date_filter_arg <- function(year_query, cases,
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 default_field = 'TS', api_key = options('wos_api_key'),
 											 parallel = T, parse_query = T,
-											 query_name = glue('WOS_{safe_now()}'), save = T, ...) {
+											 file_name = glue('WOS_{safe_now()}'), save = T, ...) {
 
 	message('Searching WOS...')
 
@@ -260,7 +260,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract, DOI = doi,
 							Journal = journal, N_citations = tot_cites,
 							Published = format(ymd(date),'%b %Y'), Source = 'WOS',
-							File = query_name)
+							File = file_name)
 
 	additional_infos <- list(
 		authors = records_list$author %>% group_by(ID = ut) %>%
@@ -284,12 +284,12 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 
 	message('...found ', nrow(records), ' records.')
 
-	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
+	if (save) write_rds(records, file.path('Records', paste0(file_name, '.rds')))
 
 	records
 }
 
-parse_medline <- function(entries, query_name = glue('Pubmed_{safe_now()}')) {
+parse_medline <- function(entries) {
 	entries <- entries %>%
 		str_remove_all('\\r') %>%
 		str_replace_all('\\n\\s\\s+', ' ') %>%
@@ -320,7 +320,6 @@ parse_medline <- function(entries, query_name = glue('Pubmed_{safe_now()}')) {
 		Authors = FAU, Journal = JT, Journal_short = TA,
 		Article_type = PT, Mesh = MH, Author_keywords = OT, Published = DP,
 		Source = 'Pubmed',
-		File = query_name
 	) %>% mutate(
 		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
@@ -331,7 +330,7 @@ parse_medline <- function(entries, query_name = glue('Pubmed_{safe_now()}')) {
 
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = options('ncbi_api_key'),
-													query_name = glue('Pubmed_{safe_now()}'), save = T,
+													file_name = glue('Pubmed_{safe_now()}'), save = T,
 													record_limit = numeric(),
 													...) {
 
@@ -389,11 +388,12 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 	message('- parsing results')
 
-	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n'))
+	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n')) %>%
+		mutate(File = file_name)
 
 	message('...found ', nrow(records), ' records.')
 
-	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
+	if (save) write_rds(records, file.path('Records', paste0(file_name, '.rds')))
 
 	records
 
@@ -401,7 +401,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 												api_key = options('ieee_api_key')[[1]], allow_web_scraping = T,
-												query_name = glue('IEEE_{safe_now()}'), save = T,
+												file_name = glue('IEEE_{safe_now()}'), save = T,
 												wait_for = 20, record_limit = NULL) {
 	message('Searching Pubmed...')
 
@@ -626,14 +626,14 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
 					 	str_squish(.x)),
 		Source = 'IEEE',
-		File = query_name
+		File = file_name
 	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
 							 Published, Source, File)
 
 	message('...found ', nrow(records), ' records.')
 
-	if (save) write_rds(records, file.path('Records', paste0(query_name, '.rds')))
+	if (save) write_rds(records, file.path('Records', paste0(file_name, '.rds')))
 
 	records
 }
