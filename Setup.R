@@ -278,9 +278,9 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 	for (info in additional_infos) records <- left_join(records, info, by = 'ID')
 
 	records <- mutate(records,
-										across(where(is.character), ~ replace(.x, .x == '', NA)),
-										across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
-	)
+										across(where(is.character), ~ replace(.x, .x == '', NA) %>%
+													 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+													 	str_squish(.x)))
 
 	message('...found ', nrow(records), ' records.')
 
@@ -322,8 +322,9 @@ parse_medline <- function(entries, query_name = glue('Pubmed_{safe_now()}')) {
 		Source = 'Pubmed',
 		File = query_name
 	) %>% mutate(
-		across(where(is.character), ~ replace(.x, .x == '', NA)),
-		across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
+		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
+					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+					 	str_squish(.x))
 	)
 }
 
@@ -621,8 +622,9 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	}) %>% bind_rows()
 
 	records <- left_join(records, article_data, by = 'URL') %>% mutate(
-		across(where(is.character), ~ replace(.x, .x == '', NA)),
-		across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';')),
+		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
+					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+					 	str_squish(.x)),
 		Source = 'IEEE',
 		File = query_name
 	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
@@ -637,7 +639,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 
-read_bib_files <- function(files) {
+read_bib_files <- function(files, session = NA, query = NA) {
 
 	pblapply(files, function(file) {
 
@@ -664,7 +666,8 @@ read_bib_files <- function(files) {
 
 		if (type == 'nbib') {
 
-			entries <- parse_medline(entries)
+			parse_medline(entries) %>%
+				mutate(Session, Query)
 		}
 
 		else if (type == 'wos') {
@@ -685,7 +688,8 @@ read_bib_files <- function(files) {
 				Published = paste(`Publication Date`, `Publication Year`),
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
-				File = basename(file)
+				File = basename(file),
+				Session, Query
 			) %>% mutate(
 				across(where(is.character), ~ replace(.x, .x == '', NA)),
 				across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
@@ -708,7 +712,8 @@ read_bib_files <- function(files) {
 				N_citations = `Article Citation Count`,
 				Published = `Online Date`,
 				Source = 'IEEE',
-				File = basename(file)
+				File = basename(file),
+				Session, Query
 			) %>% mutate(
 				across(where(is.character), ~ replace(.x, .x == '', NA)),
 				across(where(is.character), ~ str_squish(.x) %>% str_replace_all(' +;', ';'))
