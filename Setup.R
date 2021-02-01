@@ -397,7 +397,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 												api_key = options('ieee_api_key')[[1]], allow_web_scraping = T,
 												file_name = glue('IEEE_{safe_now()}'), save = T,
 												wait_for = 20, record_limit = NULL) {
-	message('Searching Pubmed...')
+	message('Searching IEEE...')
 
 	if (!is.null(additional_fields) & length(additional_fields) > 0) {
 
