@@ -173,6 +173,15 @@ clean_date_filter_arg <- function(year_query, cases,
 
 }
 
+clean_record_textfields <- function(df) {
+	mutate(df,
+				 across(where(is.character), ~ replace(.x, .x == '', NA) %>%
+				 			 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+				 			 	str_squish())
+	)
+}
+
+
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 default_field = 'TS', api_key = options('wos_api_key'),
 											 parallel = T, parse_query = T, ...) {
@@ -276,10 +285,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 
 	for (info in additional_infos) records <- left_join(records, info, by = 'ID')
 
-	records <- mutate(records,
-										across(where(is.character), ~ replace(.x, .x == '', NA) %>%
-													 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-													 	str_squish(.x)))
+	records <- records %>% clean_record_textfields()
 
 	message('...found ', nrow(records), ' records.')
 
@@ -317,11 +323,7 @@ parse_medline <- function(entries) {
 		Authors = FAU, Journal = JT, Journal_short = TA,
 		Article_type = PT, Mesh = MH, Author_keywords = OT, Published = DP,
 		Source = 'Pubmed',
-	) %>% mutate(
-		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
-					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-					 	str_squish(.x))
-	)
+	) %>% clean_record_textfields()
 }
 
 
@@ -630,12 +632,10 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		ret
 	}) %>% bind_rows()
 
-	records <- left_join(records, article_data, by = 'URL') %>% mutate(
-		across(where(is.character), ~ replace(.x, .x == '', NA) %>%
-					 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-					 	str_squish()),
-		Source = 'IEEE', Source_type = 'API'
-	) %>% select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
+	records <- left_join(records, article_data, by = 'URL') %>%
+		mutate(Source = 'IEEE', Source_type = 'API') %>%
+		clean_record_textfields() %>%
+		select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
 							 Published, Source, Source_type)
 
@@ -701,11 +701,7 @@ read_bib_files <- function(files) {
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
 				Source_type = 'parsed',
-			) %>% mutate(
-				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
-							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-							 	str_squish(.x))
-			)
+			) %>% clean_record_textfields()
 		}
 
 		else if (type == 'ieee') {
@@ -725,11 +721,7 @@ read_bib_files <- function(files) {
 				Published = `Online Date`,
 				Source = 'IEEE',
 				Source_type = 'parsed',
-			) %>% mutate(
-				across(where(is.character), ~ replace(.x, .x == '', NA) %>%
-							 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-							 	str_squish(.x))
-			)
+			) %>% clean_record_textfields()
 		}
 	}) %>% setNames(basename(files))
 }
