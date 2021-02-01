@@ -634,6 +634,12 @@ read_bib_files <- function(files) {
 
 	pblapply(files, function(file) {
 
+		if (str_detect(file, '(parsed|API)\\.csv')) {  # no parsing necessary
+			message('Reading ', basename(file), '...')
+
+			return(read_csv(file))
+		}
+
 		message('Parsing ', basename(file), '...')
 
 		type <- NULL
