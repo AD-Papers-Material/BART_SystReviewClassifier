@@ -726,6 +726,111 @@ read_bib_files <- function(files) {
 	}) %>% setNames(basename(files))
 }
 
+perform_search_session <- function(query, year_query = NULL, actions = c('API', 'parsed'),
+														 sources = c('IEEE', 'WOS', 'Pubmed'),
+														 session_name = 'Session1', query_name = 'Query1',
+														 records_folder = 'Records', overwrite = FALSE,
+														 journal = 'Session_journal.csv') {
+
+	folder_path <- file.path(records_folder, session_name, query_name)
+
+	if (!dir.exists(folder_path)) dir.create(folder_path, recursive = T)
+
+	search_ts <- safe_now()
+
+	record_data <- lapply(sources, function(source) {
+
+		input_file <- NA
+
+		lapply(actions, function(action) {
+
+			output_file <- file.path(folder_path, glue('{source}_{action}.csv'))
+
+			if (file.exists(output_file) & !overwrite) {
+				warning(output_file, ' already present and argument overwrite == FALSE.', call. = F)
+
+				return(NULL)
+			}
+
+			if (file.exists(output_file) & overwrite) warning(output_file, ' will be overwritten.', call. = F)
+
+			if (action == 'API') {
+				## API search
+
+				search_fun <- get(paste0('search_', str_to_lower(source)))
+
+				records <- search_fun(query = query, year_query = year_query)
+
+			} else if (action == 'parsed') {
+				## Parsing downloaded records
+
+				input_file <- list.files(folder_path, full.names = F) %>%
+					str_subset(paste(actions, collapse = '|'), negate = T) %>%
+					str_subset(regex(source, ignore_case = T))
+
+				input_file <- file.path(folder_path, input_file)
+
+				if (length(input_file) > 0) {
+					if (length(input_file) > 1) {
+						stop('Only one source file to parse can exists per source/query/session.')
+					}
+
+					records <- read_bib_files(input_file)[[1]]
+				} else return(NULL)
+			}
+
+			records$FileID <- paste(session_name, query_name, basename(output_file), collapse = ' - ')
+
+			write_csv(records, output_file)
+
+			data.frame(
+				Session_ID = session_name,
+				Query_ID = query_name,
+				Source = source,
+				Type = action,
+				Raw_file = if(!is.na(input_file)) basename(input_file) else NA,
+				Parsed_file = basename(output_file),
+				Timestamp = search_ts,
+				Filter = year_query,
+				N_results = nrow(records),
+				Query = query
+			)
+		})
+
+	}) %>% bind_rows()
+
+	if (nrow(record_data) == 0) {
+		warning('No records were added', call. = F)
+	}
+
+	if (!is.null(journal)) {
+
+		if (str_detect(journal, '\\.csv$')) {
+			write_fun <- write_csv
+			read_fun <- read_csv
+		} else if (str_detect(journal, '\\.xlsx?$')) {
+			write_fun <- WriteXLS::WriteXLS
+			read_fun <- read_excel
+		} else stop('Session journal file type must be csv or excel.')
+
+		if (file.exists(journal)) {
+			previous_data <- read_fun(journal)
+
+			if (overwrite) {
+				previous_data <- previous_data %>%
+					anti_join(select(record_data, Session_ID, Query_ID, Source, Type, Filter))
+			}
+			record_data <- bind_rows(previous_data, record_data)
+		}
+
+		write_fun(record_data, journal)
+	}
+
+	record_data
+
+}
+
+
 join_sources <- function(source.list) {
 	lapply(source.list, function(source) {
 		source %>% transmute(
