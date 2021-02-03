@@ -870,21 +870,29 @@ join_sources <- function(source.list) {
 }
 
 
-save_annotation_file <- function(sources = NULL, source_folder = 'Records', recursive = T, prev_records = NULL, out_type = c('xlsx', 'csv')) {
+save_annotation_file <- function(records = NULL, records_folder = 'Records', recursive = T, prev_annotation = NULL, out_type = c('xlsx', 'csv')) {
 
 	out_type <- match.arg(out_type)
 
-	if (is.null(sources) & is.null(source_folder)) {
-		stop('Either parsed sources or sources path are needed')
+	if (is.null(records) & is.null(records_folder)) {
+		stop('Either parsed records or record folder paths are needed')
 	}
 
-	if (is.null(sources) & !is.null(source_folder)) {
-		message('- parsing sources...')
-		sources <- read_bib(list.files(source_folder, full.names = T, recursive = recursive))
+	if (is.null(records) & !is.null(records_folder)) {
+		message('- parsing records...')
+		records <- list.files(records_folder, full.names = T, recursive = recursive) %>%
+			str_subset('~\\$', negate = T) %>%
+			read_bib_files()
 	}
 
-	message('- joining sources...')
-	joined_sources <- join_sources(sources) %>%
+	if (!is.data.frame(records)) {
+		message('- joining records...')
+		records <- join_sources(records)
+		message(": ", nrow(records), ' unique records')
+	}
+
+
+	records <- records %>%
 		mutate(
 			Rev_title = NA,
 			Rev_abstract = NA,
@@ -892,39 +900,37 @@ save_annotation_file <- function(sources = NULL, source_folder = 'Records', recu
 			.before = DOI
 		)
 
-	message(": ", nrow(joined_sources), ' unique records')
+	if (!is.null(prev_annotation) & file.exists(prev_annotation)) {
 
-	if (!is.null(prev_records) & file.exists(prev_records)) {
+		if (str_detect(prev_annotation, '\\.xlsx?$')) {
+			prev_records <- read_excel(prev_annotation)
+		} else prev_records <- read_csv(prev_annotation)
 
-		if (str_detect(prev_records, '\\.xlsx?$')) {
-			old_sources <- read_excel(prev_records)
-		} else old_sources <- read_csv(prev_records)
+		records <- records %>% filter(!(ID %in% prev_records$ID))
 
-		joined_sources <- joined_sources %>% filter(!(ID %in% old_sources$ID))
+		message("(", nrow(records), ' new records)')
 
-		message("(", nrow(joined_sources), ' new records)')
-
-		joined_sources <- full_join(
-			old_sources, joined_sources
+		records <- full_join(
+			prev_records, records
 		) %>%
 			mutate(
-				Parent_file = prev_records,
+				Parent_file = prev_annotation,
 			) %>%
 			fix_duplicated_records()
 
 	}
 
-	joined_sources <- joined_sources %>% arrange(Order)
+	records <- records %>% arrange(Order)
 
 	message('- saving records...')
 
 	file <- file.path('Annotations', paste0('Records_', safe_now(), '.', out_type))
 
 	if (out_type == 'xlsx') {
-		WriteXLS::WriteXLS(joined_sources, ExcelFileName = file)
-	} else write_csv(joined_sources, file = file)
+		WriteXLS::WriteXLS(records, ExcelFileName = file)
+	} else write_csv(records, file = file)
 
-	invisible(joined_sources)
+	invisible(records)
 }
 
 fix_duplicated_records <- function(Records) {
