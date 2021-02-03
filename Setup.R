@@ -644,93 +644,11 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	records
 }
 
-
-read_bib_files <- function(files) {
-
-	pblapply(files, function(file) {
-
-		if (str_detect(file, '(parsed|API)\\.csv')) {  # no parsing necessary
-			message('Reading ', basename(file), '...')
-
-			return(read_csv(file))
-		}
-
-		message('Parsing ', basename(file), '...')
-
-		type <- NULL
-
-		if (str_detect(file, '\\.(nbib|txt)$')) {
-			entries <- read_file(file)
-
-			if (str_detect(entries, 'PMID-')) type <- 'nbib'
-
-		} else if (str_detect(file, '\\.(xlsx?|csv)$')) {
-			entries <- if (str_detect(file, '\\.csv$')) read_csv(file) else read_excel(file)
-
-			if ('UT (Unique WOS ID)' %in% colnames(entries)) type <- 'wos'
-			else if ('IEEE Terms' %in% colnames(entries)) type <- 'ieee'
-		}
-
-		if (is.null(type)) {
-			warning('Format not recognized')
-			return(NULL)
-		}
-
-		if (type == 'nbib') {
-
-			parse_medline(entries) %>%
-				mutate(Source_type = 'parsed')
-		}
-
-		else if (type == 'wos') {
-
-			entries %>% transmute(
-				Order = 1:n(),
-				ID = `UT (Unique WOS ID)`,
-				Title = `Article Title`,
-				Abstract, DOI,
-				Authors = `Author Full Names`,
-				Journal = `Source Title`,
-				Journal_short = `Journal ISO Abbreviation`,
-				Article_type = `Document Type`,
-				Author_keywords = `Author Keywords`,
-				Keywords = `Keywords Plus`,
-				Topic = `WoS Categories`,
-				N_citations = `Times Cited, All Databases`,
-				Published = paste(`Publication Date`, `Publication Year`),
-				PMID = `Pubmed Id`,
-				Source = 'WOS',
-				Source_type = 'parsed',
-			) %>% clean_record_textfields()
-		}
-
-		else if (type == 'ieee') {
-
-			entries %>% transmute(
-				Order = 1:n(),
-				ID = paste0('IEEE:', str_remove(`PDF Link`, fixed('https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber='))),
-				Title = `Document Title`,
-				Abstract, DOI, URL = `PDF Link`,
-				Authors, Journal = `Publication Title`,
-				Author_keywords = `Author Keywords`,
-				Keywords = cbind(`IEEE Terms`, `INSPEC Controlled Terms`, `INSPEC Non-Controlled Terms`) %>%
-					apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA),
-				Mesh = Mesh_Terms,
-				Article_type = str_remove(`Document Identifier`, 'IEEE '),
-				N_citations = `Article Citation Count`,
-				Published = `Online Date`,
-				Source = 'IEEE',
-				Source_type = 'parsed',
-			) %>% clean_record_textfields()
-		}
-	}) %>% setNames(basename(files))
-}
-
 perform_search_session <- function(query, year_query = NULL, actions = c('API', 'parsed'),
-														 sources = c('IEEE', 'WOS', 'Pubmed'),
-														 session_name = 'Session1', query_name = 'Query1',
-														 records_folder = 'Records', overwrite = FALSE,
-														 journal = 'Session_journal.csv') {
+																	 sources = c('IEEE', 'WOS', 'Pubmed'),
+																	 session_name = 'Session1', query_name = 'Query1',
+																	 records_folder = 'Records', overwrite = FALSE,
+																	 journal = 'Session_journal.csv') {
 
 	folder_path <- file.path(records_folder, session_name, query_name)
 
@@ -830,6 +748,87 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 }
 
+
+read_bib_files <- function(files) {
+
+	pblapply(files, function(file) {
+
+		if (str_detect(file, '(parsed|API)\\.csv')) {  # no parsing necessary
+			message('Reading ', basename(file), '...')
+
+			return(read_csv(file))
+		}
+
+		message('Parsing ', basename(file), '...')
+
+		type <- NULL
+
+		if (str_detect(file, '\\.(nbib|txt)$')) {
+			entries <- read_file(file)
+
+			if (str_detect(entries, 'PMID-')) type <- 'nbib'
+
+		} else if (str_detect(file, '\\.(xlsx?|csv)$')) {
+			entries <- if (str_detect(file, '\\.csv$')) read_csv(file) else read_excel(file)
+
+			if ('UT (Unique WOS ID)' %in% colnames(entries)) type <- 'wos'
+			else if ('IEEE Terms' %in% colnames(entries)) type <- 'ieee'
+		}
+
+		if (is.null(type)) {
+			warning('Format not recognized')
+			return(NULL)
+		}
+
+		if (type == 'nbib') {
+
+			parse_medline(entries) %>%
+				mutate(Source_type = 'parsed')
+		}
+
+		else if (type == 'wos') {
+
+			entries %>% transmute(
+				Order = 1:n(),
+				ID = `UT (Unique WOS ID)`,
+				Title = `Article Title`,
+				Abstract, DOI,
+				Authors = `Author Full Names`,
+				Journal = `Source Title`,
+				Journal_short = `Journal ISO Abbreviation`,
+				Article_type = `Document Type`,
+				Author_keywords = `Author Keywords`,
+				Keywords = `Keywords Plus`,
+				Topic = `WoS Categories`,
+				N_citations = `Times Cited, All Databases`,
+				Published = paste(`Publication Date`, `Publication Year`),
+				PMID = `Pubmed Id`,
+				Source = 'WOS',
+				Source_type = 'parsed',
+			) %>% clean_record_textfields()
+		}
+
+		else if (type == 'ieee') {
+
+			entries %>% transmute(
+				Order = 1:n(),
+				ID = paste0('IEEE:', str_remove(`PDF Link`, fixed('https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber='))),
+				Title = `Document Title`,
+				Abstract, DOI, URL = `PDF Link`,
+				Authors, Journal = `Publication Title`,
+				Author_keywords = `Author Keywords`,
+				Keywords = cbind(`IEEE Terms`, `INSPEC Controlled Terms`, `INSPEC Non-Controlled Terms`) %>%
+					apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA),
+				Mesh = Mesh_Terms,
+				Article_type = str_remove(`Document Identifier`, 'IEEE '),
+				N_citations = `Article Citation Count`,
+				Published = `Online Date`,
+				Source = 'IEEE',
+				Source_type = 'parsed',
+			) %>% clean_record_textfields()
+		}
+	}) %>% setNames(basename(files))
+}
 
 join_sources <- function(source.list) {
 	lapply(source.list, function(source) {
