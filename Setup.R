@@ -748,6 +748,15 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 }
 
+extract_source_file_paths <- function(journal, sessions = journal$Session_ID,
+																			queries = journal$Query_ID,
+																			sources = journal$Source,
+																			records_folder = 'Records') {
+	journal %>% filter(Session_ID %in% sessions, Query_ID %in%  queries,
+										 Source %in% sources) %>%
+		with(file.path(records_folder, Session_ID, Query_ID, Parsed_file)) %>%
+		unique()
+}
 
 read_bib_files <- function(files) {
 
@@ -861,7 +870,7 @@ join_sources <- function(source.list) {
 }
 
 
-update_annotation_file <- function(sources = NULL, source_folder = 'Records', recursive = T, prev_records = NULL, out_type = c('xlsx', 'csv')) {
+save_annotation_file <- function(sources = NULL, source_folder = 'Records', recursive = T, prev_records = NULL, out_type = c('xlsx', 'csv')) {
 
 	out_type <- match.arg(out_type)
 
