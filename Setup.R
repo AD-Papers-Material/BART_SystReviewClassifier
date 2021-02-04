@@ -870,27 +870,37 @@ join_sources <- function(source.list) {
 }
 
 
-save_annotation_file <- function(records = NULL, records_folder = 'Records', recursive = T, prev_annotation = NULL, out_type = c('xlsx', 'csv')) {
+save_annotation_file <- function(records = NULL, records_folders = 'Records',
+																 prev_annotation = NULL,
+																 annotation_folder = 'Annotations',
+																 session_name = 'Session1', recursive = T,
+																 out_type = c('xlsx', 'csv')) {
 
 	out_type <- match.arg(out_type)
 
-	if (is.null(records) & is.null(records_folder)) {
+	if (is.null(records) & is.null(records_folders)) {
 		stop('Either parsed records or record folder paths are needed')
 	}
 
-	if (is.null(records) & !is.null(records_folder)) {
-		message('- parsing records...')
-		records <- list.files(records_folder, full.names = T, recursive = recursive) %>%
-			str_subset('~\\$', negate = T) %>%
-			read_bib_files()
+	if (!is.null(records) & !is.null(records_folders)) {
+		warning('Both records and record folder were passed, only the firsts will be used')
 	}
 
-	if (!is.data.frame(records)) {
+	if (is.null(records) & !is.null(records_folders)) {
+		records <- list.files(records_folders, full.names = T, recursive = recursive) %>%
+			str_subset('~\\$', negate = T)
+	}
+
+	if (is.character(records)) {
+		message('- parsing records...')
+		records <- read_bib_files(records)
+	}
+
+	if (!is.data.frame(records) & is.list(records)) {
 		message('- joining records...')
 		records <- join_sources(records)
 		message(": ", nrow(records), ' unique records')
 	}
-
 
 	records <- records %>%
 		mutate(
@@ -900,7 +910,7 @@ save_annotation_file <- function(records = NULL, records_folder = 'Records', rec
 			.before = DOI
 		)
 
-	if (!is.null(prev_annotation) & file.exists(prev_annotation)) {
+	if (!is.null(prev_annotation) && file.exists(prev_annotation)) {
 
 		if (str_detect(prev_annotation, '\\.xlsx?$')) {
 			prev_records <- read_excel(prev_annotation)
@@ -924,7 +934,10 @@ save_annotation_file <- function(records = NULL, records_folder = 'Records', rec
 
 	message('- saving records...')
 
-	file <- file.path('Annotations', paste0('Records_', safe_now(), '.', out_type))
+	folder <- file.path(annotation_folder, session_name)
+	if (!dir.exists(folder)) dir.create(folder, recursive = T)
+
+	file <- file.path(folder, paste0('Records_', safe_now(), '.', out_type))
 
 	if (out_type == 'xlsx') {
 		WriteXLS::WriteXLS(records, ExcelFileName = file)
@@ -961,15 +974,13 @@ fix_duplicated_records <- function(Records) {
 	bind_rows(unique_sources, dup_sources) %>% select(-UID)
 }
 
-summarise_by_source <- function(file) {
-	data <- read_excel(file)
+summarise_by_source <- function(annotation_file) {
+	data <- if (is.character(annotation_file)) read_excel(annotation_file) else annotation_file
 
 	sources <- data$Source %>% str_split(., '; ') %>% unlist() %>% table()
 
 	c(setNames(as.vector(sources), names(sources)), Total = nrow(data))
 }
-
-
 
 # NLP ---------------------------------------------------------------------
 
