@@ -700,7 +700,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 					} else return(NULL)
 				}
 
-				records$FileID <- paste(session_name, query_name, basename(output_file), collapse = ' - ')
+				records$FileID <- file.path(session_name, query_name, basename(output_file))
 
 				write_csv(records, output_file)
 			}
@@ -878,7 +878,27 @@ join_records <- function(record.list) {
 		arrange(Order)
 }
 
-save_annotation_file <- function(records, prev_annotation = NULL,
+order_by_query_match <- function(records, query) {
+	terms <- str_remove_all(query, '[^\\w\\s\\*]+|(?<= )(AND|OR)(?= )') %>%
+		str_split('\\s+') %>%
+		unlist() %>% unique() %>%
+		str_replace_all('\\*', '\\\\w*')
+
+	records %>%
+		mutate(
+			text = paste(Title, Abstract),
+			doc.length = str_count(text, '\\b'),
+			term.count = str_count(text, paste(terms, collapse = '|')),
+			score = term.count/doc.length
+		) %>%
+		arrange(desc(score)) %>%
+		mutate(Order = 1:n()) %>%
+		select(-text, -doc.length, -term.count, -score)
+}
+
+
+
+save_annotation_file <- function(records, reorder_query = NULL, prev_annotation = NULL,
 																 annotation_folder = 'Annotations',
 																 session_name = 'Session1', recursive = T,
 																 out_type = c('xlsx', 'csv')) {
@@ -906,6 +926,12 @@ save_annotation_file <- function(records, prev_annotation = NULL,
 		message('- joining records...')
 		records <- join_records(records)
 		message(": ", nrow(records), ' unique records')
+	}
+
+	if (!is.null(reorder_query)) {
+		message('- reordering records...')
+
+		records <- order_by_query_match(records, query = reorder_query)
 	}
 
 	records <- records %>%
