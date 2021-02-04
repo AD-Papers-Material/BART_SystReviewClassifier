@@ -366,22 +366,24 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	# ~ 20x faster than pubmedR::pmApiRequest plus xml parsing
 	records <- pbmclapply(0:steps, function(step) {
 		#print(paste(step * 200))
-		try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
-															retstart = step * 200, retmax = min(200, total_count - step * 200),
-															rettype = 'medline', parsed = F,
-															api_key = options('ncbi_api_key')), silent = T)
+		have.results <- F
+		trials <- 0
+
+		while (!have.results & trials < 20) { # not efficient but the other solution (below) fails for some reason
+			rescords <- try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
+																			 retstart = step * 200, retmax = min(200, total_count - step * 200),
+																			 rettype = 'medline', parsed = F,
+																			 api_key = options('ncbi_api_key')), silent = T)
+
+			have.results <- class(rescords) == 'character'
+			trials <- trials + 1
+		}
+
+		rescords
 	})
 
-	failed.steps <- sapply(records, function(x) class(x) == 'try-error') %>% which
-
-	if (length(failed.steps) > 0) {
-		message(paste('- repeating', length(failed.steps), 'failed fetch tentatives'))
-		refetched <- pblapply(failed.steps, function(step) {
-			rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
-														retstart = step * 200, retmax = 200, rettype = 'medline', parsed = F, api_key = options('ncbi_api_key'))
-		})
-
-		records[failed.steps] <- refetched
+	if (sapply(records, function(x) class(x) == 'try-error') %>% any) {
+		stop('Couldn\'t get results for some steps after 20 attempts')
 	}
 
 	message('- parsing results')
