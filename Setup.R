@@ -268,7 +268,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract, DOI = doi,
 							Journal = journal, N_citations = tot_cites,
 							Published = format(ymd(date),'%b %Y'), Source = 'WOS',
-							Source_type = 'API')
+							Source_type = 'API', Creation_date = safe_now())
 
 	additional_infos <- list(
 		authors = records_list$author %>% group_by(ID = ut) %>%
@@ -323,6 +323,7 @@ parse_medline <- function(entries) {
 		Authors = FAU, Journal = JT, Journal_short = TA,
 		Article_type = PT, Mesh = MH, Author_keywords = OT, Published = DP,
 		Source = 'Pubmed',
+		Creation_date = now()
 	) %>% clean_record_textfields()
 }
 
@@ -635,7 +636,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	}) %>% bind_rows()
 
 	records <- left_join(records, article_data, by = 'URL') %>%
-		mutate(Source = 'IEEE', Source_type = 'API') %>%
+		mutate(Source = 'IEEE', Source_type = 'API', Creation_date = now()) %>%
 		clean_record_textfields() %>%
 		select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
 							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
@@ -656,59 +657,60 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 	if (!dir.exists(folder_path)) dir.create(folder_path, recursive = T)
 
-	search_ts <- safe_now()
+	search_ts <- now()
 
 	record_data <- lapply(sources, function(source) {
-
-		input_file <- NA
 
 		lapply(actions, function(action) {
 
 			output_file <- file.path(folder_path, glue('{source}_{action}.csv'))
 
+			input_file <- list.files(folder_path, full.names = F) %>%
+				str_subset(paste(actions, collapse = '|'), negate = T) %>%
+				str_subset(regex(source, ignore_case = T))
+
+			input_file <- file.path(folder_path, input_file)
+
 			if (file.exists(output_file) & !overwrite) {
 				warning(output_file, ' already present and argument overwrite == FALSE.', call. = F)
 
-				return(NULL)
+				if (action == 'API') input_file <- character()
+
+				records <- read_csv(output_file, col_types = cols())
+			} else {
+
+				if (file.exists(output_file) & overwrite) warning(output_file, ' will be overwritten.', call. = F)
+
+				if (action == 'API') {
+					## API search
+
+					search_fun <- get(paste0('search_', str_to_lower(source)))
+
+					records <- search_fun(query = query, year_query = year_query)
+
+				} else if (action == 'parsed') {
+					## Parsing downloaded records
+
+					if (length(input_file) > 0) {
+						if (length(input_file) > 1) {
+							stop('Only one source file to parse can exists per source/query/session.')
+						}
+
+						records <- read_bib_files(input_file)[[1]]
+					} else return(NULL)
+				}
+
+				records$FileID <- paste(session_name, query_name, basename(output_file), collapse = ' - ')
+
+				write_csv(records, output_file)
 			}
-
-			if (file.exists(output_file) & overwrite) warning(output_file, ' will be overwritten.', call. = F)
-
-			if (action == 'API') {
-				## API search
-
-				search_fun <- get(paste0('search_', str_to_lower(source)))
-
-				records <- search_fun(query = query, year_query = year_query)
-
-			} else if (action == 'parsed') {
-				## Parsing downloaded records
-
-				input_file <- list.files(folder_path, full.names = F) %>%
-					str_subset(paste(actions, collapse = '|'), negate = T) %>%
-					str_subset(regex(source, ignore_case = T))
-
-				input_file <- file.path(folder_path, input_file)
-
-				if (length(input_file) > 0) {
-					if (length(input_file) > 1) {
-						stop('Only one source file to parse can exists per source/query/session.')
-					}
-
-					records <- read_bib_files(input_file)[[1]]
-				} else return(NULL)
-			}
-
-			records$FileID <- paste(session_name, query_name, basename(output_file), collapse = ' - ')
-
-			write_csv(records, output_file)
 
 			data.frame(
 				Session_ID = session_name,
 				Query_ID = query_name,
 				Source = source,
 				Type = action,
-				Raw_file = if(!is.na(input_file)) basename(input_file) else NA,
+				Raw_file = if (length(input_file) > 0) basename(input_file) else NA,
 				Parsed_file = basename(output_file),
 				Timestamp = search_ts,
 				Filter = year_query,
@@ -736,11 +738,11 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 		if (file.exists(journal)) {
 			previous_data <- read_fun(journal)
 
-			if (overwrite) {
-				previous_data <- previous_data %>%
-					anti_join(select(record_data, Session_ID, Query_ID, Source, Type, Filter))
-			}
-			record_data <- bind_rows(previous_data, record_data)
+			record_data <- previous_data %>%
+				bind_rows(record_data) %>%
+				group_by(Session_ID, Query_ID, Source, Type) %>%
+				arrange(Timestamp, .by_group = T) %>%
+				summarise(across(.fns = last))
 		}
 
 		write_fun(record_data, journal)
@@ -767,7 +769,7 @@ read_bib_files <- function(files) {
 		if (str_detect(file, '(parsed|API)\\.csv')) {  # no parsing necessary
 			message('Reading ', basename(file), '...')
 
-			return(read_csv(file))
+			return(read_csv(file, col_types = cols()))
 		}
 
 		message('Parsing ', basename(file), '...')
@@ -780,7 +782,7 @@ read_bib_files <- function(files) {
 			if (str_detect(entries, 'PMID-')) type <- 'nbib'
 
 		} else if (str_detect(file, '\\.(xlsx?|csv)$')) {
-			entries <- if (str_detect(file, '\\.csv$')) read_csv(file) else read_excel(file)
+			entries <- if (str_detect(file, '\\.csv$')) read_csv(file, col_types = cols()) else read_excel(file)
 
 			if ('UT (Unique WOS ID)' %in% colnames(entries)) type <- 'wos'
 			else if ('IEEE Terms' %in% colnames(entries)) type <- 'ieee'
@@ -816,6 +818,7 @@ read_bib_files <- function(files) {
 				PMID = `Pubmed Id`,
 				Source = 'WOS',
 				Source_type = 'parsed',
+				Creation_date = now()
 			) %>% clean_record_textfields()
 		}
 
@@ -836,6 +839,7 @@ read_bib_files <- function(files) {
 				Published = `Online Date`,
 				Source = 'IEEE',
 				Source_type = 'parsed',
+				Creation_date = now()
 			) %>% clean_record_textfields()
 		}
 	}) %>% setNames(basename(files))
@@ -843,7 +847,8 @@ read_bib_files <- function(files) {
 
 join_sources <- function(source.list) {
 	lapply(source.list, function(source) {
-		source %>% transmute(
+		source %>%
+			transmute(
 			Order,
 			DOI, ID, Title, Abstract, Authors, Year = Published %>% str_extract('\\d{4}') %>% as.numeric(),
 			Journal = if (exists('Journal')) Journal else NA,
@@ -853,7 +858,8 @@ join_sources <- function(source.list) {
 			Mesh = if (exists('Mesh')) Mesh else NA,
 			Article_type,
 			N_citations = if (exists('N_citations')) N_citations else NA,
-			Source, Source_type, FileID
+			Source, Source_type,
+			FileID = if (exists('FileID')) FileID else NA,
 		)
 	}) %>% bind_rows() %>%
 		mutate(
@@ -868,35 +874,34 @@ join_sources <- function(source.list) {
 					unique() %>% paste(collapse = '; ')
 			})
 		) %>%
+		distinct() %>%
 		arrange(Order)
 }
 
 
-save_annotation_file <- function(records = NULL, records_folders = 'Records',
-																 prev_annotation = NULL,
+save_annotation_file <- function(records, prev_annotation = NULL,
 																 annotation_folder = 'Annotations',
 																 session_name = 'Session1', recursive = T,
 																 out_type = c('xlsx', 'csv')) {
 
 	out_type <- match.arg(out_type)
 
-	if (is.null(records) & is.null(records_folders)) {
-		stop('Either parsed records or record folder paths are needed')
-	}
-
-	if (!is.null(records) & !is.null(records_folders)) {
-		warning('Both records and record folder were passed, only the firsts will be used')
-	}
-
-	if (is.null(records) & !is.null(records_folders)) {
-		records <- list.files(records_folders, full.names = T, recursive = recursive) %>%
-			str_subset('~\\$', negate = T)
+	if (class(records) %nin% c('character', 'list', 'data.frame')) {
+		stop('"records" should be either of vector of file/folder paths, a list of data.frame or a single data.frame')
 	}
 
 	if (is.character(records)) {
+		records <- c(
+			list.files(records, full.names = T, recursive = recursive) %>%
+				str_subset('~\\$', negate = T),
+			records[!dir.exists(records)]
+		)
+
 		message('- parsing records...')
 		records <- read_bib_files(records)
 	}
+
+	if (length(records) == 1) records <- records[[1]]
 
 	if (!is.data.frame(records) & is.list(records)) {
 		message('- joining records...')
@@ -916,7 +921,7 @@ save_annotation_file <- function(records = NULL, records_folders = 'Records',
 
 		if (str_detect(prev_annotation, '\\.xlsx?$')) {
 			prev_records <- read_excel(prev_annotation)
-		} else prev_records <- read_csv(prev_annotation)
+		} else prev_records <- read_csv(prev_annotation, col_types = cols())
 
 		records <- records %>% filter(!(ID %in% prev_records$ID))
 
