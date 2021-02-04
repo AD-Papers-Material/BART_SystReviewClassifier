@@ -729,7 +729,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 		if (str_detect(journal, '\\.csv$')) {
 			write_fun <- write_csv
-			read_fun <- read_csv
+			read_fun <- function(x) read_csv(x, col_types = cols())
 		} else if (str_detect(journal, '\\.xlsx?$')) {
 			write_fun <- WriteXLS::WriteXLS
 			read_fun <- read_excel
