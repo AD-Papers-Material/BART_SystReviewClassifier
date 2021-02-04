@@ -845,8 +845,8 @@ read_bib_files <- function(files) {
 	}) %>% setNames(basename(files))
 }
 
-join_sources <- function(source.list) {
-	lapply(source.list, function(source) {
+join_records <- function(record.list) {
+	lapply(record.list, function(source) {
 		source %>%
 			transmute(
 			Order,
@@ -878,7 +878,6 @@ join_sources <- function(source.list) {
 		arrange(Order)
 }
 
-
 save_annotation_file <- function(records, prev_annotation = NULL,
 																 annotation_folder = 'Annotations',
 																 session_name = 'Session1', recursive = T,
@@ -905,7 +904,7 @@ save_annotation_file <- function(records, prev_annotation = NULL,
 
 	if (!is.data.frame(records) & is.list(records)) {
 		message('- joining records...')
-		records <- join_sources(records)
+		records <- join_records(records)
 		message(": ", nrow(records), ' unique records')
 	}
 
