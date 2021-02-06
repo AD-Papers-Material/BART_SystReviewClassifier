@@ -372,9 +372,9 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 		while (!have.results & trials < 20) { # not efficient but the other solution (below) fails for some reason
 			rescords <- try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
-																			 retstart = step * 200, retmax = min(200, total_count - step * 200),
-																			 rettype = 'medline', parsed = F,
-																			 api_key = options('ncbi_api_key')), silent = T)
+																						retstart = step * 200, retmax = min(200, total_count - step * 200),
+																						rettype = 'medline', parsed = F,
+																						api_key = options('ncbi_api_key')), silent = T)
 
 			have.results <- class(rescords) == 'character'
 			trials <- trials + 1
@@ -639,8 +639,8 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		mutate(Source = 'IEEE', Source_type = 'API', Creation_date = now()) %>%
 		clean_record_textfields() %>%
 		select(Order, ID, Title, Abstract, DOI, URL, Authors, Journal,
-							 Article_type, Author_keywords, Keywords, Mesh, N_citations,
-							 Published, Source, Source_type)
+					 Article_type, Author_keywords, Keywords, Mesh, N_citations,
+					 Published, Source, Source_type)
 
 	message('...found ', nrow(records), ' records.')
 
@@ -653,70 +653,92 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 																	 records_folder = 'Records', overwrite = FALSE,
 																	 journal = 'Session_journal.csv') {
 
+	load_if_exists <- function(out_file, overwrite) {
+
+		if (file.exists(out_file)) {
+			if (!overwrite) {
+				warning(basename(out_file), ' already present and argument overwrite == FALSE.', call. = F)
+
+				read_csv(out_file, col_types = cols())
+			} else {
+				warning(basename(out_file), ' will be overwritten.', call. = F)
+				NULL
+			}
+		} else NULL
+
+	}
+
 	folder_path <- file.path(records_folder, session_name, query_name)
 
 	if (!dir.exists(folder_path)) dir.create(folder_path, recursive = T)
 
 	search_ts <- now()
 
+	input_files <- NA
+
 	record_data <- lapply(sources, function(source) {
 
 		lapply(actions, function(action) {
 
-			output_file <- file.path(folder_path, glue('{source}_{action}.csv'))
+			records <- NULL
 
-			input_file <- list.files(folder_path, full.names = F) %>%
-				str_subset(paste(actions, collapse = '|'), negate = T) %>%
-				str_subset(regex(source, ignore_case = T))
+			if (action == 'API') {
+				## API search
 
-			input_file <- file.path(folder_path, input_file)
+				output_file <- file.path(folder_path, glue('{source}_API.csv'))
 
-			if (file.exists(output_file) & !overwrite) {
-				warning(output_file, ' already present and argument overwrite == FALSE.', call. = F)
+				records <- load_if_exists(output_file, overwrite)  # load records if output already existing
 
-				if (action == 'API') input_file <- character()
-
-				records <- read_csv(output_file, col_types = cols())
-			} else {
-
-				if (file.exists(output_file) & overwrite) warning(output_file, ' will be overwritten.', call. = F)
-
-				if (action == 'API') {
-					## API search
-
+				if (is.null(records)) { # in output not existing search via API
 					search_fun <- get(paste0('search_', str_to_lower(source)))
 
 					records <- search_fun(query = query, year_query = year_query)
-
-				} else if (action == 'parsed') {
-					## Parsing downloaded records
-
-					if (length(input_file) > 0) {
-						if (length(input_file) > 1) {
-							stop('Only one source file to parse can exists per source/query/session.')
-						}
-
-						records <- read_bib_files(input_file)[[1]]
-					} else return(NULL)
 				}
+
+			} else if (action == 'parsed') {
+				## Parsing downloaded records
+
+				# find input files (i.e. files not containing API or parsed in the name)
+				input_files <- list.files(folder_path, full.names = F) %>%
+					str_subset('API|parsed', negate = T) %>%
+					str_subset(regex(source, ignore_case = T))
+
+				if (length(input_files) > 0) { # continue if any input file exists
+
+					output_file <- file.path(folder_path, glue('{source}_parsed.csv'))
+
+					records <- load_if_exists(output_file, overwrite) # load records if output already existing
+
+					if (is.null(records)) { # in output not existing parse the raw data
+						records <- file.path(folder_path, input_files) %>%
+							read_bib_files() %>%
+							bind_rows()
+					}
+
+					input_files <- paste(input_files, collapse = ', ')
+				} else input_files <- NA
+			}
+
+			if (!is.null(records)) {
 
 				records$FileID <- file.path(session_name, query_name, basename(output_file))
 
 				write_csv(records, output_file)
+
+				data.frame(
+					Session_ID = session_name,
+					Query_ID = query_name,
+					Source = source,
+					Type = action,
+					Input_files = input_files,
+					Output_file = basename(output_file),
+					Timestamp = search_ts,
+					Filter = year_query,
+					N_results = nrow(records),
+					Query = query
+				)
 			}
 
-			data.frame(
-				Session_ID = session_name,
-				Query_ID = query_name,
-				Source = source,
-				Type = action,
-				Raw_file = if (length(input_file) > 0) basename(input_file) else NA,
-				Parsed_file = basename(output_file),
-				Timestamp = search_ts,
-				Filter = year_query,
-				N_results = nrow(records),
-				Query = query
-			)
 		})
 
 	}) %>% bind_rows()
@@ -849,18 +871,18 @@ join_records <- function(record.list) {
 	lapply(record.list, function(source) {
 		source %>%
 			transmute(
-			Order,
-			DOI, ID, Title, Abstract, Authors, Year = Published %>% str_extract('\\d{4}') %>% as.numeric(),
-			Journal = if (exists('Journal')) Journal else NA,
-			Journal_short = if (exists('Journal_short')) Journal_short else NA,
-			Keywords = if (exists('Keywords')) Keywords else NA,
-			Author_keywords = if (exists('Author_keywords')) Author_keywords else NA,
-			Mesh = if (exists('Mesh')) Mesh else NA,
-			Article_type,
-			N_citations = if (exists('N_citations')) N_citations else NA,
-			Source, Source_type,
-			FileID = if (exists('FileID')) FileID else NA,
-		)
+				Order,
+				DOI, ID, Title, Abstract, Authors, Year = Published %>% str_extract('\\d{4}') %>% as.numeric(),
+				Journal = if (exists('Journal')) Journal else NA,
+				Journal_short = if (exists('Journal_short')) Journal_short else NA,
+				Keywords = if (exists('Keywords')) Keywords else NA,
+				Author_keywords = if (exists('Author_keywords')) Author_keywords else NA,
+				Mesh = if (exists('Mesh')) Mesh else NA,
+				Article_type,
+				N_citations = if (exists('N_citations')) N_citations else NA,
+				Source, Source_type,
+				FileID = if (exists('FileID')) FileID else NA,
+			)
 	}) %>% bind_rows() %>%
 		mutate(
 			Keywords = cbind(Keywords, Author_keywords) %>%
@@ -898,9 +920,10 @@ order_by_query_match <- function(records, query) {
 
 
 
-save_annotation_file <- function(records, reorder_query = NULL, prev_annotation = NULL,
+save_annotation_file <- function(records, reorder_query = NULL,
+																 prev_annotation = NULL,
 																 annotation_folder = 'Annotations',
-																 session_name = 'Session1', recursive = T,
+																 session_name = 'Session1',
 																 out_type = c('xlsx', 'csv')) {
 
 	out_type <- match.arg(out_type)
@@ -911,7 +934,7 @@ save_annotation_file <- function(records, reorder_query = NULL, prev_annotation 
 
 	if (is.character(records)) {
 		records <- c(
-			list.files(records, full.names = T, recursive = recursive) %>%
+			list.files(records, full.names = T, recursive = T) %>%
 				str_subset('~\\$', negate = T),
 			records[!dir.exists(records)]
 		)
