@@ -780,7 +780,7 @@ extract_source_file_paths <- function(journal, sessions = journal$Session_ID,
 																			records_folder = 'Records') {
 	journal %>% filter(Session_ID %in% sessions, Query_ID %in%  queries,
 										 Source %in% sources) %>%
-		with(file.path(records_folder, Session_ID, Query_ID, Parsed_file)) %>%
+		with(file.path(records_folder, Session_ID, Query_ID, Output_file)) %>%
 		unique()
 }
 
