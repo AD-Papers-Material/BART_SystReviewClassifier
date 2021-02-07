@@ -1,0 +1,119 @@
+
+# Research Protocol
+
+
+This document will guide the reader along the steps to utilize the framework and reproduce our results.
+
+## Acquisition of the records
+
+Once the framework is loaded, the user defines an initial search query which needs to be as specific as possible while still generating a sufficient number of positive matches:
+
+```{r setup}
+source('Setup.R') # Load the framework
+
+# Initial query to be built on domain knowledge
+query <- '((model OR models OR modeling OR network OR networks) AND (dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR hospital OR "long-term-care" OR "long term care" OR "longterm care" OR "long-term care" OR "healthcare associated") AND (infection OR resistance OR resistant))'
+
+# Year filter. The framework convert it to the API specific format seamlessly.
+# common logical comparators can be used, i.e. <, <=, >, >=, while dashes
+# denotes inclusive date intervals. A single year restricts results to one year
+# period.
+year_filter <- '2010-2020'
+
+```
+
+The query is passed to the `perform_search_session()` function, together with an unique identifier for the **search session** and **search query**. A session identifies a homogeneus group of complementary or alternative queries (e.g. sometimes it is easier to create two different simpler queries than a complex and long one that returns the same results).\
+In our implementation we define as sessions the group of actions that includes the utilization of a search query and the subsequent cycle of manual review and relevancy prediction of its results.\
+
+`perform_search_session()` will use common scientific research database APIs (at the moment Pubmed, Web of Science and IEEE) to look for records related to query, store them on the disk and returns or update **journal** (a csv/excel file) with all info about sessions, queries and search results. The records will be stored in folders with the following structure: Records/\*session_id\*/\*query_id\*.
+If manually downloaded results are already available, users can create these folders manually and put the data there (the file name needs to contain the source name as written in the `sources` argument) and the function will acquire and parse them.\
+Users can choose whether to perform an API search, parse already downloaded, or do both using the `actions` argument.
+
+Note that for Pubmed, the API search may return slightly less records than a manual one due to a different query expansion algorithm (check Pubmed documentation) between the two services; therefore is advisable to perform also a manual search and put the .nbib file in the Session/Query folder. `perform_search_session()` will acquire them seamlessly.
+
+```{r perform searches}
+# This call will perform an API search on Pubmed, WOS and IEEE services and/or
+# (based on the `actions` argument) parse already downloaded data (.csv format
+# for IEEE, .xls for WOS and .nbib for Pubmed).
+# Set overwrite = TRUE to overwrite previously dowloaded/parsed records
+journal <- perform_search_session(query = query, year_query = year_filter,
+																	session_name = 'Session1', query_name = 'Query1',
+																	records_folder = 'Records',
+																	journal = 'Session_journal.csv')
+
+```
+
+Once the records are stored, they must be read and merged into an **annotation file** where the initial manual review of the records will be perfomed.\
+A series of functions are available to prepare the data for manual evaluation:
+
+```{r managing records}
+# Extract the file paths of records. Arguments can be used to filter by session
+# query, source. Only parsed files will be returned, not the raw ones downloaded
+# manually.
+Annotation_data <- extract_source_file_paths(journal) %>% 
+	
+	# Read record files. Will parse them if raw data downloaded manually (not
+	# necessary in this case). Return a list of records, one per file.
+	read_bib_files() %>% 
+	
+	# Join a list of records into one dataframe, solving duplicated records
+	join_records() %>% 
+	
+	# Order records by the sum of relative frequency of the query terms in the
+	# title + abstract. Increases the chance of encountering relevant records at
+	# the beginning of the manual classification.
+	order_by_query_match(query) %>% 
+	
+	# Add fields for the manual classification
+	mutate(
+			Rev_manual = NA,
+			Rev_prediction = NA,
+			.before = DOI
+		)
+
+# Store the file
+dir.create(file.path('Annotations', 'Session1'))
+folder <- file.path('Annotations', 'Session1')
+dir.create(folder, recursive = T)
+file <- file.path(folder, paste0('Records_', safe_now(), '.xlsx'))
+WriteXLS::WriteXLS(records, ExcelFileName = file)
+```
+
+Actually all these step are more easily performed by `save_annotation_file()`. This function can take as input either the path to record files, or the parsed records (one data frame or a list of data frames) or a group of folders where to look for files into. In addition, it also allows to add the new records to a previous annotation file (arg `prev_annotation`), useful with subsequent searching sessions with different queries. Finally, previous manual classifications of the new records can be imported using `prev_classification`.
+
+```{r save annotation file}
+# This function extract the appropriate file paths from a session journal. By
+# default it passes all stored files, otherwise it can be filtered by session,
+# query, and source (i.e. Pubmed, WOS, IEEE)
+record_files <- extract_source_file_paths(journal)
+
+# save_annotation_file accept a great variety of inputs:
+
+	# record file paths
+save_annotation_file(record_files, session_name = 'Session1')
+
+	# specific record file folders
+save_annotation_file(file.path('Records', 'Session1'), session_name = 'Session1')
+
+	# or parent folders, since it search for files recursively
+save_annotation_file(file.path('Records'), session_name = 'Session1')
+
+	# finally it can accept the already parsed files
+read_bib_files(record_files) %>% save_annotation_file(session_name = 'Session1')
+
+```
+
+Notice that the framework is `tidyverse` friendly and the precedent steps can be all performed in one call (which is the suggested procedure):
+
+```{r one call}
+Records <- perform_search_session(query = query, year_query = year_filter,
+											 session_name = 'Session1', query_name = 'Query1',
+											 journal = 'Session_journal.csv') %>% # perform searches and parse files; save and return the journal
+	extract_source_file_paths() %>% # return the record file paths
+	save_annotation_file(reorder_query = query, session_name = 'Session1') # save and return the joined data
+```
+
+
+Now the annotation file is ready for manual classification of relevant and non-relevant records.
+
+
