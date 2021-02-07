@@ -926,6 +926,7 @@ order_by_query_match <- function(records, query) {
 
 save_annotation_file <- function(records, reorder_query = NULL,
 																 prev_annotation = NULL,
+																 prev_classification = NULL,
 																 annotation_folder = 'Annotations',
 																 session_name = 'Session1',
 																 out_type = c('xlsx', 'csv')) {
@@ -969,6 +970,7 @@ save_annotation_file <- function(records, reorder_query = NULL,
 		)
 
 	if (!is.null(prev_annotation) && file.exists(prev_annotation)) {
+		message('- appending to a previous annotation file')
 
 		if (str_detect(prev_annotation, '\\.xlsx?$')) {
 			prev_records <- read_excel(prev_annotation)
@@ -985,10 +987,17 @@ save_annotation_file <- function(records, reorder_query = NULL,
 				Parent_file = prev_annotation,
 			) %>%
 			fix_duplicated_records()
-
 	}
 
-	records <- records %>% arrange(Order)
+	if (!is.null(prev_classification) && file.exists(prev_classification)) {
+		message('- importing previous classifications')
+
+		if (str_detect(prev_classification, '\\.xlsx?$')) {
+			prev_records <- read_excel(prev_classification)
+		} else prev_records <- read_csv(prev_classification, col_types = cols())
+
+		records <- import_classification(records, prev_records = prev_records)
+	}
 
 	message('- saving records...')
 
@@ -1033,16 +1042,66 @@ fix_duplicated_records <- function(Records) {
 }
 
 summarise_by_source <- function(annotation_file) {
-	data <- if (is.character(annotation_file)) read_excel(annotation_file) else annotation_file
+	data <- if (is.character(annotation_file)) {
+		read_excel(annotation_file)
+		} else annotation_file
 
 	sources <- data$Source %>% str_split(., '; ') %>% unlist() %>% table()
 
 	c(setNames(as.vector(sources), names(sources)), Total = nrow(data))
 }
 
+import_classification <- function(records, IDs = records$ID, prev_records) {
+	records$uID = str_to_lower(records$Title) %>%
+		str_remove_all('[^\\w\\d\\s]+')
+	prev_records$uID = str_to_lower(prev_records$Title) %>%
+		str_remove_all('[^\\w\\d\\s]+')
+
+	target_uID <- records$uID[records$ID %in% IDs]
+	prev_records <- filter(prev_records, uID %in% target_uID)
+
+	if ('Rev_title' %in% colnames(prev_records)) {
+		prev_records <- prev_records %>%
+			transmute(
+				Rev_manual = ifelse(!is.na(Rev_abstract), Rev_abstract, Rev_title),
+				Rev_prediction = Rev_prediction,
+				uID
+			)
+	}
+
+	prev_records <- prev_records %>% transmute(
+		uID,
+		Rev_previous = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual)
+	)
+
+	left_join(records, prev_records, by = 'uID') %>%
+		select(Order, contains('Rev_'), Rev_previous, everything()) %>%
+		select(-uID)
+}
+
+check_classification_trends <- function(records, column = 'Rev_manual',
+																				step_size = 20, limit = nrow(records)) {
+
+	steps <- seq(step_size, limit, by = step_size)
+
+	pbmclapply(steps, function(step) {
+		records %>% head(step) %>% pull(column) %>%
+			table %>% matrix(nrow = 1) %>%
+			as.data.frame() %>% setNames(c('No', 'Yes'))
+	}) %>% bind_rows() %>%
+		ggplot(aes(x = steps)) +
+		geom_line(aes(y = Yes, color = 'yes'), size = 1) +
+		geom_line(aes(y = No, color = 'no'), size = 1) +
+		labs(y = 'Records', x = 'Batch size', color = 'Classification') +
+		theme_minimal()
+}
+
+
+
 # NLP ---------------------------------------------------------------------
 
-lemmatize <- function(text.vec, dict = lexicon::hash_lemmas, separator = '_tagseparator_') {
+lemmatize <- function(text.vec, dict = lexicon::hash_lemmas,
+											separator = '_tagseparator_') {
 	dict <- setNames(lexicon::hash_lemmas$lemma, lexicon::hash_lemmas$token)
 
 	terms <- paste(text.vec, separator, collapse = ' ')
