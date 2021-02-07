@@ -177,7 +177,9 @@ clean_record_textfields <- function(df) {
 	mutate(df,
 				 across(where(is.character), ~ replace(.x, .x == '', NA) %>%
 				 			 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-				 			 	str_squish())
+				 			 	str_squish() %>%
+				 			 	{replace(., . == 'NA', NA)}
+				 			 )
 	)
 }
 
