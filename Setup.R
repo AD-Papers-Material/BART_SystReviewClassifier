@@ -1146,6 +1146,14 @@ tokenize_authors <- function(corpus) {
 	output
 }
 
+tokenize_keywords <- function(keywords) {
+	keywords %>%
+		str_replace_all('\\s*;\\s*', ';') %>%
+		str_replace_all('[^;\\w]+', '_') %>%
+		str_replace_all(';', ' ')
+}
+
+
 tokenize_MESH <- function(mesh) {
 
 	message('- tokenizing Mesh terms')
@@ -1632,7 +1640,8 @@ create_training_set <- function(Records, pos.mult = 10L) {
 	message('Title DTM')
 	Title_DTM <- with(
 		Records,
-		text_to_DTM(Title, min.freq = 25, label = 'TITLE__', ids = ID, freq.subset.ids = ID[!is.na(Target)])
+		text_to_DTM(Title, min.freq = 25, label = 'TITLE__', ids = ID,
+								freq.subset.ids = ID[!is.na(Target)])
 	)
 
 	message('dimensions: ', paste(dim(Title_DTM), collapse = ', '))
@@ -1642,7 +1651,8 @@ create_training_set <- function(Records, pos.mult = 10L) {
 		Records,
 		Abstract %>%
 			str_remove_all(regex('\\b(background|introduction|method\\w*|result\\w*|conclusion\\w*|discussion)',ignore_case = T)) %>%
-			text_to_DTM(min.freq = 30, label = 'ABSTR__', ids = ID, freq.subset.ids = ID[!is.na(Target)])
+			text_to_DTM(min.freq = 30, label = 'ABSTR__', ids = ID,
+									freq.subset.ids = ID[!is.na(Target)])
 	)
 
 	message('dimensions: ', paste(dim(Abstract_DTM), collapse = ', '))
@@ -1660,7 +1670,9 @@ create_training_set <- function(Records, pos.mult = 10L) {
 	message('\nKeywords DTM')
 	Keywords_DTM <- with(
 		Records,
-		text_to_DTM(Keywords, min.freq = 30, label = 'KEYS__', ids = ID, freq.subset.ids = ID[!is.na(Target)])
+		text_to_DTM(Keywords, tokenize.fun = tokenize_keywords, min.freq = 30,
+								label = 'KEYS__', ids = ID,
+								freq.subset.ids = ID[!is.na(Target)])
 	)
 
 	message('dimensions: ', paste(dim(Keywords_DTM), collapse = ', '))
