@@ -959,9 +959,8 @@ save_annotation_file <- function(records, reorder_query = NULL,
 
 	records <- records %>%
 		mutate(
-			Rev_title = NA,
-			Rev_abstract = NA,
-			Rev_text = NA,
+			Rev_manual = NA,
+			Rev_prediction = NA,
 			.before = DOI
 		)
 
@@ -1018,8 +1017,7 @@ fix_duplicated_records <- function(Records) {
 			across(any_of(c('Title', 'Abstract', 'Authors', 'Journal', 'Journal_short', 'Year',
 											"Pred_delta", "Pred_Med", "Pred_Low", "Pred_Up")), ~ last(na.omit(.x))),
 			across(any_of(c('ID', 'DOI', 'Mesh', 'Article_type', 'Source', 'Source_type', 'FileID',
-											"Rev_title", "Rev_abstract", "Rev_prediction",
-											"Rev_text", "Predicted_label")), ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
+											"Rev_manual", "Rev_prediction", "Predicted_label")), ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
 			Keywords = Keywords %>% str_split('; ') %>% unlist() %>% na.omit() %>% unique() %>%
 				purrr::keep(~ str_length(.x) > 0) %>%
 				paste(collapse = '; '),
@@ -1620,11 +1618,12 @@ create_training_set <- function(Records, pos.mult = 10L) {
 
 	Records <- Records %>%
 		transmute(
-			Target = case_when(
-				!is.na(Rev_prediction) ~ Rev_prediction,
-				!is.na(Rev_abstract) ~ Rev_abstract,
-				T ~ Rev_title
-			),
+			# Target = case_when(
+			# 	!is.na(Rev_prediction) ~ Rev_prediction,
+			# 	!is.na(Rev_abstract) ~ Rev_abstract,
+			# 	T ~ Rev_title
+			# ),
+			Target = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual),
 			ID, Title, Abstract, Authors, Keywords, Mesh
 		) %>% {
 			.[c(rep(which(.$Target %in% 'y'), pos.mult), which(!(.$Target %in% 'y'))),]
@@ -1875,8 +1874,12 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 			Target = NULL
 		)
 
-	Annotated_data <- left_join(select(Records, -any_of(colnames(Predicted_data %>% select(-ID)))), Predicted_data, by = 'ID') %>%
-		select(Order:Rev_text, Predicted_label, Pred_delta, Pred_Med, Pred_Low, Pred_Up, everything()) %>%
+	Annotated_data <- left_join(
+		select(Records, -any_of(colnames(Predicted_data %>% select(-ID)))),
+		Predicted_data,
+		by = 'ID'
+	) %>%
+		select(Order:Pred_Up, everything()) %>%
 		arrange(desc(Pred_delta)) %>%
 		mutate(Parent_file = file)
 
@@ -2204,11 +2207,13 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 				paste(collapse =', ')
 
 			Predicted <- Annotated_data$Predicted_label
-			Manual <- with(Annotated_data, case_when(
-				!is.na(Rev_prediction) ~ as.character(Rev_prediction),
-				!is.na(Rev_abstract) ~ Rev_abstract,
-				T ~ Rev_title
-			))
+			# Manual <- with(Annotated_data, case_when(
+			# 	!is.na(Rev_prediction) ~ as.character(Rev_prediction),
+			# 	!is.na(Rev_abstract) ~ Rev_abstract,
+			# 	T ~ Rev_title
+			# ))
+			Manual <- with(Annotated_data, ifelse(!is.na(Rev_prediction),
+																						Rev_prediction, Rev_manual))
 
 			status <- c(
 				Uncertain = sum(Predicted %in% 'unk'),
