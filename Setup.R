@@ -112,7 +112,7 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 safe_now <- function() str_replace_all(now(), c(' ' = 'T', ':' = '.'))
 
 
-# Article data management -------------------------------------------------
+# Record search -----------------------------------------------
 
 clean_date_filter_arg <- function(year_query, cases,
 																	arg_in_query_test = NULL, query = NULL) {
@@ -172,17 +172,6 @@ clean_date_filter_arg <- function(year_query, cases,
 	year_query
 
 }
-
-clean_record_textfields <- function(df) {
-	mutate(df,
-				 across(where(is.character), ~ replace(.x, .x == '', NA) %>%
-				 			 	str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
-				 			 	str_squish() %>%
-				 			 	{replace(., . == 'NA', NA)}
-				 			 )
-	)
-}
-
 
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 											 default_field = 'TS', api_key = options('wos_api_key'),
@@ -776,6 +765,19 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 }
 
+
+# Article data management -------------------------------------------------
+
+clean_record_textfields <- function(df) {
+	mutate(df,
+				 across(where(is.character),
+				 			 ~ str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+				 			 	str_squish() %>%
+				 			 	replace(.x, .x %in% c('', 'NA'), NA)
+				 )
+	)
+}
+
 extract_source_file_paths <- function(journal, sessions = journal$Session_ID,
 																			queries = journal$Query_ID,
 																			sources = journal$Source,
@@ -890,7 +892,7 @@ join_records <- function(record.list) {
 			Keywords = cbind(Keywords, Author_keywords) %>%
 				apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA) %>% str_to_lower,
 			Author_keywords = NULL
-		) %>%
+	) %>%
 		fix_duplicated_records() %>%
 		mutate(
 			Keywords = str_split(Keywords, '\\s*;\\s*') %>% sapply(function(x) {
@@ -1026,7 +1028,8 @@ fix_duplicated_records <- function(Records) {
 			N_citations = suppressWarnings(na.omit(N_citations) %>% max(na.rm = T) %>% purrr::modify_if(~ !is.finite(.x), ~ NA))
 		)
 
-	bind_rows(unique_sources, dup_sources) %>% select(-UID)
+	bind_rows(unique_sources, dup_sources) %>% select(-UID) %>%
+		mutate(across(where(is.character), ~ ifelse(.x %in% c('', 'NA'), NA_character_, .x)))
 }
 
 summarise_by_source <- function(annotation_file) {
