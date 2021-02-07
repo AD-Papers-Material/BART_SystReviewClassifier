@@ -11,7 +11,7 @@ shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
 			patchwork)
 
 # Packages required but not loaded
-required.pkgs <- setdiff(c('purrr', 'WriteXLS', 'tictoc', 'tidyr', 'arm',
+required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
 													 'parallel', 'jsonlite', 'rentrez',
 													 'wosr'), installed.packages())
 
@@ -744,7 +744,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 			write_fun <- write_csv
 			read_fun <- function(x) read_csv(x, col_types = cols())
 		} else if (str_detect(journal, '\\.xlsx?$')) {
-			write_fun <- WriteXLS::WriteXLS
+			write_fun <- function(x, file) openxlsx::write.xlsx(x, file, asTable = T)
 			read_fun <- read_excel
 		} else stop('Session journal file type must be csv or excel.')
 
@@ -1007,7 +1007,7 @@ save_annotation_file <- function(records, reorder_query = NULL,
 	file <- file.path(folder, paste0('Records_', safe_now(), '.', out_type))
 
 	if (out_type == 'xlsx') {
-		WriteXLS::WriteXLS(records, ExcelFileName = file)
+		openxlsx::write.xlsx(records, file = file, asTable = T)
 	} else write_csv(records, file = file)
 
 	invisible(records)
@@ -2031,14 +2031,16 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	time_stamp <- safe_now()
 
-	WriteXLS::WriteXLS(out, ExcelFileName = file.path('Annotations', paste0('Records_P_', time_stamp, '.xlsx')))
+	output_file <- file.path('Annotations', paste0('Records_P_', time_stamp, '.xlsx'))
+	openxlsx::write.xlsx(out, file = output_file, asTable = T)
 	tictoc::toc()
 
 	tictoc::tic()
 	out$Prediction_matrix <- avg_preds
 	out$DTM <- DTM
 
-	readr::write_rds(out, file.path('Models', paste0('Results_', time_stamp, '.rds')), compress = 'gz', )
+	output_file <- file.path('Models', paste0('Results_', time_stamp, '.rds'))
+	readr::write_rds(out, file = output_file, compress = 'gz', )
 	tictoc::toc()
 
 	invisible(out)
