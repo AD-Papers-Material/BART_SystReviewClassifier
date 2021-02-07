@@ -771,9 +771,9 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 clean_record_textfields <- function(df) {
 	mutate(df,
 				 across(where(is.character),
-				 			 ~ str_replace_all(c(' +;' = ';', '["\']+' = ' ')) %>%
+				 			 ~ str_replace_all(.x, c(' +;' = ';', '["\']+' = ' ')) %>%
 				 			 	str_squish() %>%
-				 			 	replace(.x, .x %in% c('', 'NA'), NA)
+				 			 	{replace(., . %in% c('', 'NA'), NA)}
 				 )
 	)
 }
