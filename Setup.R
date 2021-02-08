@@ -913,7 +913,7 @@ order_by_query_match <- function(records, query) {
 	records %>%
 		mutate(
 			text = paste(Title, Abstract),
-			doc.length = str_count(text, '\\b'),
+			doc.length = str_count(text, '\\b') + 1,
 			term.count = str_count(text, paste(terms, collapse = '|')),
 			score = term.count/doc.length
 		) %>%
