@@ -256,8 +256,8 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 	)
 
 	records <- records_list$publication %>%
-		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract, DOI = doi,
-							Journal = journal, N_citations = tot_cites,
+		transmute(Order = 1:n(), ID = ut, Title = title, Abstract = abstract,
+							DOI = doi, Journal = journal, N_citations = tot_cites,
 							Published = format(ymd(date),'%b %Y'), Source = 'WOS',
 							Source_type = 'API', Creation_date = safe_now())
 
@@ -282,42 +282,6 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 
 	records
 }
-
-parse_medline <- function(entries) {
-	entries <- entries %>%
-		str_remove_all('\\r') %>%
-		str_replace_all('\\n\\s\\s+', ' ') %>%
-		str_trim() %>%
-		str_split('\\n+(?=PMID-)') %>% unlist
-
-	tags <- c('TI', 'BTI', 'AB', 'JT', 'TA', 'DP')
-	info <- lapply(tags, function(tag) {
-		str_extract(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% str_remove('[A-Z]+ *- ')
-	}) %>% setNames(tags) %>% bind_cols()
-
-	tags <- c('FAU', 'PT', 'MH', 'OT')
-	info <- cbind(info, lapply(tags, function(tag) {
-		str_extract_all(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; '))
-	}) %>% setNames(tags) %>% bind_cols())
-
-	tags <- c('LID', 'AID')
-	info <- cbind(info, lapply(tags, function(tag) {
-		str_extract(entries, sprintf('(?<=\\n)%s *- .+(?= \\[doi\\])', tag)) %>% str_remove('[A-Z]+ *- ')
-	}) %>% setNames(tags) %>% bind_cols())
-
-	info$PMID = paste0('PMID:', str_extract(entries, '(?<=PMID- )\\d+'))
-
-	info %>% transmute(
-		Order = 1:n(),
-		ID = PMID, Title = ifelse(is.na(TI), BTI, TI),
-		Abstract = AB, DOI = ifelse(is.na(LID), AID, LID),
-		Authors = FAU, Journal = JT, Journal_short = TA,
-		Article_type = PT, Mesh = MH, Author_keywords = OT, Published = DP,
-		Source = 'Pubmed',
-		Creation_date = now()
-	) %>% clean_record_textfields()
-}
-
 
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = options('ncbi_api_key'),
@@ -639,7 +603,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 perform_search_session <- function(query, year_query = NULL, actions = c('API', 'parsed'),
-																	 sources = c('IEEE', 'WOS', 'Pubmed'),
+																	 sources = c('IEEE', 'WOS', 'Pubmed', 'Scopus', 'Embase'),
 																	 session_name = 'Session1', query_name = 'Query1',
 																	 records_folder = 'Records', overwrite = FALSE,
 																	 journal = 'Session_journal.csv') {
@@ -680,10 +644,11 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 				records <- load_if_exists(output_file, overwrite)  # load records if output already existing
 
-				if (is.null(records)) { # in output not existing search via API
-					search_fun <- get(paste0('search_', str_to_lower(source)))
+				search_fun <- paste0('search_', str_to_lower(source))
 
-					records <- search_fun(query = query, year_query = year_query)
+				if (is.null(records) & exists(search_fun)) { # if output not existing search via API and API search is available
+
+					records <- get(search_fun)(query = query, year_query = year_query)
 				}
 
 			} else if (action == 'parsed') {
@@ -766,12 +731,12 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 }
 
 
-# Article data management -------------------------------------------------
+# Record data management -------------------------------------------------
 
 clean_record_textfields <- function(df) {
 	mutate(df,
 				 across(where(is.character),
-				 			 ~ str_replace_all(.x, c(' +;' = ';', '["\']+' = ' ')) %>%
+				 			 ~ str_replace_all(.x, c(' *; *' = ';', '["\']+' = ' ')) %>%
 				 			 	str_squish() %>%
 				 			 	{replace(., . %in% c('', 'NA'), NA)}
 				 )
@@ -788,7 +753,132 @@ extract_source_file_paths <- function(journal, sessions = journal$Session_ID,
 		unique()
 }
 
+parse_medline <- function(entries, timestamp = now()) {
+	entries <- entries %>%
+		str_remove_all('\\r') %>%
+		str_replace_all('\\n\\s\\s+', ' ') %>%
+		str_trim() %>%
+		str_split('\\n+(?=PMID-)') %>% unlist
+
+	tags <- c('TI', 'BTI', 'AB', 'JT', 'TA', 'DP')
+	info <- lapply(tags, function(tag) {
+		str_extract(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% str_remove('[A-Z]+ *- ')
+	}) %>% setNames(tags) %>% bind_cols()
+
+	tags <- c('FAU', 'PT', 'MH', 'OT')
+	info <- cbind(info, lapply(tags, function(tag) {
+		str_extract_all(entries, sprintf('(?<=\\n)%s *- .+', tag)) %>% sapply(function(x) str_remove(x, '[A-Z]+ *- ') %>% paste0(collapse = '; '))
+	}) %>% setNames(tags) %>% bind_cols())
+
+	tags <- c('LID', 'AID')
+	info <- cbind(info, lapply(tags, function(tag) {
+		str_extract(entries, sprintf('(?<=\\n)%s *- .+(?= \\[doi\\])', tag)) %>% str_remove('[A-Z]+ *- ')
+	}) %>% setNames(tags) %>% bind_cols())
+
+	info$PMID = str_extract(entries, '(?<=PMID- )\\d+')
+
+	info %>% transmute(
+		Order = 1:n(),
+		ID = paste0('PMID:', PMID), Title = ifelse(is.na(TI), BTI, TI),
+		Abstract = AB, DOI = ifelse(is.na(LID), AID, LID),
+		Authors = FAU, URL = paste0('https://pubmed.ncbi.nlm.nih.gov/', PMID),
+		Journal = JT, Journal_short = TA, Article_type = PT, Mesh = MH,
+		Author_keywords = OT, Published = DP,
+		Source = 'Pubmed',
+		Creation_date = timestamp
+	) %>% clean_record_textfields()
+}
+
+parse_wos <- function(entries, timestamp = now()) {
+	entries %>% transmute(
+		Order = 1:n(),
+		ID = `UT (Unique WOS ID)`,
+		Title = `Article Title`,
+		Abstract, DOI,
+		Authors = `Author Full Names`,
+		Journal = `Source Title`,
+		Journal_short = `Journal ISO Abbreviation`,
+		Article_type = `Document Type`,
+		Author_keywords = `Author Keywords`,
+		Keywords = `Keywords Plus`,
+		Topic = `WoS Categories`,
+		N_citations = `Times Cited, All Databases`,
+		Published = paste(`Publication Date`, `Publication Year`),
+		PMID = `Pubmed Id`,
+		Source = 'WOS',
+		Source_type = 'parsed',
+		Creation_date = timestamp
+	) %>% clean_record_textfields()
+}
+
+parse_ieee <- function(entries, timestamp = now()) {
+	entries %>% transmute(
+		Order = 1:n(),
+		ID = paste0('IEEE:', str_remove(`PDF Link`, fixed('https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber='))),
+		Title = `Document Title`,
+		Abstract, DOI, URL = `PDF Link`,
+		Authors, Journal = `Publication Title`,
+		Author_keywords = `Author Keywords`,
+		Keywords = cbind(`IEEE Terms`, `INSPEC Controlled Terms`, `INSPEC Non-Controlled Terms`) %>%
+			apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA),
+		Mesh = Mesh_Terms,
+		Article_type = str_remove(`Document Identifier`, 'IEEE '),
+		N_citations = `Article Citation Count`,
+		Published = `Online Date`,
+		Source = 'IEEE',
+		Source_type = 'parsed',
+		Creation_date = now()
+	) %>% clean_record_textfields()
+}
+
+parse_embase <- function(entries, timestamp = now()) {
+	entries %>% transmute(
+		Order = 1:n(),
+		ID = paste0('EM:', PUI),
+		Title,
+		Abstract, DOI, URL = paste0('https://www.embase.com/a/#/search/results?id=', PUI),
+		Authors = `Author Names` %>%
+			str_replace_all(c('\\s*,\\s*' = ';', ' (?=\\w\\.)' = ', ')),
+		Journal = `Source title`,
+		Author_keywords = `Author Keywords` %>% str_replace_all('\\s*,\\s*', ';'),
+		Keywords = select(cur_data(), contains('Emtree')) %>%
+			apply(1, function(x) na.omit(x) %>% paste(collapse = ', ')) %>%
+			str_replace_all(c(
+				'\\s*,\\s*' = ';',
+				'\\(.+\\)' = ''
+			)),
+		Article_type = `Publication Type`,
+		Published = `Date of Publication`,
+		Source = 'Embase',
+		Source_type = 'parsed',
+		Creation_date = timestamp
+	) %>% clean_record_textfields()
+}
+
+parse_scopus <- function(entries, timestamp = now()) {
+	entries %>% transmute(
+		Order = 1:n(),
+		ID = paste0('SCP:', EID),
+		Title,
+		Abstract = str_remove(Abstract, fixed('[No abstract available]')),
+		DOI, URL = Link,
+		Authors = Authors %>%
+			str_replace_all(c('\\s*,\\s*' = ';', ' (?=\\w\\.)' = ', ')),
+		Journal = `Source title`,
+		Author_keywords = `Author Keywords`,
+		Keywords = `Index Keywords`,
+		Article_type = `Document Type`,
+		N_citations = `Cited by`,
+		Published = Year,
+		Source = 'Scopus',
+		Source_type = 'parsed',
+		Creation_date = timestamp
+	) %>% clean_record_textfields()
+}
+
 read_bib_files <- function(files) {
+
+	ts <- now()
 
 	pblapply(files, function(file) {
 
@@ -805,69 +895,24 @@ read_bib_files <- function(files) {
 		if (str_detect(file, '\\.(nbib|txt)$')) {
 			entries <- read_file(file)
 
-			if (str_detect(entries, 'PMID-')) type <- 'nbib'
+			if (str_detect(entries, 'PMID-')) type <- 'medline'
 
 		} else if (str_detect(file, '\\.(xlsx?|csv)$')) {
 			entries <- if (str_detect(file, '\\.csv$')) read_csv(file, col_types = cols()) else read_excel(file)
 
 			if ('UT (Unique WOS ID)' %in% colnames(entries)) type <- 'wos'
 			else if ('IEEE Terms' %in% colnames(entries)) type <- 'ieee'
+			else if ('Scopus' %in% entries$Source) type <- 'scopus'
+			else if ('Embase Accession ID' %in% colnames(entries)) type <- 'embase'
 		}
 
 		if (is.null(type)) {
-			warning('Format not recognized')
+			warning('Format not recognized for ', file)
 			return(NULL)
 		}
 
-		if (type == 'nbib') {
-
-			parse_medline(entries) %>%
-				mutate(Source_type = 'parsed')
-		}
-
-		else if (type == 'wos') {
-
-			entries %>% transmute(
-				Order = 1:n(),
-				ID = `UT (Unique WOS ID)`,
-				Title = `Article Title`,
-				Abstract, DOI,
-				Authors = `Author Full Names`,
-				Journal = `Source Title`,
-				Journal_short = `Journal ISO Abbreviation`,
-				Article_type = `Document Type`,
-				Author_keywords = `Author Keywords`,
-				Keywords = `Keywords Plus`,
-				Topic = `WoS Categories`,
-				N_citations = `Times Cited, All Databases`,
-				Published = paste(`Publication Date`, `Publication Year`),
-				PMID = `Pubmed Id`,
-				Source = 'WOS',
-				Source_type = 'parsed',
-				Creation_date = now()
-			) %>% clean_record_textfields()
-		}
-
-		else if (type == 'ieee') {
-
-			entries %>% transmute(
-				Order = 1:n(),
-				ID = paste0('IEEE:', str_remove(`PDF Link`, fixed('https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber='))),
-				Title = `Document Title`,
-				Abstract, DOI, URL = `PDF Link`,
-				Authors, Journal = `Publication Title`,
-				Author_keywords = `Author Keywords`,
-				Keywords = cbind(`IEEE Terms`, `INSPEC Controlled Terms`, `INSPEC Non-Controlled Terms`) %>%
-					apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA),
-				Mesh = Mesh_Terms,
-				Article_type = str_remove(`Document Identifier`, 'IEEE '),
-				N_citations = `Article Citation Count`,
-				Published = `Online Date`,
-				Source = 'IEEE',
-				Source_type = 'parsed',
-				Creation_date = now()
-			) %>% clean_record_textfields()
-		}
+		get(paste0('parse_', type))(entries, ts) %>%
+			data.frame()
 	}) %>% setNames(basename(files))
 }
 
@@ -877,6 +922,7 @@ join_records <- function(record.list) {
 			transmute(
 				Order,
 				DOI, ID, Title, Abstract, Authors, Year = Published %>% str_extract('\\d{4}') %>% as.numeric(),
+				URL = if (exists('URL')) URL else NA,
 				Journal = if (exists('Journal')) Journal else NA,
 				Journal_short = if (exists('Journal_short')) Journal_short else NA,
 				Keywords = if (exists('Keywords')) Keywords else NA,
@@ -922,8 +968,6 @@ order_by_query_match <- function(records, query) {
 		select(-text, -doc.length, -term.count, -score)
 }
 
-
-
 save_annotation_file <- function(records, reorder_query = NULL,
 																 prev_annotation = NULL,
 																 prev_classification = NULL,
@@ -956,12 +1000,6 @@ save_annotation_file <- function(records, reorder_query = NULL,
 		message(": ", nrow(records), ' unique records')
 	}
 
-	if (!is.null(reorder_query)) {
-		message('- reordering records...')
-
-		records <- order_by_query_match(records, query = reorder_query)
-	}
-
 	records <- records %>%
 		mutate(
 			Rev_manual = NA,
@@ -969,8 +1007,9 @@ save_annotation_file <- function(records, reorder_query = NULL,
 			.before = DOI
 		)
 
-	if (!is.null(prev_annotation) && file.exists(prev_annotation)) {
+	if (!is.null(prev_annotation)) {
 		message('- appending to a previous annotation file')
+		if (!file.exists(prev_annotation)) stop(prev_annotation, ' do not exist')
 
 		if (str_detect(prev_annotation, '\\.xlsx?$')) {
 			prev_records <- read_excel(prev_annotation)
@@ -989,14 +1028,21 @@ save_annotation_file <- function(records, reorder_query = NULL,
 			fix_duplicated_records()
 	}
 
-	if (!is.null(prev_classification) && file.exists(prev_classification)) {
+	if (!is.null(prev_classification)) {
 		message('- importing previous classifications')
+		if (!file.exists(prev_classification)) stop(prev_classification, ' do not exist')
 
 		if (str_detect(prev_classification, '\\.xlsx?$')) {
 			prev_records <- read_excel(prev_classification)
 		} else prev_records <- read_csv(prev_classification, col_types = cols())
 
 		records <- import_classification(records, prev_records = prev_records)
+	}
+
+	if (!is.null(reorder_query)) {
+		message('- reordering records...')
+
+		records <- order_by_query_match(records, query = reorder_query)
 	}
 
 	message('- saving records...')
@@ -1027,10 +1073,12 @@ fix_duplicated_records <- function(Records) {
 		group_by(UID) %>%
 		summarise(
 			Order = min(Order),
-			across(any_of(c('Title', 'Abstract', 'Authors', 'Journal', 'Journal_short', 'Year',
-											"Pred_delta", "Pred_Med", "Pred_Low", "Pred_Up")), ~ last(na.omit(.x))),
-			across(any_of(c('ID', 'DOI', 'Mesh', 'Article_type', 'Source', 'Source_type', 'FileID',
-											"Rev_manual", "Rev_prediction", "Predicted_label")), ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
+			across(any_of(c('Title', 'Abstract', 'Authors', 'Journal', 'Journal_short',
+											'Year', "Pred_delta", "Pred_Med", "Pred_Low", "Pred_Up")),
+						 ~ last(na.omit(.x))),
+			across(any_of(c('ID', 'DOI', 'URL', 'Mesh', 'Article_type', 'Source',
+											'Source_type', 'FileID', "Rev_manual", "Rev_prediction",
+											"Predicted_label")), ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
 			Keywords = Keywords %>% str_split('; ') %>% unlist() %>% na.omit() %>% unique() %>%
 				purrr::keep(~ str_length(.x) > 0) %>%
 				paste(collapse = '; '),
@@ -1079,19 +1127,24 @@ import_classification <- function(records, IDs = records$ID, prev_records) {
 		select(-uID)
 }
 
-check_classification_trends <- function(records, column = 'Rev_manual',
-																				step_size = 20, limit = nrow(records)) {
+check_classification_trend <- function(records, column = 'Rev_manual',
+																				step_size = 20, limit = NULL) {
 
-	steps <- seq(step_size, limit, by = step_size)
+	if (is.null(limit)) limit <- max(which(!is.na(records[[column]])))
+	steps <- seq(step_size, limit, by = step_size) %>% c(limit) %>% unique()
 
-	pbmclapply(steps, function(step) {
-		records %>% head(step) %>% pull(column) %>%
-			table %>% matrix(nrow = 1) %>%
-			as.data.frame() %>% setNames(c('No', 'Yes'))
+	pblapply(steps, function(step) {
+		records %>% head(step) %>%
+			summarise(
+				Yes = sum(Rev_manual == 'y', na.rm = T),
+				No = sum(Rev_manual == 'n', na.rm = T)
+				)
 	}) %>% bind_rows() %>%
 		ggplot(aes(x = steps)) +
 		geom_line(aes(y = Yes, color = 'yes'), size = 1) +
 		geom_line(aes(y = No, color = 'no'), size = 1) +
+		geom_label(aes(y = Yes, x = steps, label = Yes)) +
+		geom_label(aes(y = No, x = steps, label = No)) +
 		labs(y = 'Records', x = 'Batch size', color = 'Classification') +
 		theme_minimal()
 }
@@ -1212,9 +1265,11 @@ tokenize_authors <- function(corpus) {
 
 tokenize_keywords <- function(keywords) {
 	keywords %>%
-		str_replace_all('\\s*;\\s*', ';') %>%
-		str_replace_all('[^;\\w]+', '_') %>%
-		str_replace_all(';', ' ')
+		str_to_lower() %>%
+		str_replace_all(c(
+			'\\s*;\\s*' = ';',
+			'[^;\\w]+' = '_',
+			';' = ' '))
 }
 
 
