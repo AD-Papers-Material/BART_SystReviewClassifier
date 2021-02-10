@@ -1059,15 +1059,22 @@ save_annotation_file <- function(records, reorder_query = NULL,
 	invisible(records)
 }
 
-fix_duplicated_records <- function(Records) {
-	Records <- Records %>% mutate(
-		UID = str_to_lower(Title) %>% str_remove_all('[^\\w\\d\\s]+')
-	)
+fix_duplicated_records <- function(records) {
+	records <- records %>%
+		mutate(
+			UID = str_to_lower(Title) %>% str_remove_all('[^\\w\\d]+')
+		) %>%
+		group_by(UID) %>%
+		mutate(DOI = na.omit(DOI)[1]) %>%
+		ungroup() %>%
+		mutate(
+			UID = ifelse(is.na(DOI), UID, DOI)
+		)
 
-	dup_recs <- Records$UID[duplicated(Records$UID) | duplicated(Records$DOI)]
+	dup_recs <- records$UID[duplicated(records$UID)]
 
-	unique_sources <- Records %>% filter(!(UID %in% dup_recs))
-	dup_sources <- Records %>% filter(UID %in% dup_recs)
+	unique_sources <- records %>% filter(!(UID %in% dup_recs))
+	dup_sources <- records %>% filter(UID %in% dup_recs)
 
 	dup_sources <- dup_sources %>%
 		group_by(UID) %>%
@@ -1075,10 +1082,11 @@ fix_duplicated_records <- function(Records) {
 			Order = min(Order),
 			across(any_of(c('Title', 'Abstract', 'Authors', 'Journal', 'Journal_short',
 											'Year', "Pred_delta", "Pred_Med", "Pred_Low", "Pred_Up")),
-						 ~ last(na.omit(.x))),
+						 ~ na.omit(.x)[1]),
 			across(any_of(c('ID', 'DOI', 'URL', 'Mesh', 'Article_type', 'Source',
 											'Source_type', 'FileID', "Rev_manual", "Rev_prediction",
-											"Predicted_label")), ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
+											"Rev_previous", "Predicted_label")),
+						 ~ na.omit(.x) %>% unique() %>% paste(collapse = '; ')),
 			Keywords = Keywords %>% str_split('; ') %>% unlist() %>% na.omit() %>% unique() %>%
 				purrr::keep(~ str_length(.x) > 0) %>%
 				paste(collapse = '; '),
@@ -1086,7 +1094,7 @@ fix_duplicated_records <- function(Records) {
 		)
 
 	bind_rows(unique_sources, dup_sources) %>% select(-UID) %>%
-		mutate(across(where(is.character), ~ ifelse(.x %in% c('', 'NA'), NA_character_, .x)))
+		clean_record_textfields()
 }
 
 summarise_by_source <- function(annotation_file) {
