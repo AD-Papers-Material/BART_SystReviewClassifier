@@ -1041,9 +1041,9 @@ save_annotation_file <- function(records, reorder_query = NULL,
 			if (str_detect(prev_classification, '\\.xlsx?$')) {
 				prev_records <- read_excel(prev_classification)
 			} else prev_records <- read_csv(prev_classification, col_types = cols())
-		} else if (is.data.frame(prev_annotation)) {
+		} else if (is.data.frame(prev_classification)) {
 			prev_records <- prev_classification
-		} else stop('prev_annotation must be a file path or a data.frame')
+		} else stop('prev_classification must be a file path or a data.frame')
 
 		records <- import_classification(records, prev_records = prev_records)
 	}
