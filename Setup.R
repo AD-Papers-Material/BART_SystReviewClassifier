@@ -1009,11 +1009,16 @@ save_annotation_file <- function(records, reorder_query = NULL,
 
 	if (!is.null(prev_annotation)) {
 		message('- appending to a previous annotation file')
-		if (!file.exists(prev_annotation)) stop(prev_annotation, ' do not exist')
+		if (is.character(prev_annotation)) {
+			if (!file.exists(prev_annotation)) stop(prev_annotation, ' do not exist')
 
-		if (str_detect(prev_annotation, '\\.xlsx?$')) {
-			prev_records <- read_excel(prev_annotation)
-		} else prev_records <- read_csv(prev_annotation, col_types = cols())
+			if (str_detect(prev_annotation, '\\.xlsx?$')) {
+				prev_records <- read_excel(prev_annotation)
+			} else prev_records <- read_csv(prev_annotation, col_types = cols())
+		} else if (is.data.frame(prev_annotation)) {
+			prev_records <- prev_annotation
+			prev_annotation <- NULL
+		} else stop('prev_annotation must be a file path or a data.frame')
 
 		records <- records %>% filter(!(ID %in% prev_records$ID))
 
@@ -1030,11 +1035,15 @@ save_annotation_file <- function(records, reorder_query = NULL,
 
 	if (!is.null(prev_classification)) {
 		message('- importing previous classifications')
-		if (!file.exists(prev_classification)) stop(prev_classification, ' do not exist')
+		if (is.character(prev_classification)) {
+			if (!file.exists(prev_classification)) stop(prev_classification, ' do not exist')
 
-		if (str_detect(prev_classification, '\\.xlsx?$')) {
-			prev_records <- read_excel(prev_classification)
-		} else prev_records <- read_csv(prev_classification, col_types = cols())
+			if (str_detect(prev_classification, '\\.xlsx?$')) {
+				prev_records <- read_excel(prev_classification)
+			} else prev_records <- read_csv(prev_classification, col_types = cols())
+		} else if (is.data.frame(prev_annotation)) {
+			prev_records <- prev_classification
+		} else stop('prev_annotation must be a file path or a data.frame')
 
 		records <- import_classification(records, prev_records = prev_records)
 	}
