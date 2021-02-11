@@ -1628,144 +1628,144 @@ get_tree_rules <- function(tree, rule.as.text = T, eval.ready = F, mark.leaves =
 
 }
 
-#' Simplify ctree rules.
+#' #' Simplify ctree rules.
+#' #'
+#' #' Remove redundant components of a rule keeping only the shortest set
+#' #' definition (e.g.: if many conditions in a rule represent nested sets, only
+#' #' those necessary to define the innermost set are kept). The conditions are
+#' #' also rearranged alphabetically for easier comparison.
+#' #'
+#' #' @param rules A character vector of rules joined by the & symbol.
+#' #'
+#' #' @return The same vector of rules after simplification.
+#' #'
+#' #' @import dplyr
+#' #' @import stringr
+#' #'
+#' #' @export
+#' #'
+#' #' @examples
+#' simplify_rules <- function(rules) {
+#' 	library(dplyr)
+#' 	library(stringr)
 #'
-#' Remove redundant components of a rule keeping only the shortest set
-#' definition (e.g.: if many conditions in a rule represent nested sets, only
-#' those necessary to define the innermost set are kept). The conditions are
-#' also rearranged alphabetically for easier comparison.
+#' 	sapply(rules, function(rule) {
 #'
-#' @param rules A character vector of rules joined by the & symbol.
+#' 		if (rule == '') return(NA)
 #'
-#' @return The same vector of rules after simplification.
+#' 		components <- str_split(rule, ' & ') %>% unlist
+#' 		vars <- str_extract(components, '.* [<>%=in]+') %>% unique
+#' 		ind <- sapply(vars, function(v) tail(which(str_detect(components, fixed(v))), 1))
 #'
-#' @import dplyr
-#' @import stringr
+#' 		paste(components[ind] %>% sort, collapse = ' & ')
+#' 	}) %>% na.omit
+#' }
 #'
-#' @export
+#' clean_filtering_rule <- function(rules) {
+#' 	# rules_to_df(rules) %>%
+#' 	# 	mutate(
+#' 	# 		val = sapply(1:n(), function(i) {
+#' 	# 			if (!str_detect(op[i], 'in')) return(val[i])
+#' 	# 			values <- str_extract(val[i], 'c\\(.+?\\)')
+#' 	# 			rest <- str_remove(val[i], 'c\\(.+?\\) ?')
+#' 	#
+#' 	# 			values <- eval(parse(text = values)) %>% na.omit()
+#' 	#
+#' 	# 			if (length(values) > 1) values <- glue("[{paste(values, collapse = ', ')}]")
+#' 	#
+#' 	# 			paste(values, rest)
+#' 	# 		}),
+#' 	# 		op = str_replace_all(op, c('<=' = '≤', '>=' = '≥')),
+#' 	# 		op = case_when(
+#' 	# 			str_detect(val, '\\[') ~ 'in',
+#' 	# 			str_detect(op, 'in') ~ '=',
+#' 	# 			T ~ op
+#' 	# 		)
+#' 	# 	) %>%
+#' 	# 	group_by(rule) %>%
+#' 	# 	summarise(
+#' 	# 		new_rule = glue("{var} {op} {val}") %>%
+#' 	# 			paste0(collapse = ' & ')
+#' 	# 	) %>% pull(new_rule)
 #'
-#' @examples
-simplify_rules <- function(rules) {
-	library(dplyr)
-	library(stringr)
-
-	sapply(rules, function(rule) {
-
-		if (rule == '') return(NA)
-
-		components <- str_split(rule, ' & ') %>% unlist
-		vars <- str_extract(components, '.* [<>%=in]+') %>% unique
-		ind <- sapply(vars, function(v) tail(which(str_detect(components, fixed(v))), 1))
-
-		paste(components[ind] %>% sort, collapse = ' & ')
-	}) %>% na.omit
-}
-
-clean_filtering_rule <- function(rules) {
-	# rules_to_df(rules) %>%
-	# 	mutate(
-	# 		val = sapply(1:n(), function(i) {
-	# 			if (!str_detect(op[i], 'in')) return(val[i])
-	# 			values <- str_extract(val[i], 'c\\(.+?\\)')
-	# 			rest <- str_remove(val[i], 'c\\(.+?\\) ?')
-	#
-	# 			values <- eval(parse(text = values)) %>% na.omit()
-	#
-	# 			if (length(values) > 1) values <- glue("[{paste(values, collapse = ', ')}]")
-	#
-	# 			paste(values, rest)
-	# 		}),
-	# 		op = str_replace_all(op, c('<=' = '≤', '>=' = '≥')),
-	# 		op = case_when(
-	# 			str_detect(val, '\\[') ~ 'in',
-	# 			str_detect(op, 'in') ~ '=',
-	# 			T ~ op
-	# 		)
-	# 	) %>%
-	# 	group_by(rule) %>%
-	# 	summarise(
-	# 		new_rule = glue("{var} {op} {val}") %>%
-	# 			paste0(collapse = ' & ')
-	# 	) %>% pull(new_rule)
-
-	sapply(rules, function(rule) {
-		str_split(rule, '&') %>% unlist %>% str_squish %>% sapply(function(x) {
-
-			if (str_detect(x, '%in%')) {
-				pieces <- str_split(x, '%in%') %>% unlist %>% str_squish
-
-				values <- eval(parse(text = pieces[2])) %>% na.omit()
-				values <- paste0('"', values, '"')
-
-				if (length(values) > 1) values <- glue("in [{paste(values, collapse = ', ')}]")
-				else values <- glue("= {values}")
-
-				glue("{pieces[1]} {values}")
-			} else str_replace_all(x, c('<=' = '≤', '>=' = '≥'))
-		}) %>% sort %>% paste(collapse = ' & ')
-	})
-}
-
-rules_to_df <- function(rules) {
-
-	if (length(rules) == 0) return(data.frame(rule = character(0), var = character(0), val = character(0)))
-
-	splitted <- rules %>% str_split(' & ')
-
-	lapply(1:length(splitted), function(i) {
-
-		op <- str_extract(splitted[[i]], ' [%in%<=>≤≥]+ ') %>% str_squish()
-		struct <- splitted[[i]] %>%
-			str_split(' [%in%<=>≤≥]+ ') %>%
-			lapply(function(rule) {
-				rule <- str_squish(rule)
-
-				data.frame(
-					rule = i,
-					var = rule[1],
-					val = rule[2]
-				)
-			}) %>% bind_rows()
-
-		struct$op <- op
-		struct
-	}) %>% bind_rows()
-}
-
-
-add_ecdf_to_rules <- function(rules, data) {
-
-	rule_struct <- rules_to_df(rules)
-
-	vars <- rule_struct %>%
-		pull(var) %>% unique
-
-	cumfuncs <- lapply(vars, function(v) {
-		if (str_detect(rule_struct$op[rule_struct$var == v], 'in|^=$')) {
-			function(x) {
-
-				x <- str_remove_all(x, 'c\\(|[\\)\\[\\]"]') %>%
-					paste(collapse = ', ') %>%
-					str_split(', ?') %>%
-					unlist()
-
-				mean(data[[v]] %in% x)
-			}
-		} else ecdf(data[[v]])
-	}) %>% setNames(vars)
-
-	rule_struct$p = sapply(1:nrow(rule_struct), function(i) {
-		rule <- rule_struct[i,]
-		if (!is.null(cumfuncs[[rule$var]])) cumfuncs[[rule$var]](rule$val) else NA
-	}) %>% percent
-
-	rule_struct %>%
-		group_split(rule) %>%
-		sapply(function(df) {
-			glue_data(df, "{var} {op} {val} ({df$p})") %>%
-				paste0(collapse = ' & ')
-		})
-}
+#' 	sapply(rules, function(rule) {
+#' 		str_split(rule, '&') %>% unlist %>% str_squish %>% sapply(function(x) {
+#'
+#' 			if (str_detect(x, '%in%')) {
+#' 				pieces <- str_split(x, '%in%') %>% unlist %>% str_squish
+#'
+#' 				values <- eval(parse(text = pieces[2])) %>% na.omit()
+#' 				values <- paste0('"', values, '"')
+#'
+#' 				if (length(values) > 1) values <- glue("in [{paste(values, collapse = ', ')}]")
+#' 				else values <- glue("= {values}")
+#'
+#' 				glue("{pieces[1]} {values}")
+#' 			} else str_replace_all(x, c('<=' = '≤', '>=' = '≥'))
+#' 		}) %>% sort %>% paste(collapse = ' & ')
+#' 	})
+#' }
+#'
+#' rules_to_df <- function(rules) {
+#'
+#' 	if (length(rules) == 0) return(data.frame(rule = character(0), var = character(0), val = character(0)))
+#'
+#' 	splitted <- rules %>% str_split(' & ')
+#'
+#' 	lapply(1:length(splitted), function(i) {
+#'
+#' 		op <- str_extract(splitted[[i]], ' [%in%<=>≤≥]+ ') %>% str_squish()
+#' 		struct <- splitted[[i]] %>%
+#' 			str_split(' [%in%<=>≤≥]+ ') %>%
+#' 			lapply(function(rule) {
+#' 				rule <- str_squish(rule)
+#'
+#' 				data.frame(
+#' 					rule = i,
+#' 					var = rule[1],
+#' 					val = rule[2]
+#' 				)
+#' 			}) %>% bind_rows()
+#'
+#' 		struct$op <- op
+#' 		struct
+#' 	}) %>% bind_rows()
+#' }
+#'
+#'
+#' add_ecdf_to_rules <- function(rules, data) {
+#'
+#' 	rule_struct <- rules_to_df(rules)
+#'
+#' 	vars <- rule_struct %>%
+#' 		pull(var) %>% unique
+#'
+#' 	cumfuncs <- lapply(vars, function(v) {
+#' 		if (str_detect(rule_struct$op[rule_struct$var == v], 'in|^=$')) {
+#' 			function(x) {
+#'
+#' 				x <- str_remove_all(x, 'c\\(|[\\)\\[\\]"]') %>%
+#' 					paste(collapse = ', ') %>%
+#' 					str_split(', ?') %>%
+#' 					unlist()
+#'
+#' 				mean(data[[v]] %in% x)
+#' 			}
+#' 		} else ecdf(data[[v]])
+#' 	}) %>% setNames(vars)
+#'
+#' 	rule_struct$p = sapply(1:nrow(rule_struct), function(i) {
+#' 		rule <- rule_struct[i,]
+#' 		if (!is.null(cumfuncs[[rule$var]])) cumfuncs[[rule$var]](rule$val) else NA
+#' 	}) %>% percent
+#'
+#' 	rule_struct %>%
+#' 		group_split(rule) %>%
+#' 		sapply(function(df) {
+#' 			glue_data(df, "{var} {op} {val} ({df$p})") %>%
+#' 				paste0(collapse = ' & ')
+#' 		})
+#' }
 
 
 # Modeling -----------------------------------------------------------
@@ -1789,7 +1789,7 @@ create_training_set <- function(Records, pos.mult = 10L) {
 	message('Title DTM')
 	Title_DTM <- with(
 		Records,
-		text_to_DTM(Title, min.freq = 25, label = 'TITLE__', ids = ID,
+		text_to_DTM(Title, min.freq = 20, label = 'TITLE__', ids = ID,
 								freq.subset.ids = ID[!is.na(Target)])
 	)
 
@@ -1800,7 +1800,7 @@ create_training_set <- function(Records, pos.mult = 10L) {
 		Records,
 		Abstract %>%
 			str_remove_all(regex('\\b(background|introduction|method\\w*|result\\w*|conclusion\\w*|discussion)',ignore_case = T)) %>%
-			text_to_DTM(min.freq = 30, label = 'ABSTR__', ids = ID,
+			text_to_DTM(min.freq = 20, label = 'ABSTR__', ids = ID,
 									freq.subset.ids = ID[!is.na(Target)])
 	)
 
@@ -1819,7 +1819,7 @@ create_training_set <- function(Records, pos.mult = 10L) {
 	message('\nKeywords DTM')
 	Keywords_DTM <- with(
 		Records,
-		text_to_DTM(Keywords, tokenize.fun = tokenize_keywords, min.freq = 30,
+		text_to_DTM(Keywords, tokenize.fun = tokenize_keywords, min.freq = 20,
 								label = 'KEYS__', ids = ID,
 								freq.subset.ids = ID[!is.na(Target)])
 	)
@@ -1829,7 +1829,7 @@ create_training_set <- function(Records, pos.mult = 10L) {
 	message('\nMesh DTM')
 	Mesh_DTM <- with(
 		Records,
-		text_to_DTM(Mesh, tokenize.fun = tokenize_MESH, min.freq = 40,
+		text_to_DTM(Mesh, tokenize.fun = tokenize_MESH, min.freq = 20,
 								label = 'MESH__', ids = ID, freq.subset.ids = ID[!is.na(Target)],
 								add.ngrams = F)
 	)
