@@ -838,7 +838,7 @@ parse_embase <- function(entries, timestamp = now()) {
 		Title,
 		Abstract, DOI, URL = paste0('https://www.embase.com/a/#/search/results?id=', PUI),
 		Authors = `Author Names` %>%
-			str_replace_all(c('\\s*,\\s*' = ';', ' (?=\\w\\.)' = ', ')),
+			str_replace_all(c('\\s*,\\s*' = ';', ' (?=\\w\\.)' = ', ', '\\.' = ' ')),
 		Journal = `Source title`,
 		Author_keywords = `Author Keywords` %>% str_replace_all('\\s*,\\s*', ';'),
 		Keywords = select(cur_data(), contains('Emtree')) %>%
@@ -863,7 +863,7 @@ parse_scopus <- function(entries, timestamp = now()) {
 		Abstract = str_remove(Abstract, fixed('[No abstract available]')),
 		DOI, URL = Link,
 		Authors = Authors %>%
-			str_replace_all(c('\\s*,\\s*' = ';', ' (?=\\w\\.)' = ', ')),
+			str_replace_all(c('\\s*,\\s*' = ';', ' (?=\\w\\.)' = ', ', '\\.' = ' ')),
 		Journal = `Source title`,
 		Author_keywords = `Author Keywords`,
 		Keywords = `Index Keywords`,
@@ -1976,12 +1976,15 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	pos.mult <- round(pos.mult)
 
-	message('Loading file or DTM')
+	message('Loading Annotation file')
 
 	tictoc::tic()
 	Records <- read_excel(file)
 	tictoc::toc()
 
+	message('Loading or creating DTM')
+
+	tictoc::tic()
 	if (is.null(DTM)) {
 		DTM <- create_training_set(Records, pos.mult)
 	} else if (is.character(DTM)) {
@@ -1991,6 +1994,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	if (!(all(DTM$ID %in% Records$ID) & all(Records$ID %in% DTM$ID))) {
 		stop('The DTM and the records should be compatible (same IDs).')
 	}
+	tictoc::toc()
 
 	message('Model generation')
 
