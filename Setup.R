@@ -1162,7 +1162,6 @@ check_classification_trend <- function(records, column = 'Rev_manual',
 		ggplot(aes(x = steps)) +
 		geom_line(aes(y = Yes, color = 'yes'), size = 1) +
 		geom_line(aes(y = No, color = 'no'), size = 1) +
-		geom_label(aes(y = No, x = steps, label = No)) +
 		labs(y = 'Records', x = 'Batch size', color = 'Classification') +
 		theme_minimal()
 
@@ -1173,7 +1172,9 @@ check_classification_trend <- function(records, column = 'Rev_manual',
 			}), .x[n()]))
 	)
 
-	p + geom_label(aes(y = Yes, x = steps, label = Yes), data = df)
+	p +
+		geom_label(aes(y = Yes, x = steps, label = Yes), data = df, alpha = .8) +
+		geom_label(aes(y = No, x = steps, label = No), alpha = .8)
 }
 
 
