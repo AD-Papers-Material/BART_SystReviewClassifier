@@ -1466,7 +1466,7 @@ DTM.aggr_synonyms <- function(DTM, min.sim = .9) {
 
 		DTM <- DTM %>% select(-all_of(syn.components %>% unlist)) %>% # Remove single terms
 			bind_cols(new_cols) # Add joined terms
-	}
+	} else DTM
 }
 
 impute_edges <- function(template.mat, target.mat = NULL, a = 1, b = 1) {
@@ -1776,16 +1776,15 @@ create_training_set <- function(Records, pos.mult = 10L) {
 
 	Records <- Records %>%
 		transmute(
-			# Target = case_when(
-			# 	!is.na(Rev_prediction) ~ Rev_prediction,
-			# 	!is.na(Rev_abstract) ~ Rev_abstract,
-			# 	T ~ Rev_title
-			# ),
 			Target = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual),
 			ID, Title, Abstract, Authors, Keywords, Mesh
 		) %>% {
 			.[c(rep(which(.$Target %in% 'y'), pos.mult), which(!(.$Target %in% 'y'))),]
 		}
+
+	if (all(is.na(Records$Target))) {
+		stop('There are no classified records')
+	}
 
 	message('Title DTM')
 	Title_DTM <- with(
