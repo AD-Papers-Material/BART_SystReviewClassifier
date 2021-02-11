@@ -1182,6 +1182,7 @@ check_classification_trend <- function(records, column = 'Rev_manual',
 
 lemmatize <- function(text.vec, dict = lexicon::hash_lemmas,
 											separator = '_tagseparator_') {
+
 	dict <- setNames(lexicon::hash_lemmas$lemma, lexicon::hash_lemmas$token)
 
 	terms <- paste(text.vec, separator, collapse = ' ')
@@ -1317,9 +1318,11 @@ tokenize_MESH <- function(mesh) {
 }
 
 
-text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus), freq.subset.ids = ids,
+text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
+												freq.subset.ids = ids,
 												included.pos = c('Noun', 'Verb', 'Adjective'),
-												tokenize.fun = tokenize_text, add.ngrams = T, aggr.synonyms = T, n.gram.thresh = .5,
+												tokenize.fun = tokenize_text, add.ngrams = T,
+												aggr.synonyms = T, n.gram.thresh = .5,
 												syn.thresh = .9, label = 'TERM__', na.as.missing = T) {
 
 	raw.corpus <- corpus
@@ -1345,7 +1348,7 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus), freq.subs
 		term =  splitted.corpus %>% unlist,
 		val = 1,
 		ID = rep(order.ids, splitted.corpus %>% sapply(length))
-	) %>% na.omit %>% distinct %>%
+	) %>% na.omit() %>% distinct() %>%
 		mutate(
 			val = replace(val, str_detect(term, '\\*'), 2),
 			term = str_remove(term, '\\*')
@@ -1859,8 +1862,9 @@ summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
 compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
 															 folder = getwd(), name = as.character(Y),
 															 rebuild = F, num_trees = 50, k = 2,
-															 num_iterations_after_burn_in = 1000, run_in_sample = F,
-															 mem_cache_for_speed = T,  use_missing_data = T, verbose = T, ...) {
+															 num_iterations_after_burn_in = 1000,
+															 run_in_sample = F, mem_cache_for_speed = T,
+															 use_missing_data = T, verbose = T, ...) {
 	library(dplyr)
 	library(bartMachine)
 	library(glue)
@@ -1908,7 +1912,8 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
 	model
 }
 
-compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F, quants = c(.05, .5, .95), AUC.thr = .9) {
+compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F,
+																		 quants = c(.05, .5, .95), AUC.thr = .9) {
 
 	library(scales)
 	library(pROC)
@@ -1939,9 +1944,12 @@ compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F, 
 		roc <- pROC::roc(response = y, predictor = samples[,i])
 		data.frame(
 			AUC = pROC::auc(roc) %>% as.vector(),
-			pROC::coords(roc, "best", ret = c('threshold', 'sensitivity', 'specificity', 'accuracy', 'ppv', 'npv'), transpose = F) %>%
+			pROC::coords(roc, "best",
+									 ret = c('threshold', 'sensitivity',
+									 				'specificity', 'accuracy', 'ppv', 'npv'),
+									 transpose = F) %>%
 				as.list() %>% as.data.frame.list() %>% head(1) %>%
-				magrittr::set_colnames(c('Threshold', 'Sens', 'Spec', 'Acc', 'PPV', 'NPV')),
+				setNames(c('Threshold', 'Sens', 'Spec', 'Acc', 'PPV', 'NPV')),
 			Sens.thr = quantile(samples[y == y_levels[1], i], min(quants)),
 			Spec.thr = quantile(samples[y == y_levels[2], i], max(quants))
 		)
@@ -1955,13 +1963,16 @@ compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F, 
 
 enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 																	 n.models = 40, AUC.thr = .9,
-																	 perf.quants = c(.01, .5, .99), rebuild = T, ...) {
+																	 perf.quants = c(.01, .5, .99),
+																	 rebuild = T, ...) {
 
 	perf.quants <- sort(perf.quants)[c(2, 1, 3)]
 
 	if (pos.mult < 1) stop('pos.mult should be at least 1')
 
-	if ((pos.mult - round(pos.mult)) != 0) warning('pos.mult should be an integer; will be rounded up.')
+	if ((pos.mult - round(pos.mult)) != 0) {
+		warning('pos.mult should be an integer; will be rounded up.')
+	}
 
 	pos.mult <- round(pos.mult)
 
@@ -1977,8 +1988,9 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 		DTM <- readr::read_rds(DTM)$DTM
 	}
 
-
-	if (!(all(DTM$ID %in% Records$ID) & all(Records$ID %in% DTM$ID))) stop('The DTM and the records should be compatible (same IDs).')
+	if (!(all(DTM$ID %in% Records$ID) & all(Records$ID %in% DTM$ID))) {
+		stop('The DTM and the records should be compatible (same IDs).')
+	}
 
 	message('Model generation')
 
@@ -1996,11 +2008,21 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 			test_data <- all_data %>% filter(!(ID %in% train_data$ID))
 
-			bart.mod <- compute_BART_model(train_data %>% select(-ID), 'Target', name = 'BartModel', rebuild = T, save = F, verbose = F, ...)
+			bart.mod <- compute_BART_model(train_data %>% select(-ID), 'Target',
+																		 name = 'BartModel', rebuild = T, save = F,
+																		 verbose = F, ...)
 
 			out <- list(
-				preds = bart_machine_get_posterior(bart.mod, new_data = DTM %>% select(all_of(colnames(bart.mod$X))))$y_hat_posterior_samples,
-				oos.perf = compute_pred_performance(bart.mod, data = test_data, Y = 'Target', AUC.thr = AUC.thr, quants = perf.quants),
+
+				preds = bart_machine_get_posterior(
+					bart.mod,
+					new_data = DTM %>%	select(all_of(colnames(bart.mod$X)))
+				)$y_hat_posterior_samples,
+
+				oos.perf = compute_pred_performance(
+					bart.mod, data = test_data, Y = 'Target', AUC.thr = AUC.thr,
+					quants = perf.quants),
+
 				var.imp = bartMachine::get_var_props_over_chain(bart.mod, 'trees')
 			)
 		})
@@ -2012,13 +2034,16 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	tictoc::tic()
 
-	avg_preds <- (Reduce("+", bart.mods %>% lapply(`[[`, 'preds')) / length(bart.mods))
+	avg_preds <- (Reduce(
+		"+",
+		bart.mods %>% lapply(`[[`, 'preds')
+	) / length(bart.mods))
 
 	Predicted_data <- DTM %>% select(ID, Target) %>%
 		data.frame(
 			mclapply(perf.quants, function(q) {
 				apply(avg_preds, 1, quantile, q)
-			}) %>% bind_cols() %>% magrittr::set_colnames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
+			}) %>% bind_cols() %>% setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
 		) %>%
 		mutate(
 			Pred_delta = Pred_Up - Pred_Low,
@@ -2027,7 +2052,10 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 				Pred_Up < min(Pred_Low[Target %in% 'y']) ~ 'n',
 				T ~ 'unk'
 			),
-			Predicted_label = replace(Predicted_label, Predicted_label != Target & Predicted_label != 'unk', 'check'),
+			Predicted_label = replace(
+				Predicted_label,
+				Predicted_label != Target & Predicted_label != 'unk',
+				'check'),
 			across(matches('Pred_'), signif, 3),
 			Target = NULL
 		)
@@ -2128,7 +2156,10 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	invisible(out)
 }
 
-select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F, only.inclusive.rules = F, target.vec, target.data, algorithm = c('linear', 'sequential')) {
+select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
+															only.inclusive.rules = F, target.vec, target.data,
+															algorithm = c('linear', 'sequential')) {
+
 	algorithm <- match.arg(algorithm)
 
 	add_cumulative <- function(df, with.score = F) {
@@ -2327,6 +2358,7 @@ extract_rules <- function(Model_output, vimp.threshold = 1.25, n.trees = 800, ..
 }
 
 rules_to_query <- function(rules) {
+
 	str_remove_all(rules, '^V__') %>% sapply( function(r) {
 
 		rules <- str_split(r, ' & ') %>% unlist %>% sapply(function(x) {
@@ -2342,6 +2374,7 @@ rules_to_query <- function(rules) {
 		rules <- str_remove_all(rules, ' %in% "[01]"') %>% str_squish()
 		paste0('(', rules, ')')
 	}) %>% {paste0('(', paste(., collapse = ' OR '), ')')}
+
 }
 
 summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
