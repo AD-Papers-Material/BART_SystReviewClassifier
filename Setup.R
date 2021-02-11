@@ -1150,20 +1150,30 @@ check_classification_trend <- function(records, column = 'Rev_manual',
 	if (is.null(limit)) limit <- max(which(!is.na(records[[column]])))
 	steps <- seq(step_size, limit, by = step_size) %>% c(limit) %>% unique()
 
-	pblapply(steps, function(step) {
+	df <- pblapply(steps, function(step) {
 		records %>% head(step) %>%
 			summarise(
 				Yes = sum(Rev_manual == 'y', na.rm = T),
 				No = sum(Rev_manual == 'n', na.rm = T)
 				)
-	}) %>% bind_rows() %>%
+	}) %>% bind_rows()
+
+	p <- df %>%
 		ggplot(aes(x = steps)) +
 		geom_line(aes(y = Yes, color = 'yes'), size = 1) +
 		geom_line(aes(y = No, color = 'no'), size = 1) +
-		geom_label(aes(y = Yes, x = steps, label = Yes)) +
 		geom_label(aes(y = No, x = steps, label = No)) +
 		labs(y = 'Records', x = 'Batch size', color = 'Classification') +
 		theme_minimal()
+
+	df <- mutate(
+		df,
+		across(c(Yes, No), ~ c(.x[1], sapply(2:(n() - 1), function(i) {
+			if (.x[i] == .x[i-1]) NA else .x[i]
+			}), .x[n()]))
+	)
+
+	p + geom_label(aes(y = Yes, x = steps, label = Yes), data = df)
 }
 
 
