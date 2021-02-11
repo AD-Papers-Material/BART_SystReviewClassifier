@@ -1587,7 +1587,7 @@ get_tree_rules <- function(tree, rule.as.text = T, eval.ready = F, mark.leaves =
 					} else {
 						yval[,(2 + n_distinct(tree$y)):(ncol(yval) - 1)] %>%
 							as.data.frame() %>%
-							magrittr::set_colnames(paste0('pred', 1:n_distinct(tree$y)))
+							setNames(paste0('pred', 1:n_distinct(tree$y)))
 					}
 				} else {
 					tree$frame[as.character(id),] %>% transmute(avg = yval, dev)
@@ -1964,7 +1964,7 @@ compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F,
 enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 																	 n.models = 40, AUC.thr = .9,
 																	 perf.quants = c(.01, .5, .99),
-																	 rebuild = T, ...) {
+																	 rebuild = FALSE, ...) {
 
 	perf.quants <- sort(perf.quants)[c(2, 1, 3)]
 
@@ -1982,12 +1982,14 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	Records <- read_excel(file)
 	tictoc::toc()
 
-	message('Loading or creating DTM')
-
 	tictoc::tic()
 	if (is.null(DTM)) {
+		message('Creating DTM')
+
 		DTM <- create_training_set(Records, pos.mult)
 	} else if (is.character(DTM)) {
+		message('Loading DTM')
+
 		DTM <- readr::read_rds(DTM)$DTM
 	}
 
@@ -2098,7 +2100,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 				AUC = pROC::auc(roc) %>% as.vector(),
 				pROC::coords(roc, "best", ret = c('threshold', 'sensitivity', 'specificity', 'accuracy', 'ppv', 'npv'), transpose = F) %>%
 					as.list() %>% as.data.frame.list() %>% head(1) %>%
-					magrittr::set_colnames(c('Threshold', 'Sens', 'Spec', 'Acc', 'PPV', 'NPV')),
+					setNames(c('Threshold', 'Sens', 'Spec', 'Acc', 'PPV', 'NPV')),
 				Sens.thr = quantile(samples[y == y_levels[2], i], min(perf.quants)),
 				Spec.thr = quantile(samples[y == y_levels[1], i], max(perf.quants))
 			)
@@ -2115,7 +2117,8 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 					) %>% paste(collapse = '; ')
 				},
 				UnkToLabel = with(Annotated_data, sum(Predicted_label == 'unk' & is.na(Rev_prediction))),
-				PosToLabel = with(Annotated_data, sum(Predicted_label == 'y' & is.na(Rev_prediction) & is.na(Rev_abstract))),
+				NewPos = with(Annotated_data, sum(Predicted_label == 'y' & is.na(Rev_prediction) & is.na(Rev_manual))),
+				ToCheck = with(Annotated_data, sum(Predicted_label == 'check' & is.na(Rev_prediction)))
 			) %>% t
 	})
 
@@ -2333,7 +2336,7 @@ extract_rules <- function(Model_output, vimp.threshold = 1.25, n.trees = 800, ..
 
 	SpecificDTM <- pbmclapply(specific.terms, function(term) {
 		factor((select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = T) > 0) + 0)
-	}) %>% bind_cols() %>% magrittr::set_colnames(paste0('V__', specific.terms)) %>%
+	}) %>% bind_cols() %>% setNames(paste0('V__', specific.terms)) %>%
 		mutate_all(~ replace(.x, is.na(.x), 0))
 
 	print(paste('N. features:', ncol(SpecificDTM)))
