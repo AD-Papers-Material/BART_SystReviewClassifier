@@ -2053,6 +2053,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 
 	tictoc::tic()
 
+	# Average posterior samples along the ensemble of models
 	avg_preds <- (Reduce(
 		"+",
 		bart.mods %>% lapply(`[[`, 'preds')
@@ -2061,12 +2062,12 @@ enrich_annotation_file <- function(file, DTM = NULL,
 	Predicted_data <- DTM %>% select(ID, Target) %>%
 		data.frame(
 			mclapply(perf.quants, function(q) {
-				apply(avg_preds, 1, quantile, q)
+				apply(avg_preds, 1, quantile, q) # summarise posterior
 			}) %>% bind_cols() %>% setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
 		) %>%
 		mutate(
-			Pred_delta = Pred_Up - Pred_Low,
-			Predicted_label = case_when(
+			Pred_delta = Pred_Up - Pred_Low, # add posterior interval range
+			Predicted_label = case_when( # assign y or n if posterior lower/upper is outside the common range in the manually labeled articles, otherwise label as unknown
 				Pred_Low > max(Pred_Up[Target %in% 'n']) ~ 'y',
 				Pred_Up < min(Pred_Low[Target %in% 'y']) ~ 'n',
 				T ~ 'unk'
@@ -2074,7 +2075,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 			Predicted_label = replace(
 				Predicted_label,
 				Predicted_label != Target & Predicted_label != 'unk',
-				'check'),
+				'check'), # mark if predicted label is in contrast with the training data
 			across(matches('Pred_'), signif, 3),
 			Target = NULL
 		)
