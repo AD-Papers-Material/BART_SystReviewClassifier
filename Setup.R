@@ -1995,7 +1995,9 @@ enrich_annotation_file <- function(file, DTM = NULL,
 	message('Loading Annotation file')
 
 	tictoc::tic()
-	Records <- read_excel(file)
+	Records <- read_excel(file, n_max = 10^6)  %>% # read the file and use (theoretically) all rows to infer the column type, to avoid misspecification errors
+		arrange(Order)
+
 	if (all(is.na(Records$Rev_manual))) stop('No manually labeled entries. Sort excel doc to put them first')
 	tictoc::toc()
 
