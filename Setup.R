@@ -530,7 +530,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		records <- records %>%
 			transmute(
 				Order = 1:n(),
-				ID = paste0('IEEE:', publication_number),
+				ID = paste0('IEEE:', str_extract(abstract_url, '\\d+/$')),
 				Title = title,
 				Abstract = abstract,
 				DOI = doi,
@@ -2005,6 +2005,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 		stop('The DTM and the records should be compatible (same IDs).')
 	}
 
+	# Add features reporting the number of terms present in each block
 	for (field in c('ABSTR', 'TITLE', 'KEYS', 'MESH')) {
 		DTM[[paste0(field, '.count')]] <- select(DTM, contains(field)) %>%
 			rowSums(na.rm = T)
