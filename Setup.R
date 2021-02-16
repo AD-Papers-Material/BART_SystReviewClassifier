@@ -1144,17 +1144,25 @@ import_classification <- function(records, IDs = records$ID, prev_records) {
 		select(-uID)
 }
 
-check_classification_trend <- function(records, column = 'Rev_manual',
+check_classification_trend <- function(records, column = NULL,
 																				step_size = 20, limit = NULL) {
 
-	if (is.null(limit)) limit <- max(which(!is.na(records[[column]])))
+	if (is.null(column)) {
+		records <- records %>%
+		mutate(Target = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual))
+	} else records$Target <- records[[column]]
+
+	records <- records %>% arrange(Order) %>%
+		filter(!is.na(Target))
+
+	if (is.null(limit)) limit <- max(which(!is.na(records$Target)))
 	steps <- seq(step_size, limit, by = step_size) %>% c(limit) %>% unique()
 
 	df <- pblapply(steps, function(step) {
 		records %>% head(step) %>%
 			summarise(
-				Yes = sum(Rev_manual == 'y', na.rm = T),
-				No = sum(Rev_manual == 'n', na.rm = T)
+				Yes = sum(Target == 'y', na.rm = T),
+				No = sum(Target == 'n', na.rm = T)
 				)
 	}) %>% bind_rows()
 
@@ -1988,6 +1996,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 
 	tictoc::tic()
 	Records <- read_excel(file)
+	if (all(is.na(Records$Rev_manual))) stop('No manually labeled entries. Sort excel doc to put them first')
 	tictoc::toc()
 
 	tictoc::tic()
@@ -2001,9 +2010,20 @@ enrich_annotation_file <- function(file, DTM = NULL,
 		DTM <- readr::read_rds(DTM)$DTM
 	}
 
-	if (!(all(DTM$ID %in% Records$ID) & all(Records$ID %in% DTM$ID))) {
+	if (!(all(Records$ID %in% DTM$ID))) {
 		stop('The DTM and the records should be compatible (same IDs).')
 	}
+
+	# Import the labeling from the reviewed data to the DTM
+	Cur_Target <- Records %>%
+		transmute(
+			ID,
+			Target = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual),
+		)
+
+	DTM$Target <- NULL
+
+	DTM <- left_join(DTM, Cur_Target, by = 'ID')
 
 	# Add features reporting the number of terms present in each block
 	for (field in c('ABSTR', 'TITLE', 'KEYS', 'MESH')) {
@@ -2049,6 +2069,8 @@ enrich_annotation_file <- function(file, DTM = NULL,
 
 		readr::write_rds(bart.mods, 'Model_backup.rds')
 	}
+
+	DTM <- DTM %>% select(-matches('\\.count$'))
 
 	message('Making predictions')
 
