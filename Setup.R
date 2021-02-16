@@ -1990,7 +1990,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 		warning('pos.mult should be an integer; will be rounded up.')
 	}
 
-	pos.mult <- round(pos.mult)
+	if (pos.mult != round(pos.mult)) stop(paste(pos.mult, 'should be an integer value'))
 
 	message('Loading Annotation file')
 
