@@ -1,7 +1,7 @@
 
 # Setup -------------------------------------------------------------------
 
-options(java.parameters = "-Xmx12g")
+options(java.parameters = "-Xmx14g")
 
 if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
@@ -1961,12 +1961,20 @@ compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F,
 
 }
 
-enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
+enrich_annotation_file <- function(file, DTM = NULL,
+																	 pos.mult = 10,
 																	 n.models = 40, AUC.thr = .9,
 																	 perf.quants = c(.01, .5, .99),
+																	 session_name = NULL,
+																	 annotation_folder = 'Annotations',
 																	 rebuild = FALSE, ...) {
 
 	perf.quants <- sort(perf.quants)[c(2, 1, 3)]
+
+	if (is.null(session_name)) {
+		session_name <- str_split(dirname(file), .Platform$file.sep) %>%
+			unlist %>% last()
+	}
 
 	if (pos.mult < 1) stop('pos.mult should be at least 1')
 
@@ -1995,6 +2003,11 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	if (!(all(DTM$ID %in% Records$ID) & all(Records$ID %in% DTM$ID))) {
 		stop('The DTM and the records should be compatible (same IDs).')
+	}
+
+	for (field in c('ABSTR', 'TITLE', 'KEYS', 'MESH')) {
+		DTM[[paste0(field, '.count')]] <- select(DTM, contains(field)) %>%
+			rowSums(na.rm = T)
 	}
 	tictoc::toc()
 
@@ -2071,7 +2084,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 		Predicted_data,
 		by = 'ID'
 	) %>%
-		select(Order:Pred_Up, everything()) %>%
+		select(Order, matches('^Rev'), matches('^Pred'), everything()) %>%
 		arrange(desc(Pred_delta)) %>%
 		mutate(Parent_file = file)
 
@@ -2148,7 +2161,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	time_stamp <- safe_now()
 
-	output_file <- file.path('Annotations', paste0('Records_P_', time_stamp, '.xlsx'))
+	output_file <- file.path(dirname(file), paste0('Records_P_', time_stamp, '.xlsx'))
 	openxlsx::write.xlsx(out, file = output_file, asTable = T)
 	tictoc::toc()
 
@@ -2156,7 +2169,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	out$Prediction_matrix <- avg_preds
 	out$DTM <- DTM
 
-	output_file <- file.path('Models', paste0('Results_', time_stamp, '.rds'))
+	output_file <- file.path('Models', session_name, paste0('Results_', time_stamp, '.rds'))
 	readr::write_rds(out, file = output_file, compress = 'gz', )
 	tictoc::toc()
 
