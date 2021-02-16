@@ -2085,8 +2085,8 @@ enrich_annotation_file <- function(file, DTM = NULL,
 		Predicted_data,
 		by = 'ID'
 	) %>%
-		select(Order, matches('^Rev'), matches('^Pred'), everything()) %>%
-		arrange(desc(Pred_delta)) %>%
+		select(Order, matches('^Rev'), Predicted_label, matches('^Pred'), everything()) %>%
+		arrange(desc(Order)) %>%
 		mutate(Parent_file = file)
 
 	tictoc::toc()
