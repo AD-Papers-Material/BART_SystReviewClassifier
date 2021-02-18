@@ -1041,6 +1041,7 @@ save_annotation_file <- function(records, reorder_query = NULL,
 			if (str_detect(prev_classification, '\\.xlsx?$')) {
 				prev_records <- read_excel(prev_classification)
 			} else prev_records <- read_csv(prev_classification, col_types = cols())
+
 		} else if (is.data.frame(prev_classification)) {
 			prev_records <- prev_classification
 		} else stop('prev_classification must be a file path or a data.frame')
@@ -1069,7 +1070,11 @@ save_annotation_file <- function(records, reorder_query = NULL,
 }
 
 fix_duplicated_records <- function(records) {
+
 	records <- records %>%
+		group_by(ID) %>%
+		mutate(Title = na.omit(Title)[1]) %>%
+		ungroup() %>%
 		mutate(
 			UID = str_to_lower(Title) %>% str_remove_all('[^\\w\\d]+')
 		) %>%
@@ -1103,7 +1108,8 @@ fix_duplicated_records <- function(records) {
 		)
 
 	bind_rows(unique_sources, dup_sources) %>% select(-UID) %>%
-		clean_record_textfields()
+		clean_record_textfields() %>%
+		filter(!duplicated(ID))
 }
 
 summarise_by_source <- function(annotation_file) {
@@ -1117,10 +1123,14 @@ summarise_by_source <- function(annotation_file) {
 }
 
 import_classification <- function(records, IDs = records$ID, prev_records) {
-	records$uID = str_to_lower(records$Title) %>%
-		str_remove_all('[^\\w\\d\\s]+')
-	prev_records$uID = str_to_lower(prev_records$Title) %>%
-		str_remove_all('[^\\w\\d\\s]+')
+
+	records$uID = with(records,
+										 ifelse(!is.na(DOI), DOI, str_to_lower(Title) %>%
+										 			 	str_remove_all('[^\\w\\d\\s]+')))
+
+	prev_records$uID = with(prev_records,
+													ifelse(!is.na(DOI), DOI, str_to_lower(Title) %>%
+																 	str_remove_all('[^\\w\\d\\s]+')))
 
 	target_uID <- records$uID[records$ID %in% IDs]
 	prev_records <- filter(prev_records, uID %in% target_uID)
@@ -1137,7 +1147,7 @@ import_classification <- function(records, IDs = records$ID, prev_records) {
 	prev_records <- prev_records %>% transmute(
 		uID,
 		Rev_previous = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual)
-	)
+	) %>% distinct()
 
 	left_join(records, prev_records, by = 'uID') %>%
 		select(Order, contains('Rev_'), Rev_previous, everything()) %>%
@@ -1995,7 +2005,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 	message('Loading Annotation file')
 
 	tictoc::tic()
-	Records <- read_excel(file, n_max = 10^6)  %>% # read the file and use (theoretically) all rows to infer the column type, to avoid misspecification errors
+	Records <- read_excel(file, guess_max = 10^6) %>% # read the file and use (theoretically) all rows to infer the column type, to avoid misspecification errors
 		arrange(Order)
 
 	if (all(is.na(Records$Rev_manual))) stop('No manually labeled entries. Sort excel doc to put them first')
@@ -2033,6 +2043,12 @@ enrich_annotation_file <- function(file, DTM = NULL,
 			rowSums(na.rm = T)
 	}
 	tictoc::toc()
+browser()
+	message('Training data:')
+	message('Positives: ', sum(DTM$Target == 'y', na.rm = T))
+	message('Negatives: ', sum(DTM$Target == 'n', na.rm = T))
+	message('Features: ', select(DTM, -ID, -Target) %>% ncol)
+	message('')
 
 	message('Model generation')
 
@@ -2058,7 +2074,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 
 				preds = bart_machine_get_posterior(
 					bart.mod,
-					new_data = DTM %>%	select(all_of(colnames(bart.mod$X)))
+					new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
 				)$y_hat_posterior_samples,
 
 				oos.perf = compute_pred_performance(
@@ -2181,16 +2197,19 @@ enrich_annotation_file <- function(file, DTM = NULL,
 		Variable_importance = var_imp
 	)
 
-	message('Exporting')
+	rm(avg_preds, DTM, ins_perf, oos_perf, var_imp)
 
-	tictoc::tic()
+	message('Exporting')
 
 	time_stamp <- safe_now()
 
+	message('- annotation file...')
+	tictoc::tic()
 	output_file <- file.path(dirname(file), paste0('Records_P_', time_stamp, '.xlsx'))
-	openxlsx::write.xlsx(out, file = output_file, asTable = T)
+	openxlsx::write.xlsx(out, file = output_file, asTable = F)
 	tictoc::toc()
 
+	message('- model data...') #
 	tictoc::tic()
 	out$Prediction_matrix <- avg_preds
 	out$DTM <- DTM
