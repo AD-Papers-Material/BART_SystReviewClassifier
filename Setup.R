@@ -2005,8 +2005,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 	message('Loading Annotation file')
 
 	tictoc::tic()
-	Records <- read_excel(file, guess_max = 10^6) %>% # read the file and use (theoretically) all rows to infer the column type, to avoid misspecification errors
-		arrange(Order)
+	Records <- read_excel(file, guess_max = 10^6) # read the file and use (theoretically) all rows to infer the column type, to avoid misspecification errors
 
 	if (all(is.na(Records$Rev_manual))) stop('No manually labeled entries. Sort excel doc to put them first')
 	tictoc::toc()
@@ -2043,7 +2042,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 			rowSums(na.rm = T)
 	}
 	tictoc::toc()
-browser()
+
 	message('Training data:')
 	message('Positives: ', sum(DTM$Target == 'y', na.rm = T))
 	message('Negatives: ', sum(DTM$Target == 'n', na.rm = T))
@@ -2100,11 +2099,17 @@ browser()
 		bart.mods %>% lapply(`[[`, 'preds')
 	) / length(bart.mods))
 
+	# avg_preds <- bart.mods %>% pblapply(function(model) {
+	# 	n.preds <- ncol(model$preds)
+	# 	i <- sample(1:n.preds, round(n.preds/length(bart.mods)))
+	# 	model$preds[,i]
+	# }) %>% do.call(what = 'cbind')
+
 	Predicted_data <- DTM %>% select(ID, Target) %>%
 		data.frame(
-			mclapply(perf.quants, function(q) {
-				apply(avg_preds, 1, quantile, q) # summarise posterior
-			}) %>% bind_cols() %>% setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
+			apply(avg_preds, 1, quantile, perf.quants) %>% t %>%
+				as.data.frame() %>%
+				setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
 		) %>%
 		mutate(
 			Pred_delta = Pred_Up - Pred_Low, # add posterior interval range
@@ -2127,7 +2132,7 @@ browser()
 		by = 'ID'
 	) %>%
 		select(Order, matches('^Rev'), Predicted_label, matches('^Pred'), everything()) %>%
-		arrange(desc(Order)) %>%
+		arrange(Order) %>%
 		mutate(Parent_file = file)
 
 	tictoc::toc()
@@ -2197,16 +2202,14 @@ browser()
 		Variable_importance = var_imp
 	)
 
-	rm(avg_preds, DTM, ins_perf, oos_perf, var_imp)
-
 	message('Exporting')
 
 	time_stamp <- safe_now()
 
 	message('- annotation file...')
 	tictoc::tic()
-	output_file <- file.path(dirname(file), paste0('Records_P_', time_stamp, '.xlsx'))
-	openxlsx::write.xlsx(out, file = output_file, asTable = F)
+	output_file <- file.path('Annotations', session_name, paste0('Records_P_', time_stamp, '.xlsx'))
+	openxlsx::write.xlsx(out, file = output_file, asTable = T)
 	tictoc::toc()
 
 	message('- model data...') #
