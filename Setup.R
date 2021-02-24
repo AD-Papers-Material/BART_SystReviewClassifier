@@ -2210,6 +2210,18 @@ enrich_annotation_file <- function(file, DTM = NULL,
 	tictoc::tic()
 	output_file <- file.path('Annotations', session_name, paste0('Records_P_', time_stamp, '.xlsx'))
 	openxlsx::write.xlsx(out, file = output_file, asTable = T)
+
+	to_review <- out$In_sample_perf %>%
+		filter(Indicator %in% c('UnkToLabel', 'NewPos', 'ToCheck')) %>%
+		with(any(Value != '0'))
+
+	if (to_review) {
+		file.copy(
+			output_file,
+			file.path('Annotations', session_name, paste0('Records_P_R_', time_stamp, '.xlsx')),
+			overwrite = F)
+	}
+
 	tictoc::toc()
 
 	message('- model data...') #
@@ -2218,7 +2230,7 @@ enrich_annotation_file <- function(file, DTM = NULL,
 	out$DTM <- DTM
 
 	output_file <- file.path('Models', session_name, paste0('Results_', time_stamp, '.rds'))
-	readr::write_rds(out, file = output_file, compress = 'gz', )
+	readr::write_rds(out, file = output_file, compress = 'gz')
 	tictoc::toc()
 
 	invisible(out)
@@ -2445,7 +2457,7 @@ rules_to_query <- function(rules) {
 
 }
 
-summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
+summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
 	# list.files('Models') %>% pbmclapply(function(file) {
 	# 	Model <- read_rds(file.path('Models', file))
 
@@ -2453,12 +2465,14 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = T) {
 		str_subset('~\\$', negate = T) %>%
 		pbmclapply(function(file) {
 
-			Annotated_data <- read_excel(file.path('Annotations', file))
+			file_path <- file.path(annotation.folder, file)
 
-			Performance <- read_excel(file.path('Annotations', file), sheet = 'Out_of_sample_perf')
+			Annotated_data <- read_excel(file_path)
+
+			Performance <- read_excel(file_path, sheet = 'Out_of_sample_perf')
 			Performance <- as.list(Performance$Value) %>% setNames(Performance$Indicator)
 
-			Var_imp <- read_excel(file.path('Annotations', file), sheet = 'Variable_importance') %>%
+			Var_imp <- read_excel(file_path, sheet = 'Variable_importance') %>%
 				filter(!str_detect(Term, 'MESH|KEYS')) %>%
 				mutate(Term = str_remove(Term, '.+__')) %>%
 				group_by(Term) %>% slice_max(order_by = Score) %>% ungroup() %>%
