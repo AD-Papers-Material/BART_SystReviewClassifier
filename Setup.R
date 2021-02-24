@@ -1149,7 +1149,14 @@ import_classification <- function(records, IDs = records$ID, prev_records) {
 		Rev_previous = ifelse(!is.na(Rev_prediction), Rev_prediction, Rev_manual)
 	) %>% distinct()
 
-	left_join(records, prev_records, by = 'uID') %>%
+	left_join(records, prev_records, by = 'uID') %>% {
+		if ('Rev_previous.y' %in% colnames(.)) {
+			mutate(.,
+				Rev_previous = ifelse(!is.na(Rev_previous.y), Rev_previous.y, Rev_previous.x),
+				.after = Rev_prediction
+			) %>% select(-Rev_previous.y, -Rev_previous.x)
+		} else .
+	} %>%
 		select(Order, contains('Rev_'), Rev_previous, everything()) %>%
 		select(-uID)
 }
