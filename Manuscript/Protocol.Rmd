@@ -117,12 +117,18 @@ read_bib_files(record_files) %>% save_annotation_file(session_name = 'Session1')
 Notice that the framework is "chaining" friendly and the precedent steps can be all performed in one call (which is the suggested procedure):
 
 ```{r one call, echo = TRUE, eval = FALSE}
-# First create the Records/Session1/Query1 folder and put the manually downloaded files there if you have any. Otherwise the folders will be created automatically
+# First create the Records/Session1/Query1 folder and put the manually
+# downloaded files there if you have any. Otherwise the folders will be created
+# automatically
+
+# perform searches and parse files; save and return the journal
 Records <- perform_search_session(query = query, year_query = year_filter,
 											 session_name = 'Session1', query_name = 'Query1',
-											 journal = 'Session_journal.csv') %>% # perform searches and parse files; save and return the journal
-	extract_source_file_paths() %>% # return the record file paths
-	save_annotation_file(reorder_query = query, session_name = 'Session1') # read, join, reorder records and save them in the Annotations folder
+											 journal = 'Session_journal.csv') %>% 
+	# return the record file paths
+	extract_source_file_paths() %>%
+	# read, join, reorder records and save them in the Sessions folder
+	save_annotation_file(reorder_query = query, session_name = 'Session1') 
 ```
 
 
