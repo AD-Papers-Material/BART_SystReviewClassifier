@@ -2316,15 +2316,19 @@ compute_changes <- function(Annotations) {
 					count(Col) %>%
 					tidyr::pivot_wider(names_from = Col, values_from = n,
 														 names_prefix = paste0(col, ': '))
-			})
-		} %>% bind_cols()
+			}) %>% bind_cols() %>%
+				mutate(
+					Total_labeled = sum(!is.na(df$Target))
+				)
+		}
 }
 
 
 
 
 enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
-																	 n.models = 40, perf.quants = c(.01, .5, .99),
+																	 n.models = 40, resample = T,
+																	 perf.quants = c(.01, .5, .99),
 																	 session_name = NULL,
 																	 sessions_folder = 'Sessions', autorun = T,
 																	 num_reruns = 3, cur_run = 1,
@@ -2456,15 +2460,18 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	if (rebuild == FALSE & file.exists('Model_backup.rds')) {
 		message('(loading from disk...)')
+		gc()
 		bart.mods <- readr::read_rds('Model_backup.rds')
 	}
 	else {
 		bart.mods <- pblapply(1:n.models, function(i) {
 			all_data <- DTM %>% filter(!is.na(Target))
 
-			train_data <- slice_sample(all_data, prop = 1, replace = T) %>% {
-				.[c(rep(which(.$Target %in% 'y'), pos.mult), which(!(.$Target %in% 'y'))),]
-			}
+			if (resample) {
+				train_data <- slice_sample(all_data, prop = 1, replace = T) %>% {
+					.[c(rep(which(.$Target %in% 'y'), pos.mult), which(!(.$Target %in% 'y'))),]
+				}
+			} else train_data <- all_data
 
 			#test_data <- all_data %>% filter(!(ID %in% train_data$ID))
 
@@ -2491,8 +2498,10 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 			)
 		})
 
-		readr::write_rds(bart.mods, 'Model_backup.rds', compress = 'gz')
 
+		message('Writing model to disk')
+		readr::write_rds(bart.mods, 'Model_backup.rds', compress = 'gz')
+		gc()
 	}
 
 	DTM <- DTM %>% select(-matches('\\.count$'))
@@ -2611,7 +2620,8 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 		) %>% bind_rows(
 			compute_changes(Annotated_data) %>%
 				select(matches('Change')) %>%
-				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value')
+				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value') %>%
+				mutate(Value = as.character(Value))
 		),
 		Performance = Performance,
 		Variable_importance = var_imp
@@ -3144,7 +3154,7 @@ summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
 }
 
 summarise_annotations2 <- function(sessions_folder = 'Sessions',
-																	 sessions = list.dirs(sessions_folder),
+																	 sessions = list.dirs(sessions_folder, recursive = F),
 																	 analyse_iterations = T, analyse_perf = T,
 																	 ...) {
 
@@ -3161,8 +3171,9 @@ summarise_annotations2 <- function(sessions_folder = 'Sessions',
 
 		output <- lapply(0:length(annotation_files), function(i) {
 			if (i == 0) {
-				files <- c(Annotation = list.files(session_folder, pattern = '.xlsx',
-																full.names = T)[1])
+				files <- c(Annotation = (list.files(session_folder, pattern = '.xlsx',
+																full.names = T) %>%
+									 	str_subset('~\\$', negate = T))[1])
 			} else {
 				files <- c(Annotation = annotation_files[i], Samples = samples_files[i])
 			}
@@ -3190,24 +3201,7 @@ summarise_annotations2 <- function(sessions_folder = 'Sessions',
 		message('...iteration data')
 		output$Iterations = lapply(files$Iter, function(i) {
 			Annotations[[i]] %>%
-				transmute(
-					Target = coalesce_labels(cur_data(), c('Rev_prediction_new',
-																								 'Rev_prediction', 'Rev_manual')),
-					Change = paste(
-						coalesce_labels(cur_data(), c('Rev_prediction', 'Rev_manual')),
-						Target, sep = ' -> ') %>% str_replace_all('NA', 'unlab.')
-				) %>% {
-					df <- .
-					lapply(names(df), function(col) {
-
-						df %>%
-							transmute(Col = get(col) %>% factor()) %>%
-							filter(!is.na(Col)) %>%
-							count(Col) %>%
-							tidyr::pivot_wider(names_from = Col, values_from = n,
-																 names_prefix = paste0(col, '_'))
-					})
-				} %>% bind_cols() %>%
+				compute_changes() %>%
 				mutate(
 					Session = files$Session[files$Iter == i],
 					Iter = str_remove(i, '_'),
