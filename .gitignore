@@ -14,3 +14,5 @@ Previous run
 **/[Uu]ntitled.R
 secrets.R
 *.csv
+Sessions*
+Test_Sessions*
