@@ -953,7 +953,7 @@ join_records <- function(record.list) {
 			Keywords = cbind(Keywords, Author_keywords) %>%
 				apply(1, function(x) if (any(!is.na(x))) paste(na.omit(x), collapse = ';') else NA) %>% str_to_lower,
 			Author_keywords = NULL
-	) %>%
+		) %>%
 		fix_duplicated_records() %>%
 		mutate(
 			Keywords = str_split(Keywords, '\\s*;\\s*') %>% sapply(function(x) {
@@ -1129,7 +1129,7 @@ fix_duplicated_records <- function(records) {
 summarise_by_source <- function(annotation_file) {
 	data <- if (is.character(annotation_file)) {
 		read_excel(annotation_file)
-		} else annotation_file
+	} else annotation_file
 
 	sources <- data$Source %>% str_split(., '; ') %>% unlist() %>% table()
 
@@ -1168,8 +1168,8 @@ import_classification <- function(records, prev_records, IDs = records$ID) {
 	left_join(records, prev_records, by = 'uID') %>% {
 		if ('Rev_previous.y' %in% colnames(.)) {
 			mutate(.,
-				Rev_previous = coalesce(Rev_previous.y, Rev_previous.x),
-				.after = any_of(c('Rev_prediction_new', 'Rev_prediction', 'Rev_manual'))
+						 Rev_previous = coalesce(Rev_previous.y, Rev_previous.x),
+						 .after = any_of(c('Rev_prediction_new', 'Rev_prediction', 'Rev_manual'))
 			) %>% select(-Rev_previous.y, -Rev_previous.x)
 		} else .
 	} %>%
@@ -1178,11 +1178,11 @@ import_classification <- function(records, prev_records, IDs = records$ID) {
 }
 
 check_classification_trend <- function(records, column = NULL,
-																				step_size = 20, limit = NULL) {
+																			 step_size = 20, limit = NULL) {
 
 	if (is.null(column)) {
 		records <- records %>%
-		mutate(Target = coalesce_labels(., c('Rev_prediction', 'Rev_manual')))
+			mutate(Target = coalesce_labels(., c('Rev_prediction', 'Rev_manual')))
 	} else records$Target <- records[[column]]
 
 	records <- records %>% arrange(Order) %>%
@@ -1196,7 +1196,7 @@ check_classification_trend <- function(records, column = NULL,
 			summarise(
 				Yes = sum(Target == 'y', na.rm = T),
 				No = sum(Target == 'n', na.rm = T)
-				)
+			)
 	}) %>% bind_rows()
 
 	p <- df %>%
@@ -1210,7 +1210,7 @@ check_classification_trend <- function(records, column = NULL,
 		df,
 		across(c(Yes, No), ~ c(.x[1], sapply(2:(n() - 1), function(i) {
 			if (.x[i] == .x[i-1]) NA else .x[i]
-			}), .x[n()]))
+		}), .x[n()]))
 	)
 
 	p +
@@ -1816,9 +1816,9 @@ coalesce_labels <- function(data, label_cols = c('Rev_prediction_new','Rev_predi
 }
 
 
-create_training_set <- function(Records, pos.mult = 10L) {
+create_training_set <- function(Records, pos_mult = 10L) {
 
-	if (pos.mult < 1) stop('pos.mult should be at least 1')
+	if (pos_mult < 1) stop('pos_mult should be at least 1')
 
 	Records <- Records %>%
 		transmute(
@@ -1826,7 +1826,7 @@ create_training_set <- function(Records, pos.mult = 10L) {
 			ID, Title, Abstract, Authors, Keywords, Mesh
 		) %>% {
 			.[c(
-				rep(which(.$Target %in% 'y'), pos.mult),
+				rep(which(.$Target %in% 'y'), pos_mult),
 				which(!(.$Target %in% 'y'))),]
 		}
 
@@ -1907,7 +1907,7 @@ summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
 }
 
 
-compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
+compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 															 folder = getwd(), name = as.character(Y),
 															 rebuild = F, num_trees = 50, k = 2,
 															 num_iterations_after_burn_in = 2000,
@@ -2009,7 +2009,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
 #
 # }
 
-# compute_pred_performance2 <- function(DTM, models, perf.quants = c(.01, .5, .99),
+# compute_pred_performance2 <- function(DTM, models, perf_quants = c(.01, .5, .99),
 # 																			negLim = NULL, posLim = NULL) {
 # 	message('Build indexes')
 # 	index_data <- pblapply(1:length(models), function(i) {
@@ -2041,7 +2041,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
 # 			data.frame(
 # 				ID,
 # 				Target = DTM$Target[DTM$ID == ID],
-# 				ID_preds %>% quantile(perf.quants) %>% t %>%
+# 				ID_preds %>% quantile(perf_quants) %>% t %>%
 # 					as.data.frame() %>%
 # 					setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up')),
 # 				set = set,
@@ -2073,7 +2073,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
 # 		summarise(
 # 			'AUC [CrI]' =  cur_data() %>% select(starts_with('X')) %>% pbmclapply(function(p) {
 # 				suppressMessages(pROC::roc(response = Target, predictor = p) %>% pROC::auc() %>% as.vector())
-# 			}) %>% unlist() %>% quantile(perf.quants) %>% percent() %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
+# 			}) %>% unlist() %>% quantile(perf_quants) %>% percent() %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
 # 			'SetLimits, neg/pos' = sprintf('%s/%s',
 # 																		 min(Pred_Low[Target %in% 'y']) %>% percent,
 # 																		 max(Pred_Up[Target %in% 'n']) %>% percent
@@ -2116,7 +2116,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = T,
 compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 																		 negLim = NULL, posLim = NULL,
 																		 truePos = NULL, trueNeg = NULL,
-																		 perf.quants = c(.01, .5, .99),
+																		 perf_quants = c(.01, .5, .99),
 																		 show_progress = T) {
 
 	if (show_progress) {
@@ -2135,14 +2135,14 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 
 	data <- data %>%
 		select(any_of(c('ID', 'Target', 'Rev_previous', 'Pred_Med', 'Pred_Low',
-									'Pred_Up', 'Predicted_label'))) %>%
+										'Pred_Up', 'Predicted_label'))) %>%
 		mutate(Set = ifelse(!is.na(Target), 'Train', 'Test'))
 
 	obs <- coalesce_labels(data, c('Rev_previous', 'Target'))
 	if (is.null(truePos)) truePos <- sum(obs %in% 'y', na.rm = T)
 	if (is.null(trueNeg)) trueNeg <- sum(obs %in% 'n', na.rm = T)
 	preds <- coalesce_labels(data, c('Rev_previous', 'Target',
-																			'Predicted_label'))
+																	 'Predicted_label'))
 	predPos <- sum(preds %in% 'y', na.rm = T)
 	predNeg <- sum(preds %in% 'n', na.rm = T)
 	rm(obs, preds)
@@ -2165,7 +2165,7 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 		set <- paste(if (length(set) == 1) set else 'Total')
 
 		if (nrow(data) == 0) return(data.frame(
-			Value = c(glue('{set} (n = {n()})'), rep(NA, 9)), # Very ugly to put this number manually
+			Value = c(glue('{set} (n = {nrow(data)})'), rep(NA, 9)) # Very ugly to put this number manually
 		))
 
 		data %>%
@@ -2173,18 +2173,22 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 			summarise(
 				Set = glue('{set} (n = {n()})'),
 
-				'AUC [CrI]' =  as.data.frame(cur_data()$Samples) %>%
-					select(-any_of('ID')) %>%
-					mclapply(function(p) {
+				'AUC [CrI]' =  if (n_distinct(Target_test) == 1) {
+					'One class only'
+				} else {
+					as.data.frame(cur_data()$Samples) %>%
+						select(-any_of('ID')) %>%
+						mclapply(function(p) {
 
-						pROC::roc(response = Target_test, predictor = p) %>% #suppressMessages() %>%
-							pROC::auc() %>% as.vector()
-					}) %>% unlist() %>% {
-						if (length(.) > 1) {
-							quantile(., perf.quants) %>% percent() %>%
-								{glue("{.[2]} [{.[1]}, {.[3]}]")}
-						} else percent(.)
-					},
+							pROC::roc(response = Target_test, predictor = p) %>% #suppressMessages() %>%
+								pROC::auc() %>% as.vector()
+						}) %>% unlist() %>% {
+							if (length(.) > 1) {
+								quantile(., perf_quants) %>% percent() %>%
+									{glue("{.[2]} [{.[1]}, {.[3]}]")}
+							} else percent(.)
+						}
+				},
 
 				'SetLimits, pos/neg' = if ('Train' %in% set) {
 					if (is.null(negLim)) {
@@ -2239,7 +2243,7 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 				# 		'check')
 				#
 				# 	mean(Predicted_label[Target_test == 'n'] == 'n')
-				# }) %>% unlist %>% quantile(perf.quants)
+				# }) %>% unlist %>% quantile(perf_quants)
 
 				PPV = percent(mean(
 					Target_test[Predicted_label == 'y' |
@@ -2251,11 +2255,11 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 				## Similar results to the next indicators, but have finite bounds (no divisions by zero)
 				# 'Pos per sample rate [CrI] (prob. > random)' = {
 				# 	obsPos <- sum(Target_test %in% 'y')
-				# 	obs <- (obsPos/qhyper(perf.quants, truePos, trueNeg, n())) %>%
+				# 	obs <- (obsPos/qhyper(perf_quants, truePos, trueNeg, n())) %>%
 				# 		signif(3)
 				# 	obs_p <- phyper(obsPos, truePos, trueNeg, n()) %>% percent()
 				#
-				# 	pred <- (obsPos/qhyper(perf.quants, predPos, predNeg, n())) %>%
+				# 	pred <- (obsPos/qhyper(perf_quants, predPos, predNeg, n())) %>%
 				# 		signif(3)
 				# 	pred_p <- phyper(obsPos, predPos, predNeg, n()) %>% percent()
 				#
@@ -2267,11 +2271,11 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 					pnhyper <- extraDistr::pnhyper
 
 					obsPos <- sum(Target_test %in% 'y')
-					obs <- (qnhyper(perf.quants, trueNeg, truePos, obsPos) / n()) %>%
+					obs <- (qnhyper(perf_quants, trueNeg, truePos, obsPos) / n()) %>%
 						signif(3) %>% sort()
 					obs_p <- (1 - pnhyper(n(), trueNeg, truePos, obsPos)) %>% percent()
 
-					pred <- (qnhyper(perf.quants, predNeg, predPos, obsPos) / n()) %>%
+					pred <- (qnhyper(perf_quants, predNeg, predPos, obsPos) / n()) %>%
 						signif(3) %>% sort()
 					pred_p <- (1 - pnhyper(n(), predNeg, predPos, obsPos)) %>% percent()
 
@@ -2288,13 +2292,13 @@ compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 				#
 				# 	(TN + FN) / N - (1 - Sens)
 				# } %>% percent
-		) %>%
+			) %>%
 			tidyr::pivot_longer(everything(), names_to = 'Statistic', values_to = set) %>% {
 				if (!identical(set, 'Train')) .[,-1] else .
 			}
 	}) %>%
 		bind_cols() #%>%
-		#setNames(c('Statistic', 'Train', 'Test', 'Total'))
+	#setNames(c('Statistic', 'Train', 'Test', 'Total'))
 
 }
 
@@ -2318,7 +2322,14 @@ compute_changes <- function(Annotations) {
 														 names_prefix = paste0(col, ': '))
 			}) %>% bind_cols() %>%
 				mutate(
-					Total_labeled = sum(!is.na(df$Target))
+					Total_labeled = sum(!is.na(df$Target)),
+					New_labels = if ('Rev_prediction_new' %in% names(Annotations)) {
+						sum(!is.na(Annotations$Rev_prediction_new))
+					} else NA,
+					across(c(Total_labeled, New_labels), ~ if (!is.na(.x)) {
+						glue('{.x} ({percent(.x/nrow(Annotations))})')
+					} else NA),
+					.after = matches('Target')
 				)
 		}
 }
@@ -2326,33 +2337,39 @@ compute_changes <- function(Annotations) {
 
 
 
-enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
-																	 n.models = 40, resample = T,
-																	 perf.quants = c(.01, .5, .99),
+enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
+																	 n_models = 40, resample = T,
+																	 perf_quants = c(.01, .5, .99),
 																	 session_name = NULL,
 																	 sessions_folder = 'Sessions', autorun = T,
-																	 num_reruns = 3, cur_run = 1,
+																	 limits = list(
+																	 	stop_after = 4, replication = NULL,
+																	 	pos_target = NULL, labeling_limit = 1
+																	 ),
+																	 compute_performance = T,
 																	 use_prev_labels = T,
 																	 prev_records = NULL,
 																	 test_data = NULL,
 																	 rebuild = FALSE, ...) {
 
-	message('Run: ', cur_run)
-
-	perf.quants <- sort(perf.quants)[c(2, 1, 3)]
+	perf_quants <- sort(perf_quants)[c(2, 1, 3)]
 
 	if (is.null(session_name)) {
-		session_name <- str_split(dirname(file), .Platform$file.sep) %>%
-			unlist %>% last()
+		session_name <- basename(dirname(file))
 	}
 
-	if (pos.mult < 1) stop('pos.mult should be at least 1.')
-
-	if ((pos.mult - round(pos.mult)) != 0) {
-		warning('pos.mult should be an integer; will be rounded up.')
+	session_path <- file.path(sessions_folder, session_name)
+	if (!dir.exists(session_path)) {
+		dir.create(session_path, recursive = T)
 	}
 
-	if (pos.mult != round(pos.mult)) stop(paste(pos.mult, 'should be an integer value.'))
+	if (pos_mult < 1) stop('pos_mult should be at least 1.')
+
+	if ((pos_mult - round(pos_mult)) != 0) {
+		warning('pos_mult should be an integer; will be rounded up.')
+	}
+
+	if (pos_mult != round(pos_mult)) stop(paste(pos_mult, 'should be an integer value.'))
 
 	message('Loading Annotation file')
 
@@ -2362,7 +2379,75 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	Records <- read_excel(file, guess_max = 10^6)
 
 	if (all(is.na(Records$Rev_manual))) {
-		stop('No manually labeled entries found. This may happen if there is a great number of missings before the first labeled record.')
+		stop('No manually labeled entries found. This may also happen if there is a great number of missings before the first labeled record.')
+	}
+
+	# If the current replication number is not passed manually, the last one is
+	# extracted from the input file title and, if no new positives are present, is
+	# used after being incremented, otherwise it is reset to 1
+	repl <- 1
+
+	if (!is.null(limits) && !is.null(limits$replication)) {
+		repl <- limits$replication
+	} else if (!str_detect(file, fixed(file.path(session_path, 'Annotations')))) {
+		repl <- 1
+	} else {
+
+		prev_run <- str_extract(file, '(?<=_rep)\\d+') %>% as.numeric()
+
+		repl <- max(1, prev_run, na.rm = T)
+
+		iter_data <- compute_changes(Records) %>%
+			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n'))
+
+		new_positives <- iter_data %>% select(matches('-> y')) %>% rowSums()
+
+		if (new_positives == 0) repl <- repl + 1
+	}
+
+	if (!is.null(limits) & !isFALSE(limits)) {
+
+		message('Checking conditions for a new iteration')
+
+		Target <- coalesce_labels(Records) %>% na.omit()
+
+		# All records have been labeled
+		if (length(Target) == nrow(Records)) {
+			message('No unlabeled records left!')
+
+			return(NULL)
+		}
+
+		# Enough positives found
+		if (!is.null(limits$pos_target) &&
+				sum(Target %in% 'y') >= limits$pos_target) {
+			message('Positive records target reached!')
+			return(NULL)
+		}
+
+		# else if (!is.null(autorun$review_limit)) {
+		# 	n_reviews <- Annotated_data$Rev_prediction_new %>% na.omit() %>% length()
+		# 	if ((autorun$review_limit <= 1 & n_reviews / nrow(Annotated_data) >=  autorun$review_limit) |
+		# 			(autorun$review_limit > 1 & n_reviews >=  autorun$review_limit))
+		# 		message('Num/Ratio of labeled records above threshold!')
+		# 	return(NULL)
+		# }
+
+		# Too many records have been labeled
+		if (!is.null(limits$labeling_limit)) {
+			if ((limits$labeling_limit <= 1 & length(Target) / nrow(Records) >= limits$labeling_limit) |
+					(limits$labeling_limit > 1 & length(Target) >= limits$labeling_limit)) {
+				message('Num/Ratio of labeled records above threshold!')
+				return(NULL)
+			}
+		}
+
+		if (!is.null(limits$stop_after) && (repl > limits$stop_after)) {
+			message('Reached limit of consecutive iterations without new positive records!')
+			return(NULL)
+		}
+
+		rm(Target)
 	}
 
 	# Add Rev_prediction for storing prediction reviews if missing
@@ -2415,7 +2500,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 		} else {
 			message('Creating DTM')
 
-			DTM <- create_training_set(Records, pos.mult)
+			DTM <- create_training_set(Records, pos_mult)
 		}
 
 	} else if (is.character(DTM)) {
@@ -2454,67 +2539,115 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	message('Positives: ', sum(DTM$Target == 'y', na.rm = T))
 	message('Negatives: ', sum(DTM$Target == 'n', na.rm = T))
 	message('Features: ', select(DTM, -ID, -Target) %>% ncol)
-	message('')
 
-	message('Model generation')
+	message(glue('\nModel generation (repl: {repl})'))
 
 	if (rebuild == FALSE & file.exists('Model_backup.rds')) {
 		message('(loading from disk...)')
 		gc()
 		bart.mods <- readr::read_rds('Model_backup.rds')
+
+		Samples <- bart.mods$Samples
+		Var_imp <- bart.mods$Var_imp
+
 	}
 	else {
-		bart.mods <- pblapply(1:n.models, function(i) {
-			all_data <- DTM %>% filter(!is.na(Target))
+		# bart.mods <- pblapply(1:n_models, function(i) {
+		# 	all_data <- DTM %>% filter(!is.na(Target))
+		#
+		# 	if (resample) {
+		# 		train_data <- slice_sample(all_data, prop = 1, replace = T) %>% {
+		# 			.[c(rep(which(.$Target %in% 'y'), pos_mult), which(!(.$Target %in% 'y'))),]
+		# 		}
+		# 	} else train_data <- all_data
+		#
+		# 	#test_data <- all_data %>% filter(!(ID %in% train_data$ID))
+		#
+		# 	bart.mod <- compute_BART_model(train_data %>% select(-ID), 'Target',
+		# 																 name = 'BartModel', rebuild = T, save = F,
+		# 																 verbose = F, ...)
+		#
+		# 	list(
+		#
+		# 		preds = bart_machine_get_posterior(
+		# 			bart.mod,
+		# 			new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
+		# 		)$y_hat_posterior_samples,
+		#
+		# 		# indexes = list(
+		# 		# 	train = train_data$ID %>% unique(),
+		# 		# 	test = setdiff(all_data$ID, train_data$ID)
+		# 		# ),
+		# 		# oos.perf = compute_pred_performance(
+		# 		# 	bart.mod, data = test_data, Y = 'Target', AUC.thr = AUC.thr,
+		# 		# 	quants = perf_quants),
+		#
+		# 		var.imp = bartMachine::get_var_props_over_chain(bart.mod, 'trees')
+		# 	)
+		# })
+		#
+		#
+		# message('Writing model to disk')
+		# readr::write_rds(bart.mods, 'Model_backup.rds', compress = 'gz')
+		# gc()
+
+		Var_imp <- list()
+
+		pb <- startpb(0, n_models)
+		on.exit(closepb(pb))
+
+		for (i in 1:n_models) {
+			train_data <- DTM %>% filter(!is.na(Target))
 
 			if (resample) {
-				train_data <- slice_sample(all_data, prop = 1, replace = T) %>% {
-					.[c(rep(which(.$Target %in% 'y'), pos.mult), which(!(.$Target %in% 'y'))),]
+				train_data <- slice_sample(train_data, prop = 1, replace = T) %>% {
+					.[c(rep(which(.$Target %in% 'y'), pos_mult), which(!(.$Target %in% 'y'))),]
 				}
-			} else train_data <- all_data
+			}
 
-			#test_data <- all_data %>% filter(!(ID %in% train_data$ID))
+			bart.mod <- suppressMessages(compute_BART_model(train_data %>% select(-ID), 'Target',
+																											name = 'BartModel', rebuild = T, save = F,
+																											verbose = F, ...))
 
-			bart.mod <- compute_BART_model(train_data %>% select(-ID), 'Target',
-																		 name = 'BartModel', rebuild = T, save = F,
-																		 verbose = F, ...)
+			preds <- bart_machine_get_posterior(
+				bart.mod,
+				new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
+			)$y_hat_posterior_samples
 
-			out <- list(
+			if (!exists('Samples')) {
+				Samples <- preds
+			} else {
+				Samples <- Samples + preds
+			}
 
-				preds = bart_machine_get_posterior(
-					bart.mod,
-					new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
-				)$y_hat_posterior_samples,
+			Var_imp[[i]] <- bartMachine::get_var_props_over_chain(bart.mod, 'trees')
 
-				# indexes = list(
-				# 	train = train_data$ID %>% unique(),
-				# 	test = setdiff(all_data$ID, train_data$ID)
-				# ),
-				# oos.perf = compute_pred_performance(
-				# 	bart.mod, data = test_data, Y = 'Target', AUC.thr = AUC.thr,
-				# 	quants = perf.quants),
+			rm(bart.mod, preds, train_data)
 
-				var.imp = bartMachine::get_var_props_over_chain(bart.mod, 'trees')
-			)
-		})
+			setpb(pb, i)
+		}
+
+		# Average posterior samples along the ensemble of models
+		Samples <- Samples / n_models
 
 
-		message('Writing model to disk')
-		readr::write_rds(bart.mods, 'Model_backup.rds', compress = 'gz')
+		message('\nWriting model to disk')
+		readr::write_rds(list(Samples = Samples, Var_imp = Var_imp),
+										 'Model_backup.rds', compress = 'gz')
 		gc()
 	}
 
 	DTM <- DTM %>% select(-matches('\\.count$'))
 
-	message('Making predictions')
+	message('Generating labels')
 
 	tictoc::tic()
 
 	# Average posterior samples along the ensemble of models
-	Samples <- (Reduce(
-		"+",
-		bart.mods %>% lapply(`[[`, 'preds')
-	) / length(bart.mods))
+	# Samples <- (Reduce(
+	# 	"+",
+	# 	bart.mods %>% lapply(`[[`, 'preds')
+	# ) / length(bart.mods))
 
 	Samples <- data.frame(ID = DTM$ID, Samples)
 
@@ -2526,7 +2659,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	Predicted_data <- DTM %>% select(ID, Target) %>%
 		data.frame(
-			apply(Samples[,-1], 1, quantile, perf.quants) %>% t %>%
+			apply(Samples[,-1], 1, quantile, perf_quants) %>% t %>%
 				as.data.frame() %>%
 				setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
 		) %>%
@@ -2574,88 +2707,155 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 
 	tictoc::toc()
 
-	message('Adding performance summary')
+	Performance <- NULL
 
-	tictoc::tic()
+	if (compute_performance) {
+		message('Adding performance summary')
 
-	Performance <- compute_pred_performance(Annotated_data, samples = Samples,
-																					test_data = Test_data,
-																					perf.quants = perf.quants)
+		tictoc::tic()
+
+		Performance <- compute_pred_performance(Annotated_data, samples = Samples,
+																						test_data = Test_data,
+																						perf_quants = perf_quants)
+
+		tictoc::toc()
+	}
 
 	## Prints the performance summaries out, but it's a bit messy and this data is already in excel
 	# Performance[,-1] %>%
 	# 	lapply(function(perf) setNames(as.character(perf), Performance[[1]])) %>%
 	# 	print()
 
-	tictoc::toc()
+
 
 	message('Adding variables\' importance')
 
-	var_imp <- lapply(1:length(bart.mods), function(i) {
+	# var_imp <- lapply(1:n_models, function(i) {
+	# 	data.frame(
+	# 		Term = names(bart.mods[[i]]$var.imp),
+	# 		Val = bart.mods[[i]]$var.imp
+	# 	)
+	# }) %>% bind_rows() %>%
+	# 	group_by(Term) %>%
+	# 	summarise(Value = mean(Val), Score = Value / sd(Val), n_models = n())
+
+	Var_imp <- lapply(1:n_models, function(i) {
 		data.frame(
-			Term = names(bart.mods[[i]]$var.imp),
-			Val = bart.mods[[i]]$var.imp
+			Term = names(Var_imp[[i]]),
+			Val = Var_imp[[i]]
 		)
 	}) %>% bind_rows() %>%
 		group_by(Term) %>%
-		summarise(Value = mean(Val), Score = Value / sd(Val), n.models = n())
+		summarise(Value = mean(Val), Score = if (n_models > 1) Value / sd(Val) else Value, n_models = n())
 
-	out <- list(
-		Annotated_data = Annotated_data,
-		Results = data.frame(
-			Indicator = c(
-				'Parent file', 'Run n.', 'New labels', 'Records to review', 'Final labeling'
-			),
-			Value = c(
-				file,
-				cur_run,
-				Annotated_data$Rev_prediction_new %>%
-					summarise_vector(),
-				with(Annotated_data, Predicted_label[Rev_prediction_new %in% '*']) %>%
-					summarise_vector(),
-				coalesce_labels(Annotated_data, c('Rev_prediction_new','Rev_prediction',
-																					'Rev_manual', 'Predicted_label')) %>%
-					summarise_vector()
-			)
-		) %>% bind_rows(
-			compute_changes(Annotated_data) %>%
-				select(matches('Change')) %>%
-				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value') %>%
-				mutate(Value = as.character(Value))
-		),
-		Performance = Performance,
-		Variable_importance = var_imp
-	)
+	message('Adding annotation summary')
 
-	print(out$Results)
+	# if ('Change: unlab. -> y' %in% names(iter_data)) {
+	# 	last_iter_with_new_pos <- which(!is.na(iter_data[['Change: unlab. -> y']])) %>% max()
+	#
+	# 	if (nrow(iter_data) - last_iter_with_new_pos < stop_after) {
+	#
+	# 	}
+	# }
+
+	Results <- tibble(
+		Iter = (list.files(file.path(session_path, 'Annotations'), pattern = '.xlsx') %>%
+							str_subset('~\\$', negate = T) %>% length()) + 1,
+		'Parent file' = file,
+		'Replication n.' = repl,
+		'New labels' = Annotated_data$Rev_prediction_new %>%
+			summarise_vector(),
+		'Records to review' = with(Annotated_data, Predicted_label[Rev_prediction_new %in% '*']) %>%
+			summarise_vector(),
+		'Final labeling' = coalesce_labels(Annotated_data, c('Rev_prediction_new','Rev_prediction',
+																												 'Rev_manual', 'Predicted_label')) %>%
+			summarise_vector()
+	) %>% bind_cols(
+		compute_changes(Annotated_data) #%>% select(matches('Change'))
+	) %>%
+		mutate(across(.fns = as.character)) %>%
+		tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value')
+
+	# Results <- data.frame(
+	# 	Indicator = c(
+	# 		'Parent file', 'Rerun n.', 'New labels', 'Records to review', 'Final labeling'
+	# 	),
+	# 	Value = c(
+	# 		file,
+	# 		cur_run,
+	# 		Annotated_data$Rev_prediction_new %>%
+	# 			summarise_vector(),
+	# 		with(Annotated_data, Predicted_label[Rev_prediction_new %in% '*']) %>%
+	# 			summarise_vector(),
+	# 		coalesce_labels(Annotated_data, c('Rev_prediction_new','Rev_prediction',
+	# 																			'Rev_manual', 'Predicted_label')) %>%
+	# 			summarise_vector()
+	# 	)
+	# ) %>% bind_rows(
+	# 	compute_changes(Annotated_data) %>%
+	# 		select(matches('Change')) %>%
+	# 		tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value') %>%
+	# 		mutate(Value = as.character(Value))
+	# )
+
+	print(as.data.frame(Results))
 
 	message('Exporting')
 
-	time_stamp <- safe_now()
+	out <- list(
+		Annotated_data = Annotated_data,
+		Results = Results,
+		Performance = Performance,
+		Variable_importance = Var_imp
+	) %>% Filter(f = Negate(is.null))
 
-	tictoc::tic()
+	common_tag <- glue('{if (repl > 1) paste0("rep", repl, "_") else ""}{safe_now()}')
+	iter <- with(Results, Value[Indicator == 'Iter'])
+
+	message('...arguments')
+
+	# capture.output(
+	# 	match.call() %>%
+	# 		as.list() %>%
+	# 		str(),
+	# 	file = file.path(session_path, 'Arguments.txt')
+	# )
+
+
 	message('- DTM...')
-	DTM_path <- file.path(sessions_folder, session_name, 'DTM.rds')
-	if (!file.exists(DTM_path)) {
-		readr::write_rds(DTM, file = DTM_path, compress = 'gz')
+	tictoc::tic()
+	DTM_file <- file.path(session_path, 'DTM.rds')
+	if (!file.exists(DTM_file)) {
+		readr::write_rds(DTM, file = DTM_file, compress = 'gz')
 	}
 	tictoc::toc()
 
 	message('- annotated records...')
 	tictoc::tic()
-	output_file_ann <- file.path(sessions_folder, session_name, 'Annotations',
-													 glue('Records_P_run{cur_run}_{time_stamp}.xlsx'))
+	output_file_ann <- file.path(session_path, 'Annotations',
+															 glue('{iter}.Records_{common_tag}.xlsx'))
+
 	dir.create(dirname(output_file_ann), showWarnings = F, recursive = T)
 
 	openxlsx::write.xlsx(out, file = output_file_ann, asTable = T)
 
 	tictoc::toc()
 
+	message('- annotation summary...')
+	tictoc::tic()
+	output_file_res <- file.path(session_path, 'Results',
+															 glue('{iter}.Results_{common_tag}.csv'))
+	dir.create(dirname(output_file_res), showWarnings = F, recursive = T)
+
+	write_csv(Results, file = output_file_res)
+
+	tictoc::toc()
+
 	message('- posterior samples...')
 	tictoc::tic()
 
-	output_file_samp <- file.path(sessions_folder, session_name, 'Samples',
-																glue('Samples_{time_stamp}.rds'))
+	output_file_samp <- file.path(session_path, 'Samples',
+																glue('{iter}.Samples_{common_tag}.rds'))
 	dir.create(dirname(output_file_samp), showWarnings = F, recursive = T)
 
 	readr::write_rds(Samples, file = output_file_samp, compress = 'gz')
@@ -2663,58 +2863,147 @@ enrich_annotation_file <- function(file, DTM = NULL, pos.mult = 10,
 	tictoc::toc()
 
 	if (autorun) {
-		file.remove('Model_backup.rds')
+		if ('*' %nin% Annotated_data$Rev_prediction_new) {
+			message('\n\nAutomatic restart')
 
-		# If there aren't new prediction to review
-		if (!any(Annotated_data$Rev_prediction_new %in% '*')) {
+			file.remove('Model_backup.rds')
 
-
-			# new_train_data <- !(all.equal(
-			# 	coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction')),
-			# 	coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new'))
-			# ) %>% isTRUE())
-
-			# check if there are new positive labeled records
-			new_positives <- paste(
-				coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction')),
-				coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction',
-																					'Rev_prediction_new')),
-				sep = ' -> '
-			) %>%
-				str_subset('-> y') %>% str_subset('y -> y', negate = T) %>%
-				length()
-
-			# if no new positives start the reruns
-			if (new_positives == 0) cur_run <- cur_run + 1 else cur_run <- 1
-
-			if (cur_run <= num_reruns) { # Train data has not changed and there are still available reruns.
-				enrich_annotation_file(file, DTM = DTM_path, pos.mult = pos.mult,
-															 n.models = n.models, perf.quants = perf.quants,
-															 session_name = session_name,
-															 sessions_folder = sessions_folder,
-															 num_reruns = num_reruns, cur_run = cur_run,
-															 use_prev_labels = use_prev_labels,
-															 prev_records = prev_records,
-															 test_data = test_data,
-															 rebuild = FALSE, ...)
-			}
+			enrich_annotation_file(output_file_ann, DTM = DTM_file, pos_mult = pos_mult,
+														 n_models = n_models, perf_quants = perf_quants,
+														 session_name = session_name,
+														 sessions_folder = sessions_folder, limits = limits,
+														 autorun = autorun, use_prev_labels = use_prev_labels,
+														 prev_records = prev_records,
+														 test_data = test_data, rebuild = FALSE, ...)
+		} else {
+			message('Manual labeling needed!')
 		}
 	}
+
+
+	# if (!is.null(autorun) & !isFALSE(autorun)) {
+	#
+
+	#
+	# 	Target <- coalesce_labels(Annotated_data) %>% na.omit()
+	#
+	# 	# All records have been labeled
+	# 	if (!any(is.na(Target))) {
+	# 		message('No unlabeled records left!')
+	# 	}
+	#
+	# 	# Enough positives found
+	# 	else if (!is.null(autorun$pos_target) &&
+	# 			sum(Target %in% 'y') >= autorun$pos_target) {
+	# 		message('Positive records target reached!')
+	# 	}
+	#
+	# 	else if (!is.null(autorun$review_limit)) {
+	# 		n_reviews <- Annotated_data$Rev_prediction_new %>% na.omit() %>% length()
+	# 		if ((autorun$review_limit <= 1 & n_reviews / nrow(Annotated_data) >=  autorun$review_limit) |
+	# 				(autorun$review_limit > 1 & n_reviews >=  autorun$review_limit))
+	# 			message('Num/Ratio of labeled records above threshold!')
+	# 	}
+	#
+	# 	# Too many records have been labeled
+	# 	else if (!is.null(autorun$coverage_target)) {
+	# 		if ((autorun$coverage_target <= 1 & length(Target) / nrow(Annotated_data) >=  autorun$coverage_target) |
+	# 				(autorun$coverage_target > 1 & length(Target) >=  autorun$coverage_target))
+	# 		message('Num/Ratio of labeled records above threshold!')
+	# 	}
+	#
+	# 	# If there aren't new prediction to review
+	# 	else if (!any(Annotated_data$Rev_prediction_new %in% '*')) {
+	#
+	# 		# check if there are new positive labeled records
+	# 		# new_positives <- paste(
+	# 		# 	coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction')),
+	# 		# 	coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction',
+	# 		# 																		'Rev_prediction_new')),
+	# 		# 	sep = ' -> '
+	# 		# ) %>%
+	# 		# 	str_subset('-> y') %>% str_subset('y -> y', negate = T) %>%
+	# 		# 	length()
+	#
+	# 		message('Summarise iteration')
+	# 		# iter_data <- summarise_annotations2(sessions_folder = sessions_folder,
+	# 		# 																		sessions = session_name,
+	# 		# 																		analyse_perf = F)$Iterations %>% tail(1)
+	#
+	# 		iter_data <- compute_changes(Annotated_data) %>%
+	# 			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n'))
+	#
+	# 		str(iter_data)
+	#
+	# 		new_positives <- iter_data %>% select(matches('-> y')) %>% rowSums()
+	# 		new_negatives <- iter_data %>% select(matches('-> n')) %>% rowSums()
+	#
+	# 		if (new_positives == 0) {
+	# 			# if no new positives increase the rerun counter
+	# 			autorun$run <- autorun$run + 1
+	# 		} else {
+	# 			# else reset the rerun counter
+	# 			autorun$run <- 1
+	# 		}
+	#
+	# 		# if training data changed train the model using the output annotation
+	# 		if (new_positives > 0 | new_negatives > 0) {
+	# 			file <- output_file_ann
+	# 		}
+	#
+	# 		# in the expected numbers of runs without new positives has not been reached
+	# 		# perform a new run
+	# 		if (pos_runs < stop_after) {
+	# 	enrich_annotation_file(file, DTM = DTM_file, pos_mult = pos_mult,
+	# 												 n_models = n_models, perf_quants = perf_quants,
+	# 												 session_name = session_name,
+	# 												 sessions_folder = sessions_folder,
+	# 												 autorun = autorun, use_prev_labels = use_prev_labels,
+	# 												 prev_records = prev_records,
+	# 												 test_data = test_data, rebuild = FALSE, ...)
+	# }
+	# 	}
+	# } else {
+	# 	message('Manual labeling needed!')
+	# }
 
 	invisible(out)
 }
 
-perform_test_run <- function(Records, Test_data, session_name, DTM = NULL,
-														 pos.mult = 10,  n.models = 40, num_reruns = 4,
-														 perf.quants = c(.01, .5, .99), num_init_labels = NULL,
+perform_test_run <- function(Records, Test_data, session_name = NULL,
+														 num_init_labels = NULL, DTM = NULL,
 														 sessions_folder = 'Test_Sessions', ...) {
 
 	Records <- import_excel(Records)
 	Test_data <- import_excel(Test_data)
 
+	# if (is.null(session_name)) {
+	# 	session_name <- paste(
+	# 		'Session',
+	# 		glue('{n_models}Mod'),
+	# 		glue('{ifelse(resample, "y", "n")}Res'),
+	# 		glue('{num_init_labels}Init'),
+	# 		glue('{(max(perf_quants)-min(perf_quants))*100}Quant'),
+	# 		sep = '.'
+	# 	) %>% str_replace_all('\\.+', '.')
+	#
+		# if (file.exists(file.path(sessions_folder, session_name))) {
+		# 	stop('Session already existing')
+		# }
+	#
+	# 	message('Session name: ', session_name)
+	# }
+
+	if (file.exists(file.path(sessions_folder, session_name))) {
+		message('Session already existing')
+		return(FALSE)
+	}
+
 	file_path <- file.path(sessions_folder, session_name, 'Records.xlsx')
 
 	dir.create(dirname(file_path), recursive = T, showWarnings = FALSE)
+
+	Test_data <- import_excel(Test_data)
 
 	Records <- Records %>%
 		select(-any_of('Rev_previous')) %>% {
@@ -2722,25 +3011,106 @@ perform_test_run <- function(Records, Test_data, session_name, DTM = NULL,
 				mutate(., across(
 					any_of(c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new')),
 					~ replace(.x, Order > num_init_labels, NA)
-					))
+				))
 			} else .
 		} %>%
 		import_classification(Test_data) %>%
-		filter(!is.na(Rev_previous)) %>%
-		openxlsx::write.xlsx(file = file_path, asTable = T)
+		filter(!is.na(Rev_previous))
 
-	enrich_annotation_file(file_path, DTM = DTM, pos.mult = pos.mult,
-												 n.models = n.models, perf.quants = perf.quants,
-												 session_name = session_name,
-												 sessions_folder = sessions_folder, autorun = T,
-												 num_reruns = num_reruns, cur_run = 1,
-												 use_prev_labels = T,
-												 prev_records = Test_data,
-												 test_data = Test_data,
-												 rebuild = F, ...)
+	openxlsx::write.xlsx(Records, file = file_path, asTable = T)
 
-	message('Run completed')
+	if (!is.null(DTM)) {
+		if (is.character(DTM)) {
+			DTM <- read_rds(DTM)
+		}
+		DTM <- filter(DTM, ID %in% Records$ID)
+	}
+
+	enrich_annotation_file(file_path, session_name = session_name,
+												 sessions_folder = sessions_folder, DTM = DTM,
+												 use_prev_labels = T, autorun = T,
+												 prev_records = Test_data, test_data = Test_data, ...)
+
+	message('Iterations completed\n\n')
 	return(TRUE)
+}
+
+perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
+														Test_data = file.path(sessions_folder, 'Test_data.xlsx'),
+														DTM = NULL, resample = c(FALSE, TRUE), rebuild = T,
+														n_init = c(50, 100, 250, 500),
+														n_models = c(5, 10, 20, 40), pos_mult = c(1, 10, 20),
+														perf_quants = list(c(.05, .5, .95), c(.01, .5, .99)),
+														limits = list(
+															stop_after = 4, replication = NULL,
+															pos_target = 82, labeling_limit = 900
+														)) {
+
+	# file: 'Sessions/Session1/Records_2021-03-18T13.09.24.xlsx'
+
+	Grid <- tidyr::expand_grid(
+		resample, n_init, n_models, pos_mult, perf_quants
+	) %>%
+		mutate(
+			iteration = glue('{1:n()} / {n()}'),
+			session = paste(
+				1:n(),
+				'GridSession',
+				glue('{n_models}Mods'),
+				glue('{ifelse(resample, "y", "n")}Resamp'),
+				glue('{n_init}Init'),
+				glue('{pos_mult}Mult'),
+				glue('{(sapply(perf_quants, max)-sapply(perf_quants, min))*100}Quant'),
+				sep = '.'
+			) %>% str_replace_all('\\.+', '.')
+		)
+
+	Records <- import_excel(Records)
+	Test_data <- import_excel(Test_data)
+
+	# if (is.null(DTM)) {
+	#
+	# 	DTM_path <- file.path(sessions_folder, 'DTM.rds')
+	# 	if (file.exists(DTM_path)) {
+	# 		message('Loading DTM')
+	#
+	# 		DTM_list <- read_rds(DTM_path)
+	# 	} else {
+	# 		message('Creating DTM')
+	#
+	# 		DTM_list <- pblapply(unique(Grid$pos_mult), function(mult) {
+	# 			message('pos_mult ', mult)
+	# 			create_training_set(Records, pos_mult = mult)
+	# 		}) %>% setNames(unique(Grid$pos_mult))
+	#
+	# 		readr::write_rds(DTM_list, file.path(sessions_folder, 'DTM.rds'))
+	# 	}
+	#
+	# } else if (is.character(DTM)) {
+	# 	message('Loading DTM')
+	#
+	# 	DTM_list <- readr::read_rds(DTM)
+	#
+	# 	if (length(DTM_list) != n_distinct(Grid$pos_mult)) {
+	# 		stop('The number of DTMs is different from the number of pos_mult values.')
+	# 	}
+	# }
+
+	pblapply(1:nrow(Grid), function(i) {
+		str(Grid[i,], give.attr = F)
+
+		file.remove('Model_backup.rds')
+
+		with(Grid[i,],
+				 perform_test_run(Records, session_name = session,
+				 								 sessions_folder = sessions_folder, rebuild = TRUE,
+				 								 Test_data = Test_data, DTM = DTM, #DTM_list[[as.character(pos_mult)]],
+				 								 compute_performance = FALSE, resample = resample,
+				 								 num_init_labels = n_init, n_models = n_models,
+				 								 pos_mult = pos_mult, perf_quants = perf_quants[[1]],
+				 								 limits = limits)
+		)
+	})
 }
 
 select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
@@ -3165,72 +3535,102 @@ summarise_annotations2 <- function(sessions_folder = 'Sessions',
 
 	files <- lapply(sessions, function(session_folder) {
 		annotation_files <- list.files(file.path(session_folder, 'Annotations'),
-																	 full.names = T) %>% str_subset('~\\$', negate = T)
+																	 pattern = '.xlsx', full.names = T) %>%
+			str_subset('~\\$', negate = T)
+
+		results_files <- list.files(file.path(session_folder, 'Results'),
+																pattern = '.csv', full.names = T) %>%
+			str_subset('~\\$', negate = T)
+
 		samples_files <- list.files(file.path(session_folder, 'Samples'),
-																full.names = T) %>% str_subset('~\\$', negate = T)
+																pattern = '.rds', full.names = T)
 
 		output <- lapply(0:length(annotation_files), function(i) {
 			if (i == 0) {
 				files <- c(Annotation = (list.files(session_folder, pattern = '.xlsx',
-																full.names = T) %>%
-									 	str_subset('~\\$', negate = T))[1])
+																						full.names = T) %>%
+																 	str_subset('~\\$', negate = T))[1])
 			} else {
-				files <- c(Annotation = annotation_files[i], Samples = samples_files[i])
+				files <- c(Annotation = annotation_files[i], Samples = samples_files[i],
+									 Results = results_files[i])
 			}
 
 			data.frame(
 				Session = basename(session_folder),
-				Iter = paste0('_', i),
+				Iter = if (i == 0) 0 else str_extract(basename(files[1]), '^\\d+') %>% as.numeric(),
 				Type = names(files),
 				File = files
 			)
-			}) %>% bind_rows()
+		}) %>% bind_rows()
 
 	}) %>% bind_rows() %>%
 		tidyr::pivot_wider(id_cols = c(Session, Iter), names_from = Type,
-											 values_from = File)
+											 values_from = File) %>%
+		arrange(Iter)
 
 	message('...loading files')
-	Annotations <- mclapply(files$Annotation, import_excel) %>% setNames(files$Iter)
-	Parent_files <- mclapply(files$Annotation[-1], function(f) {
-		read_excel(f, 'Results')$Value[1]
-	}) %>% setNames(files$Iter[-1])
-	Samples <- mclapply(files$Samples[-1], read_rds) %>% setNames(files$Iter[-1])
-
-	if (analyse_iterations) {
-		message('...iteration data')
-		output$Iterations = lapply(files$Iter, function(i) {
-			Annotations[[i]] %>%
-				compute_changes() %>%
-				mutate(
-					Session = files$Session[files$Iter == i],
-					Iter = str_remove(i, '_'),
-					File = basename(files$Annotation[files$Iter == i]),
-					Parent_file = if (i != '_0') {
-						Parent_files[[i]] %>% basename()
-					} else NA,
-					.before = 1
-				)
-		}) %>% bind_rows() %>%
-			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n'))
-	}
+	Annotations <- mclapply(files$Annotation, import_excel)# %>% setNames(files$Iter)
+	Parent_files <- mclapply(files$Results[-1], function(f) {
+		df <- read_csv(f, col_types = cols())
+		df$Value[df$Indicator == 'Parent file']
+	})# %>% setNames(files$Iter[-1])
 
 	if (analyse_perf) {
-		message('...performance data')
+		Samples <- mclapply(files$Samples[-1], read_rds)# %>% setNames(files$Iter[-1])
+
+		message('...compute performance data')
+
 		output$Performance = pblapply(files$Iter[-1], function(i) {
 
+			index <- which(files$Iter == i)
+
 			output$Performance = compute_pred_performance(
-				Annotations[[i]], samples = Samples[[i]],
+				Annotations[[index]], samples = Samples[[i]],
 				show_progress = F, ...
 			) %>%
 				mutate(
-					Session = files$Session[files$Iter == i],
-					Iter = str_remove(i, '_'),
-					File = basename(files$Annotation[files$Iter == i]),
+					Session = files$Session[index],
+					Iter = i,
+					File = basename(files$Annotation[index]),
 					.before = 1
 				)
 
 		}) %>% bind_rows()
+	}
+
+	if (analyse_iterations) {
+		message('...compute iteration data')
+
+		output$Iterations = lapply(files$Iter, function(i) {
+			index <- which(files$Iter == i)
+			Annotations[[index]] %>%
+				compute_changes() %>%
+				mutate(
+					Session = files$Session[index],
+					Iter = i,
+					File = basename(files$Annotation[index]),
+					Parent_file = if (i != 0) {
+						Parent_files[[i]] %>% basename()
+					} else NA
+				)
+		}) %>% bind_rows() %>%
+			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n')) %>%
+			mutate(
+				Iters_w_no_pos = {
+					pos_vec <- select(., matches('-> y')) %>% rowSums(na.rm = T)
+					out <- rep(0, length(pos_vec))
+
+					for (i in 2:length(pos_vec)) {
+						if (pos_vec[i] > 0) out[i] <- 0 else out[i] <- out[i - 1] + 1
+					}
+
+					out
+				}, across(where(is.numeric), ~ replace(.x, 1:length(.x) != 1 & is.na(.x), 0))
+			) %>%
+			select(
+				Session, Iter, File, Parent_file,
+				matches('Target'), Total_labeled, New_labels, Iters_w_no_pos, matches('Change')
+			)
 	}
 
 	output
@@ -3254,7 +3654,7 @@ plot_predicted_pos_rate <- function(Ann_data, block_size = 50) {
 			Train = sum(Train),
 			Target = sum(Target, na.rm = T)
 		)
-#
+	#
 	# mod <- brm(Train | trials(block_size) ~ Order, family = binomial, data = Ann_data,
 	# 					 cores = 8, refresh = 0, iter = 8000,
 	# 					 backend = 'cmdstan',
@@ -3262,10 +3662,10 @@ plot_predicted_pos_rate <- function(Ann_data, block_size = 50) {
 	# 					 					prior(student_t(1, 0, 2.5), class = 'b')))
 
 	mod <- brms::brm(bf(Train | trials(block_size) ~ a * Order ^ b, a + b ~ 1, nl = T), family = binomial, data = Ann_data,
-						 cores = 8, refresh = 0, iter = 8000,
-						 backend = 'cmdstan',
-						 prior = c(set_prior('student_t(1, 0, 5)', nlpar = "a"),
-						 					set_prior('student_t(1, 0, 2.5)', nlpar = "b")))
+									 cores = 8, refresh = 0, iter = 8000,
+									 backend = 'cmdstan',
+									 prior = c(set_prior('student_t(1, 0, 5)', nlpar = "a"),
+									 					set_prior('student_t(1, 0, 2.5)', nlpar = "b")))
 
 	## To estimate the total number of positives and from there the positives in a
 	## random subsample
@@ -3277,7 +3677,7 @@ plot_predicted_pos_rate <- function(Ann_data, block_size = 50) {
 	posterior_predict(mod, newdata = data.frame(
 		block_size,
 		Order = seq(block_size, limit, block_size)
-		)) %>% rowSums() %>% quantile(seq(0,1, .1)) %>%
+	)) %>% rowSums() %>% quantile(seq(0,1, .1)) %>%
 		print()
 
 	limit <- min(Ann_data$Order[last(which(Ann_data$Target > 0))], last(Ann_data$Order))
