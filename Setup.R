@@ -7,12 +7,13 @@ if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
 library(librarian)
 shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
-			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri)
+			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri,
+			bakaburg1/tidytrees)
 
 # Packages required but not loaded
 required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
-													 'parallel', 'jsonlite', 'rentrez',
-													 'wosr', 'brms'), installed.packages())
+													 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms'),
+												 installed.packages())
 
 if (length(required.pkgs) > 0) install.packages(required.pkgs)
 
@@ -3110,7 +3111,100 @@ perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
 				 								 pos_mult = pos_mult, perf_quants = perf_quants[[1]],
 				 								 limits = limits)
 		)
-	})
+	}) %>% unlist() %>% table()
+}
+
+analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NA,
+																plot = TRUE, target = c('Pos_rate_adj', 'Pos_rate')) {
+
+	target <- match.arg(target)
+
+	out <- list.files(session_folder, pattern = 'Results_', recursive = T, full.names = T) %>%
+		#head(20) %>%
+		pbmclapply(function(file) {
+
+			readr::read_csv(file, col_types = cols()) %>%
+				tidyr::pivot_wider(names_from = Indicator, values_from = Value) %>%
+				transmute(
+					Iter,
+					Session = file,
+					Rep = `Replication n.`,
+					Tot_labeled = Total_labeled,
+					Pos_labels = `Target: y`
+				)
+		}) %>% bind_rows() %>%
+		mutate(
+			Session = str_remove(Session, 'Results.*') %>% basename(),
+			Tot_labeled = str_remove(Tot_labeled, ' \\(.*'),
+			Session %>% str_remove('.*GridSession\\.') %>%
+				str_split('\\.', simplify = T) %>%
+				as.data.frame() %>%
+				lapply(function(piece) {
+
+					label <- str_remove(piece, '^(\\d+|[yn])')[1]
+					value <- str_remove(piece, fixed(label))
+
+					setNames(data.frame(value), label)
+				}) %>% bind_cols(),
+			across(one_of(c("Tot_labeled", "Pos_labels", "Mods", "Quant", 'Init',
+											'Mult')), as.numeric),
+			Pos_rate = Pos_labels / Tot_labeled,
+			Pos_rate_adj = Pos_rate * (Pos_labels / tot_pos),
+			Target = get(target)
+		) %>%
+		group_by(Session) %>%
+		slice_max(Target, n = 1, with_ties = F) %>%
+		ungroup()
+
+	params <- c("Mods", "Quant", "Resamp", "Init", "Mult")
+
+	tree <- out %>%
+		select(Target, one_of(c("Mods", "Quant", "Resamp", "Init", "Mult"))) %>%
+		mutate_at(vars(-Target), as.factor) %>% {
+			df <- .
+			rpart(Target ~ ., df)
+		}
+
+	rules <- tidytrees::tidy_tree(tree)$rule
+
+	out <- mutate(out, Group = rules[tree$where - 1])
+
+ if (plot) {
+
+ 	p <- lapply(params, function(par) {
+ 		params <- setdiff(params, par)
+ 		out %>%
+ 			# mutate(group = select(cur_data(), one_of(params)) %>%
+ 			# 			 	apply(1, paste, collapse = ' ')) %>%
+ 			ggplot(aes(factor(get(par)), Target)) +
+ 			geom_boxplot(show.legend = F) +
+ 			geom_line(aes( group = Group, color = Group), alpha = .5, show.legend = F) +
+ 			theme_minimal() +
+ 			scale_y_continuous(trans = 'log') +
+ 			ylab(target) +
+ 			xlab(par)
+ 	}) %>% patchwork::wrap_plots() +
+ 		ggplot(out) +
+ 		geom_blank(aes(color = Group))
+
+ 	print(p)
+ }
+
+	#partykit::ctree((Pos_rate_adj) ~ ., out %>% select(Pos_rate_adj, one_of(c("Mods", "Quant", "Resamp", "Init", "Mult"))) %>% mutate_if(is.character, as.factor)) %>% plot
+
+	# local({
+	# 	par = 'Init'
+	# 	params <- setdiff(params, par)
+	# 	out <- out %>%
+	# 		filter(Resamp == 'y', Init > 100, Mult > 1) %>%
+	# 		mutate(group = select(cur_data(), one_of(params)) %>%
+	# 					 	apply(1, paste, collapse = ' '),
+	# 					 par = (as.factor(get(par))))
+	#
+	# 	brms::brm(Pos_rate_adj ~ par + (par | group), family = Gamma('log'), data = out, backend = 'cmdstanr') %>% broom::tidy()
+	# })
+
+	out
 }
 
 select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
@@ -3557,7 +3651,8 @@ summarise_annotations2 <- function(sessions_folder = 'Sessions',
 
 			data.frame(
 				Session = basename(session_folder),
-				Iter = if (i == 0) 0 else str_extract(basename(files[1]), '^\\d+') %>% as.numeric(),
+				Iter = if (i == 0) 0 else str_extract(basename(files[1]), '^\\d+') %>%
+					as.numeric(),
 				Type = names(files),
 				File = files
 			)
@@ -3566,67 +3661,75 @@ summarise_annotations2 <- function(sessions_folder = 'Sessions',
 	}) %>% bind_rows() %>%
 		tidyr::pivot_wider(id_cols = c(Session, Iter), names_from = Type,
 											 values_from = File) %>%
-		arrange(Iter)
+		arrange(Session, Iter)
 
 	message('...loading files')
-	Annotations <- mclapply(files$Annotation, import_excel)# %>% setNames(files$Iter)
-	Parent_files <- mclapply(files$Results[-1], function(f) {
+
+	Annotations <- pbmclapply(files$Annotation, import_excel) %>%
+		setNames(files$Annotation)
+
+	Parent_files <- pbmclapply(na.omit(files$Results), function(f) {
 		df <- read_csv(f, col_types = cols())
 		df$Value[df$Indicator == 'Parent file']
-	})# %>% setNames(files$Iter[-1])
+	}) %>% setNames(na.omit(files$Results))
 
 	if (analyse_perf) {
-		Samples <- mclapply(files$Samples[-1], read_rds)# %>% setNames(files$Iter[-1])
+		Samples <- pbmclapply(na.omit(files$Samples), read_rds) %>%
+			setNames(na.omit(files$Samples))
 
 		message('...compute performance data')
 
-		output$Performance = pblapply(files$Iter[-1], function(i) {
+		output$Performance = pblapply(names(Samples), function(file) {
 
-			index <- which(files$Iter == i)
+			files <- files %>% filter(Samples == file)
 
 			output$Performance = compute_pred_performance(
-				Annotations[[index]], samples = Samples[[i]],
+				Annotations[[files$Annotation]], samples = Samples[[file]],
 				show_progress = F, ...
 			) %>%
 				mutate(
-					Session = files$Session[index],
-					Iter = i,
-					File = basename(files$Annotation[index]),
+					Session = files$Session,
+					Iter = files$Iter,
+					File = basename(files$Annotation),
 					.before = 1
 				)
 
 		}) %>% bind_rows()
 	}
 
+	# TODO: use the Results files if existing and fix Iters_w_no_pos
 	if (analyse_iterations) {
 		message('...compute iteration data')
 
-		output$Iterations = lapply(files$Iter, function(i) {
-			index <- which(files$Iter == i)
-			Annotations[[index]] %>%
+		output$Iterations = lapply(names(Annotations), function(file) {
+
+			files <- files %>% filter(Annotation == file)
+
+			Annotations[[file]] %>%
 				compute_changes() %>%
 				mutate(
-					Session = files$Session[index],
-					Iter = i,
-					File = basename(files$Annotation[index]),
-					Parent_file = if (i != 0) {
-						Parent_files[[i]] %>% basename()
+					Session = files$Session,
+					Iter = files$Iter,
+					File = basename(file),
+					Parent_file = if (!is.na(files$Results)) {
+						Parent_files[[files$Results]] %>% basename()
 					} else NA
+				) %>%
+				select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n')) %>%
+				mutate(
+					Iters_w_no_pos = {
+						pos_vec <- select(., matches('-> y')) %>% rowSums(na.rm = T)
+						out <- rep(0, length(pos_vec))
+
+						for (i in 2:length(pos_vec)) {
+							if (pos_vec[i] > 0) out[i] <- 0 else out[i] <- out[i - 1] + 1
+						}
+
+						out
+					},
+					across(where(is.numeric), ~ replace(.x, 1:length(.x) != 1 & is.na(.x), 0))
 				)
 		}) %>% bind_rows() %>%
-			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n')) %>%
-			mutate(
-				Iters_w_no_pos = {
-					pos_vec <- select(., matches('-> y')) %>% rowSums(na.rm = T)
-					out <- rep(0, length(pos_vec))
-
-					for (i in 2:length(pos_vec)) {
-						if (pos_vec[i] > 0) out[i] <- 0 else out[i] <- out[i - 1] + 1
-					}
-
-					out
-				}, across(where(is.numeric), ~ replace(.x, 1:length(.x) != 1 & is.na(.x), 0))
-			) %>%
 			select(
 				Session, Iter, File, Parent_file,
 				matches('Target'), Total_labeled, New_labels, Iters_w_no_pos, matches('Change')
