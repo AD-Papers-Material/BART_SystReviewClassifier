@@ -2884,93 +2884,6 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 		}
 	}
 
-
-	# if (!is.null(autorun) & !isFALSE(autorun)) {
-	#
-
-	#
-	# 	Target <- coalesce_labels(Annotated_data) %>% na.omit()
-	#
-	# 	# All records have been labeled
-	# 	if (!any(is.na(Target))) {
-	# 		message('No unlabeled records left!')
-	# 	}
-	#
-	# 	# Enough positives found
-	# 	else if (!is.null(autorun$pos_target) &&
-	# 			sum(Target %in% 'y') >= autorun$pos_target) {
-	# 		message('Positive records target reached!')
-	# 	}
-	#
-	# 	else if (!is.null(autorun$review_limit)) {
-	# 		n_reviews <- Annotated_data$Rev_prediction_new %>% na.omit() %>% length()
-	# 		if ((autorun$review_limit <= 1 & n_reviews / nrow(Annotated_data) >=  autorun$review_limit) |
-	# 				(autorun$review_limit > 1 & n_reviews >=  autorun$review_limit))
-	# 			message('Num/Ratio of labeled records above threshold!')
-	# 	}
-	#
-	# 	# Too many records have been labeled
-	# 	else if (!is.null(autorun$coverage_target)) {
-	# 		if ((autorun$coverage_target <= 1 & length(Target) / nrow(Annotated_data) >=  autorun$coverage_target) |
-	# 				(autorun$coverage_target > 1 & length(Target) >=  autorun$coverage_target))
-	# 		message('Num/Ratio of labeled records above threshold!')
-	# 	}
-	#
-	# 	# If there aren't new prediction to review
-	# 	else if (!any(Annotated_data$Rev_prediction_new %in% '*')) {
-	#
-	# 		# check if there are new positive labeled records
-	# 		# new_positives <- paste(
-	# 		# 	coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction')),
-	# 		# 	coalesce_labels(Annotated_data, c('Rev_manual', 'Rev_prediction',
-	# 		# 																		'Rev_prediction_new')),
-	# 		# 	sep = ' -> '
-	# 		# ) %>%
-	# 		# 	str_subset('-> y') %>% str_subset('y -> y', negate = T) %>%
-	# 		# 	length()
-	#
-	# 		message('Summarise iteration')
-	# 		# iter_data <- summarise_annotations2(sessions_folder = sessions_folder,
-	# 		# 																		sessions = session_name,
-	# 		# 																		analyse_perf = F)$Iterations %>% tail(1)
-	#
-	# 		iter_data <- compute_changes(Annotated_data) %>%
-	# 			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n'))
-	#
-	# 		str(iter_data)
-	#
-	# 		new_positives <- iter_data %>% select(matches('-> y')) %>% rowSums()
-	# 		new_negatives <- iter_data %>% select(matches('-> n')) %>% rowSums()
-	#
-	# 		if (new_positives == 0) {
-	# 			# if no new positives increase the rerun counter
-	# 			autorun$run <- autorun$run + 1
-	# 		} else {
-	# 			# else reset the rerun counter
-	# 			autorun$run <- 1
-	# 		}
-	#
-	# 		# if training data changed train the model using the output annotation
-	# 		if (new_positives > 0 | new_negatives > 0) {
-	# 			file <- output_file_ann
-	# 		}
-	#
-	# 		# in the expected numbers of runs without new positives has not been reached
-	# 		# perform a new run
-	# 		if (pos_runs < stop_after) {
-	# 	enrich_annotation_file(file, DTM = DTM_file, pos_mult = pos_mult,
-	# 												 n_models = n_models, perf_quants = perf_quants,
-	# 												 session_name = session_name,
-	# 												 sessions_folder = sessions_folder,
-	# 												 autorun = autorun, use_prev_labels = use_prev_labels,
-	# 												 prev_records = prev_records,
-	# 												 test_data = test_data, rebuild = FALSE, ...)
-	# }
-	# 	}
-	# } else {
-	# 	message('Manual labeling needed!')
-	# }
-
 	invisible(out)
 }
 
@@ -3072,34 +2985,6 @@ perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
 	Records <- import_excel(Records)
 	Test_data <- import_excel(Test_data)
 
-	# if (is.null(DTM)) {
-	#
-	# 	DTM_path <- file.path(sessions_folder, 'DTM.rds')
-	# 	if (file.exists(DTM_path)) {
-	# 		message('Loading DTM')
-	#
-	# 		DTM_list <- read_rds(DTM_path)
-	# 	} else {
-	# 		message('Creating DTM')
-	#
-	# 		DTM_list <- pblapply(unique(Grid$pos_mult), function(mult) {
-	# 			message('pos_mult ', mult)
-	# 			create_training_set(Records, pos_mult = mult)
-	# 		}) %>% setNames(unique(Grid$pos_mult))
-	#
-	# 		readr::write_rds(DTM_list, file.path(sessions_folder, 'DTM.rds'))
-	# 	}
-	#
-	# } else if (is.character(DTM)) {
-	# 	message('Loading DTM')
-	#
-	# 	DTM_list <- readr::read_rds(DTM)
-	#
-	# 	if (length(DTM_list) != n_distinct(Grid$pos_mult)) {
-	# 		stop('The number of DTMs is different from the number of pos_mult values.')
-	# 	}
-	# }
-
 	pblapply(1:nrow(Grid), function(i) {
 		str(Grid[i,], give.attr = F)
 
@@ -3108,7 +2993,7 @@ perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
 		with(Grid[i,],
 				 perform_test_run(Records, session_name = session,
 				 								 sessions_folder = sessions_folder, rebuild = TRUE,
-				 								 Test_data = Test_data, DTM = DTM, #DTM_list[[as.character(pos_mult)]],
+				 								 Test_data = Test_data, DTM = DTM,
 				 								 compute_performance = FALSE, resample = resample,
 				 								 num_init_labels = n_init, n_models = n_models,
 				 								 pos_mult = pos_mult, perf_quants = perf_quants[[1]],
