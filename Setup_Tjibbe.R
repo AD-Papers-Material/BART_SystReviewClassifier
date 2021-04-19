@@ -1,21 +1,21 @@
 
 # Setup -------------------------------------------------------------------
 
-options(java.parameters = "-Xmx14g")
+options(java.parameters = "-Xmx24g")
 
 if (!('librarian' %in% installed.packages())) install.packages('librarian')
 
 library(librarian)
-shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
-			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri,
-			bakaburg1/tidytrees)
+pacman::p_load(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
+			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel)#, RLesur/crrri,
+			#bakaburg1/tidytrees)
 
 # Packages required but not loaded
-required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
-													 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms'),
-												 installed.packages())
+# required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
+# 													 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms'),
+# 												 installed.packages())
 
-if (length(required.pkgs) > 0) install.packages(required.pkgs)
+# if (length(required.pkgs) > 0) install.packages(required.pkgs)
 
 ### Uncomment if mclapply fails on windows
 # mclapply <- lapply
@@ -2347,7 +2347,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 																	 	stop_after = 4, replication = NULL,
 																	 	pos_target = NULL, labeling_limit = NULL
 																	 ),
-																	 compute_performance = T,
+																	 compute_performance = FALSE,
 																	 use_prev_labels = T,
 																	 prev_records = NULL,
 																	 test_data = NULL,
@@ -2816,7 +2816,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 	common_tag <- glue('{if (repl > 1) paste0("rep", repl, "_") else ""}{safe_now()}')
 	iter <- with(Results, Value[Indicator == 'Iter'])
 
-	message('...arguments')
+	#message('...arguments')
 
 	# capture.output(
 	# 	match.call() %>%
@@ -3152,8 +3152,8 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NA,
 			across(one_of(c("Tot_labeled", "Pos_labels", "Mods", "Quant", 'Init',
 											'Mult')), as.numeric),
 			Pos_rate = Pos_labels / Tot_labeled,
-			Pos_rate_adj = Pos_rate * (Pos_labels / tot_pos),
-			#Pos_rate_adj = (Pos_labels / tot_pos) * (1 - Tot_labeled / max(Tot_labeled)),
+			#Pos_rate_adj = Pos_rate * (Pos_labels / tot_pos),
+			Pos_rate_adj = (Pos_labels / tot_pos) * (1 - Tot_labeled / max(Tot_labeled)),
 			Target = get(target)
 		) %>%
 		group_by(Session) %>%
@@ -3190,7 +3190,7 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NA,
  			geom_line(aes(group = group, color = Rule), alpha = .5, show.legend = F) +
  			geom_point(aes(color = Rule), show.legend = F) +
  			theme_minimal() +
- 			scale_y_continuous(labels = function(x) round(x, 2)) +
+ 			scale_y_continuous(trans = 'log') +
  			ylab(target) +
  			xlab(par)
  	}) #%>% patchwork::wrap_plots()
