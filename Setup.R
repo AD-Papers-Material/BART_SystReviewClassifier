@@ -2343,9 +2343,10 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 																	 perf_quants = c(.01, .5, .99),
 																	 session_name = NULL,
 																	 sessions_folder = 'Sessions', autorun = T,
+																	 replication = NULL,
 																	 limits = list(
-																	 	stop_after = 4, replication = NULL,
-																	 	pos_target = NULL, labeling_limit = NULL
+																	 	stop_after = 4, pos_target = NULL,
+																	 	labeling_limit = NULL
 																	 ),
 																	 compute_performance = T,
 																	 use_prev_labels = T,
@@ -2376,28 +2377,24 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 
 	tictoc::tic()
 	# Read the file and use (theoretically) all rows to infer the column type, to
-	# avoid misspecification errors
+	# avoid misspecification errors.
 	Records <- read_excel(file, guess_max = 10^6)
 
 	if (all(is.na(Records$Rev_manual))) {
 		stop('No manually labeled entries found. This may also happen if there is a great number of missings before the first labeled record.')
 	}
 
-	# If the current replication number is not passed manually, the last one is
-	# extracted from the input file title and, if no new positives are present, is
-	# used after being incremented, otherwise it is reset to 1
 	repl <- 1
 
-	if (!is.null(limits) && !is.null(limits$replication)) {
-		repl <- limits$replication
-	} else if (!str_detect(file, fixed(file.path(session_path, 'Annotations')))) {
-		repl <- 1
-	} else {
+	# If the file is an annotated file the replication is extracted
+	if (basename(dirname(file)) == 'Annotations') {
 
-		prev_run <- str_extract(file, '(?<=_rep)\\d+') %>% as.numeric()
+			# replication is extracted from the file title or set to one
+			prev_run <- str_extract(file, '(?<=_rep)\\d+') %>% as.numeric()
 
-		repl <- max(1, prev_run, na.rm = T)
+			repl <- max(1, prev_run, na.rm = T)
 
+		# increase the replication if no new positives
 		iter_data <- compute_changes(Records) %>%
 			select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n'))
 
