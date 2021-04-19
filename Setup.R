@@ -2991,9 +2991,9 @@ perform_test_run <- function(Records, Test_data, session_name = NULL,
 	# 		sep = '.'
 	# 	) %>% str_replace_all('\\.+', '.')
 	#
-		# if (file.exists(file.path(sessions_folder, session_name))) {
-		# 	stop('Session already existing')
-		# }
+	# if (file.exists(file.path(sessions_folder, session_name))) {
+	# 	stop('Session already existing')
+	# }
 	#
 	# 	message('Session name: ', session_name)
 	# }
@@ -3040,16 +3040,16 @@ perform_test_run <- function(Records, Test_data, session_name = NULL,
 }
 
 perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
-														Test_data = file.path(sessions_folder, 'Test_data.xlsx'),
-														DTM = NULL, resample = c(FALSE, TRUE), rebuild = T,
-														n_init = c(50, 100, 250, 500),
-														n_models = c(5, 10, 20, 40, 60), pos_mult = c(1, 10, 20),
-														perf_quants = list(c(.1, .5, .9), c(.05, .5, .95),
-																							 c(.01, .5, .99)),
-														limits = list(
-															stop_after = 4, replication = NULL,
-															pos_target = 82, labeling_limit = 900
-														)) {
+																		Test_data = file.path(sessions_folder, 'Test_data.xlsx'),
+																		DTM = NULL, resample = c(FALSE, TRUE), rebuild = T,
+																		n_init = c(50, 100, 250, 500),
+																		n_models = c(5, 10, 20, 40, 60), pos_mult = c(1, 10, 20),
+																		perf_quants = list(c(.1, .5, .9), c(.05, .5, .95),
+																											 c(.01, .5, .99)),
+																		limits = list(
+																			stop_after = 4, replication = NULL,
+																			pos_target = 82, labeling_limit = 900
+																		)) {
 
 	# file: 'Sessions/Session1/Records_2021-03-18T13.09.24.xlsx'
 
@@ -3117,13 +3117,28 @@ perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
 	}) %>% unlist() %>% table()
 }
 
-analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NA,
-																plot = TRUE, target = c('Pos_rate_adj', 'Pos_rate')) {
+analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
+																tot_records = NULL,  plot = TRUE,
+																score = c('Pos_rate_adj_sens', 'Sens_adj_eff',
+																					'Pos_rate')) {
 
-	target <- match.arg(target)
+	score <- match.arg(score)
+
+	if (is.null(tot_pos) | is.null(tot_records)) {
+		Labels <- list.files(session_folder, pattern = 'Records_', recursive = T, full.names = T)[1] %>%
+			read_excel() %>%
+			mutate(
+				Target = coalesce_labels(., label_cols = c('Rev_prediction_new',
+																									 'Rev_prediction', 'Rev_manual',
+																									 'Rev_previous'))
+			) %>% with(table(Target)) %>% as.list()
+
+
+		if (is.null(tot_pos)) tot_pos <- Labels$y
+		if (is.null(tot_records)) tot_records <- sum(unlist(Labels))
+	}
 
 	out <- list.files(session_folder, pattern = 'Results_', recursive = T, full.names = T) %>%
-		#head(20) %>%
 		pbmclapply(function(file) {
 
 			readr::read_csv(file, col_types = cols()) %>%
@@ -3152,80 +3167,80 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NA,
 			across(one_of(c("Tot_labeled", "Pos_labels", "Mods", "Quant", 'Init',
 											'Mult')), as.numeric),
 			Pos_rate = Pos_labels / Tot_labeled,
-			Pos_rate_adj = Pos_rate * (Pos_labels / tot_pos),
-			#Pos_rate_adj = (Pos_labels / tot_pos) * (1 - Tot_labeled / max(Tot_labeled)),
-			Target = get(target)
+			Pos_rate_adj_sens = Pos_rate * (Pos_labels / tot_pos),
+			Sens_adj_eff = (Pos_labels / tot_pos) * (1 - Tot_labeled / tot_records),
+			Score = get(score)
 		) %>%
 		group_by(Session) %>%
-		slice_max(Pos_labels, n = 1, with_ties = T) %>%
-		slice_max(Target, n = 1, with_ties = F) %>%
+		slice_tail(n = 1) %>%
 		ungroup()
 
 	params <- c("Mods", "Quant", "Resamp", "Init", "Mult")
 
 	tree <- out %>%
-		select(Target, one_of(c("Mods", "Quant", "Resamp", "Init", "Mult"))) %>%
-		mutate_at(vars(-Target), as.factor) %>% {
+		select(Score, one_of(c("Mods", "Quant", "Resamp", "Init", "Mult"))) %>%
+		mutate_at(vars(-Score), as.factor) %>% {
 			df <- .
-			rpart(Target ~ ., df)
+			rpart(Score ~ ., df)
 		}
 
 	rules <- tidytrees::tidy_tree(tree)[tree$where - 1,] %>%
 		mutate(
-			rule = sprintf('%s. %s (%.2g)', as.numeric(factor(rule, unique(rule[order(estimate, decreasing = T)]))), rule, estimate)
-			)
+			rule = sprintf('%s. %s (%.2g)',
+										 as.numeric(factor(rule, unique(rule[order(estimate, decreasing = T)]))),
+										 rule, estimate),
+			rule = factor(rule, unique(rule[order(estimate, decreasing = T)]))
+		)
 
 	out <- mutate(out, Rule = rules$rule)
 
- if (plot) {
+	if (plot) {
 
- 	p <- lapply(params, function(par) {
- 		params <- setdiff(params, par)
- 		out %>%
- 			mutate(group = select(cur_data(), one_of(params)) %>%
- 						 	apply(1, paste, collapse = ' ')) %>%
- 			ggplot(aes(factor(get(par)), Target)) +
- 			geom_boxplot(show.legend = F, outlier.shape = NA) +
- 			geom_boxplot(aes(fill = Rule), show.legend = F, outlier.shape = NA) +
- 			geom_line(aes(group = group, color = Rule), alpha = .5, show.legend = F) +
- 			geom_point(aes(color = Rule), show.legend = F) +
- 			theme_minimal() +
- 			scale_y_continuous(labels = function(x) round(x, 2)) +
- 			ylab(target) +
- 			xlab(par)
- 	}) #%>% patchwork::wrap_plots()
+		p <- lapply(params, function(par) {
+			params <- setdiff(params, par)
+			out %>%
+				mutate(group = select(cur_data(), one_of(params)) %>%
+							 	apply(1, paste, collapse = ' ')) %>%
+				ggplot(aes(factor(get(par)), Score)) +
+				geom_boxplot(show.legend = F, outlier.shape = NA) +
+				geom_boxplot(aes(fill = Rule), show.legend = F, outlier.shape = NA) +
+				geom_line(aes(group = group, color = Rule), alpha = .5, show.legend = F) +
+				geom_point(aes(color = Rule), show.legend = F) +
+				theme_minimal() +
+				scale_y_continuous(labels = function(x) round(x, 2)) +
+				ylab(score) +
+				xlab(par)
+		})
 
- 	p_one <- out %>%
- 		ggplot(aes(factor(get(params[1])), Target)) +
- 		geom_line(aes( group = Rule, color = Rule), size = 2) +
- 		theme_minimal() +
- 		labs(color = glue('Par. group (mean {target})'))
+		p_one <- out %>%
+			ggplot(aes(factor(get(params[1])), Score)) +
+			geom_line(aes( group = Rule, color = Rule), size = 2) +
+			theme_minimal() +
+			labs(color = glue('Par. group (mean {score})'))
 
- 	tmp <- ggplot_gtable(ggplot_build(p_one))
- 	leg <- which(tmp$layout$name == 'guide-box')
+		tmp <- ggplot_gtable(ggplot_build(p_one))
+		leg <- which(tmp$layout$name == 'guide-box')
 
- 	legend <- tmp$grobs[[leg]]
+		legend <- tmp$grobs[[leg]]
 
- 	p <- patchwork::wrap_plots(p) + legend
+		p <- patchwork::wrap_plots(p) + legend
 
- 	print(p)
- }
+		print(p)
+	}
 
-	#partykit::ctree((Pos_rate_adj) ~ ., out %>% select(Pos_rate_adj, one_of(c("Mods", "Quant", "Resamp", "Init", "Mult"))) %>% mutate_if(is.character, as.factor)) %>% plot
-
-	# local({
-	# 	par = 'Init'
-	# 	params <- setdiff(params, par)
-	# 	out <- out %>%
-	# 		filter(Resamp == 'y', Init > 100, Mult > 1) %>%
-	# 		mutate(group = select(cur_data(), one_of(params)) %>%
-	# 					 	apply(1, paste, collapse = ' '),
-	# 					 par = (as.factor(get(par))))
-	#
-	# 	brms::brm(Pos_rate_adj ~ par + (par | group), family = Gamma('log'), data = out, backend = 'cmdstanr') %>% broom::tidy()
-	# })
-
-	out
+	list(
+		iterations = out,
+		best_parms = out %>% filter(str_detect(Rule, '^1\\.')) %>%
+			slice_max(Pos_labels, n = 1, with_ties = T) %>%
+			slice_max(Score, n = 1, with_ties = F) %>%
+			select(Iter, Rep, Tot_labeled, Pos_labels, Score, any_of(params)) %>%
+			mutate(
+				Score = glue("{signif(Score, 3)} ({score})"),
+				Pos_labels = glue("{Pos_labels} / {tot_pos}"),
+				Tot_labeled = glue("{Tot_labeled} / {tot_records}"),
+				across(.fns = as.character)) %>%
+			tidyr::pivot_longer(everything(), names_to = 'Parameter', 'Value')
+	)
 }
 
 select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
