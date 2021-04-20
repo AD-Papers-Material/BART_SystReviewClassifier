@@ -118,14 +118,22 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 	}, timeouts = max(wait_for + 3, 30), cleaning_timeout = max(wait_for + 3, 30))
 }
 
-# Parse an excel file or return data if already parsed
-import_excel <- function(input) {
-	if (is.character(input)) {
-		return(read_excel(input, guess_max = 10^6))
-	} else if ('data.frame' %nin% class(input)) {
-		stop('Input should be a file path or a data.frame')
-	} else return(input)
+# Parse an excel/csv file or return data if already parsed
+import_data <- function(input) {
+
+	if (is.character(input) | is.factor(input)) {
+		if (str_detect(input, '\\.xlsx?$')) {
+			return(read_excel(input, guess_max = 10^6))
+		} else if (str_detect(input, '\\.xlsx?$')) {
+			return(read_csv(input, guess_max = 10^6))
+		}
+	} else if (is.data.frame(input)) {
+		return(input)
+	}
+
+	stop('Input should be an existing csv/excel file path or a data.frame')
 }
+
 
 
 # Record search -----------------------------------------------
@@ -2472,7 +2480,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 
 		Records <- import_classification(
 			records = Records,
-			prev_records = import_excel(prev_records)
+			prev_records = import_data(prev_records)
 		)
 
 		tictoc::toc()
@@ -2482,7 +2490,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 		message('Importing test data')
 
 		tictoc::tic()
-		Test_data <- import_excel(test_data)
+		Test_data <- import_data(test_data)
 
 		tictoc::toc()
 	}
@@ -2888,8 +2896,8 @@ perform_test_run <- function(Records, Test_data, session_name = NULL,
 														 num_init_labels = NULL, DTM = NULL,
 														 sessions_folder = 'Test_Sessions', ...) {
 
-	Records <- import_excel(Records)
-	Test_data <- import_excel(Test_data)
+	Records <- import_data(Records)
+	Test_data <- import_data(Test_data)
 
 	# if (is.null(session_name)) {
 	# 	session_name <- paste(
@@ -2917,7 +2925,7 @@ perform_test_run <- function(Records, Test_data, session_name = NULL,
 
 	dir.create(dirname(file_path), recursive = T, showWarnings = FALSE)
 
-	Test_data <- import_excel(Test_data)
+	Test_data <- import_data(Test_data)
 
 	Records <- Records %>%
 		select(-any_of('Rev_previous')) %>% {
@@ -2979,8 +2987,8 @@ perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
 			) %>% str_replace_all('\\.+', '.')
 		)
 
-	Records <- import_excel(Records)
-	Test_data <- import_excel(Test_data)
+	Records <- import_data(Records)
+	Test_data <- import_data(Test_data)
 
 	pblapply(1:nrow(Grid), function(i) {
 		str(Grid[i,], give.attr = F)
@@ -3583,7 +3591,7 @@ summarise_annotations2 <- function(sessions_folder = 'Sessions',
 
 	message('...loading files')
 
-	Annotations <- pbmclapply(files$Annotation, import_excel) %>%
+	Annotations <- pbmclapply(files$Annotation, import_data) %>%
 		setNames(files$Annotation)
 
 	Parent_files <- pbmclapply(na.omit(files$Results), function(f) {
