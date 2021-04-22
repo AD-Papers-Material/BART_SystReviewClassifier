@@ -1073,11 +1073,15 @@ create_annotation_file <- function(records, reorder_query = NULL,
 
 create_session <- function(Records, session_name,
 													 sessions_folder = 'Sessions', DTM = NULL,
-													 dup_session_action = c('skip', 'stop', 'add', 'replace')) {
+													 dup_session_action = c('skip', 'stop', 'add', 'replace'),
+													 use_time_stamp = TRUE) {
 
 	dup_session_action <- match.arg(dup_session_action)
 
-	initialise_session <- function(Records, session_path, DTM = NULL) {
+	initialise_session <- function(Records, session_path, DTM = NULL,
+																 use_time_stamp = T) {
+
+		if (use_time_stamp) ts <- glue('_{safe_now()}') else ''
 
 		# Create the session folder
 		dir.create(session_path, recursive = T, showWarnings = FALSE)
@@ -1088,7 +1092,7 @@ create_session <- function(Records, session_name,
 
 		# Copy or write the Record data
 
-		file_path <- file.path(session_path, 'Records.xlsx')
+		file_path <- file.path(session_path, glue('Records{ts}.xlsx'))
 		if (is.character(Records) | is.factor(Records)) {
 			if (!file.exists(Records)) stop(Records, ' does not exists.')
 
@@ -1137,7 +1141,7 @@ create_session <- function(Records, session_name,
 		message('Create session folder "', session_path, '".')
 	}
 
-	initialise_session(Records, session_path, DTM)
+	initialise_session(Records, session_path, DTM, use_time_stamp)
 
 	return(session_path)
 }
