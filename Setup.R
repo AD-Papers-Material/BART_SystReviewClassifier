@@ -2405,8 +2405,8 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 																	 pos_mult = 10,
 																	 n_models = 40,
 																	 resample = T,
-																	 #
 																	 perf_quants = c(.01, .5, .99),
+																	 #
 																	 sessions_folder = 'Sessions',
 																	 autorun = T, replication = NULL,
 																	 dup_session_action = c('fill', 'add',
@@ -2945,7 +2945,11 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 														 n_models = n_models,
 														 perf_quants = perf_quants,
 														 resample = resample,
+<<<<<<< HEAD
 														 #
+=======
+														 #######
+>>>>>>> fc5673f4883e6e12dbb0ef2fd8d144d6ba0dc0c6
 														 dup_session_action = 'fill', # if an automatic reply, this is the logical option
 														 session_name = session_name,
 														 replication = NULL, # the replication will be taken by the previous annotation
