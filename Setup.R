@@ -2405,8 +2405,8 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 																	 pos_mult = 10,
 																	 n_models = 40,
 																	 resample = T,
-																	 #
 																	 perf_quants = c(.01, .5, .99),
+																	 #
 																	 sessions_folder = 'Sessions',
 																	 autorun = T, replication = NULL,
 																	 dup_session_action = c('fill', 'add',
