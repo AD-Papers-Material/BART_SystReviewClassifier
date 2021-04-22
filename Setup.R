@@ -1092,6 +1092,77 @@ save_annotation_file <- function(records, reorder_query = NULL,
 	invisible(records)
 }
 
+create_session <- function(Records, session_name,
+													 sessions_folder = 'Sessions', DTM = NULL,
+													 dup_session_action = c('skip', 'stop', 'add', 'replace')) {
+
+	dup_session_action <- match.arg(dup_session_action)
+
+	initialise_session <- function(Records, session_path, DTM = NULL) {
+
+		# Create the session folder
+		dir.create(session_path, recursive = T, showWarnings = FALSE)
+
+		# At the moment csv files will be converted to excel, eventually both file
+		# type will be supported
+		if (str_detect(Records, '\\.csv$')) Records <- import_data(Records)
+
+		# Copy or write the Record data
+
+		file_path <- file.path(session_path, 'Records.xlsx')
+		if (is.character(Records) | is.factor(Records)) {
+			if (!file.exists(Records)) stop(Records, ' does not exists.')
+
+			file.copy(Records, file_path, overwrite = T, recursive = F)
+		} else {
+			openxlsx::write.xlsx(Records, file = file_path, asTable = T)
+		}
+
+		# Copy or write the DTM data
+		file_path <- file.path(session_path, 'DTM.rds')
+		if (!is.null(DTM)) {
+			if (is.character(DTM) | is.factor(DTM)) {
+				if (!file.exists(DTM)) stop(DTM, ' does not exists.')
+
+				file.copy(DTM, file_path, overwrite = T, recursive = F)
+			} else {
+				readr::write_rds(DTM, file = file_path, asTable = T)
+			}
+		}
+	}
+
+	session_path <- file.path(sessions_folder, session_name)
+
+	if (dir.exists(session_path)) {
+		switch(dup_session_action,
+					 skip = return(session_path),
+					 add = {
+					 	warning('Session "', session_name, '" exists. Adding a replicate...')
+					 	cur_rep <- max(str_extract(session_name, '(?<=_r)\\d+') %>% as.numeric(), 1, na.rm = T)
+
+					 	session_name <- str_remove(session_name, '_r\\d+$') %>% paste0('_r', cur_rep + 1)
+
+					 	session_path <- create_session(Records = Records, session_name = session_name,
+					 																 sessions_folder = sessions_folder, DTM = DTM,
+					 																 dup_session_action = dup_session_action)
+					 },
+					 replace = {
+					 	warning('Session "', session_name, '" exists. Replacing...')
+					 	failure <- unlink(session_path, recursive = T)
+
+					 	if (failure == 1) stop('Session removal failed!')
+					 },
+					 stop = stop('Session "', session_name, '" is already existing. Stopping...')
+		)
+	} else {
+		message('Create session folder "', session_path, '".')
+	}
+
+	initialise_session(Records, session_path, DTM)
+
+	return(session_path)
+}
+
 fix_duplicated_records <- function(records) {
 
 	records <- records %>%
@@ -2349,9 +2420,10 @@ compute_changes <- function(Annotations) {
 enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 																	 n_models = 40, resample = T,
 																	 perf_quants = c(.01, .5, .99),
-																	 session_name = NULL,
-																	 sessions_folder = 'Sessions', autorun = T,
-																	 replication = NULL,
+																	 session_name, sessions_folder = 'Sessions',
+																	 autorun = T, replication = NULL,
+																	 dup_session_action = c('fill', 'add',
+																	 											 'replace', 'stop'),
 																	 limits = list(
 																	 	stop_after = 4, pos_target = NULL,
 																	 	labeling_limit = NULL
@@ -2364,22 +2436,19 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 
 	perf_quants <- sort(perf_quants)[c(2, 1, 3)]
 
-	if (is.null(session_name)) {
-		session_name <- basename(dirname(file))
-	}
+	dup_session_action <- match.arg(dup_session_action)
 
 	session_path <- file.path(sessions_folder, session_name)
-	if (!dir.exists(session_path)) {
-		dir.create(session_path, recursive = T)
-	}
 
-	if (pos_mult < 1) stop('pos_mult should be at least 1.')
+	dup_session_action <- if (dup_session_action == 'fill') 'skip' else dup_session_action
 
-	if ((pos_mult - round(pos_mult)) != 0) {
-		warning('pos_mult should be an integer; will be rounded up.')
-	}
+	create_session(Records = file, session_name = session_name,
+								 sessions_folder = sessions_folder,
+								 dup_session_action = dup_session_action)
 
-	if (pos_mult != round(pos_mult)) stop(paste(pos_mult, 'should be an integer value.'))
+	if (pos_mult < 1) stop('"pos_mult" should be at least 1.')
+
+	if (pos_mult != round(pos_mult)) stop('"pos_mult" should be an integer value.')
 
 	message('Loading Annotation file')
 
@@ -2470,7 +2539,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 			.after = Rev_prediction
 		)
 
-	if ('*' %in% Records$Rev_prediction) stop('There are unreviewed predictions')
+	if ('*' %in% Records$Rev_prediction) stop('There are unreviewed predictions.')
 	tictoc::toc()
 
 	if (!is.null(prev_records)) {
@@ -2493,7 +2562,7 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 		Test_data <- import_data(test_data)
 
 		tictoc::toc()
-	}
+	} else Test_data <- NULL
 
 	tictoc::tic()
 	if (is.null(DTM)) {
@@ -2721,13 +2790,15 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 	if (compute_performance) {
 		message('Adding performance summary')
 
-		tictoc::tic()
+		if (!is.null(Test_data)) {
 
-		Performance <- compute_pred_performance(Annotated_data, samples = Samples,
-																						test_data = Test_data,
-																						perf_quants = perf_quants)
+			tictoc::tic()
 
-		tictoc::toc()
+			Performance <- compute_pred_performance(Annotated_data, samples = Samples,
+																							test_data = Test_data,
+																							perf_quants = perf_quants)
+			tictoc::toc()
+		}
 	}
 
 	## Prints the performance summaries out, but it's a bit messy and this data is already in excel
