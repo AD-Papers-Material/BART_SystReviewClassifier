@@ -2400,10 +2400,14 @@ compute_changes <- function(Annotations) {
 
 
 
-enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
-																	 n_models = 40, resample = T,
+enrich_annotation_file <- function(file, session_name, DTM = NULL,
+																	 ## Model parameters
+																	 pos_mult = 10,
+																	 n_models = 40,
+																	 resample = T,
 																	 perf_quants = c(.01, .5, .99),
-																	 session_name, sessions_folder = 'Sessions',
+																	 ###################
+																	 sessions_folder = 'Sessions',
 																	 autorun = T, replication = NULL,
 																	 dup_session_action = c('fill', 'add',
 																	 											 'replace', 'stop'),
@@ -2412,10 +2416,14 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 																	 	labeling_limit = NULL
 																	 ),
 																	 compute_performance = T,
-																	 use_prev_labels = T,
-																	 prev_records = NULL,
 																	 test_data = NULL,
+																	 use_prev_labels = T,
+																	 prev_classification = NULL,
 																	 rebuild = FALSE, ...) {
+
+	if (length(perf_quants) != 3 & any(perf_quants >= 1 | perf_quants <= 0)) {
+		stop('"perf_quants" should be 3 quantiles, between 0 and 1 (included).')
+	}
 
 	perf_quants <- sort(perf_quants)[c(2, 1, 3)]
 
@@ -2525,14 +2533,14 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 	if ('*' %in% Records$Rev_prediction) stop('There are unreviewed predictions.')
 	tictoc::toc()
 
-	if (!is.null(prev_records)) {
-		message('Importing previous annotations')
+	if (!is.null(prev_classification)) {
+		message('Importing previous classification')
 
 		tictoc::tic()
 
 		Records <- import_classification(
 			records = Records,
-			prev_records = import_data(prev_records)
+			prev_records = import_data(prev_classification)
 		)
 
 		tictoc::toc()
@@ -2931,13 +2939,23 @@ enrich_annotation_file <- function(file, DTM = NULL, pos_mult = 10,
 
 			file.remove('Model_backup.rds')
 
-			enrich_annotation_file(output_file_ann, DTM = DTM_file, pos_mult = pos_mult,
-														 n_models = n_models, perf_quants = perf_quants,
+			enrich_annotation_file(output_file_ann, DTM = DTM_file,
+														 ## Model parameters
+														 pos_mult = pos_mult,
+														 n_models = n_models,
+														 perf_quants = perf_quants,
+														 resample = resample,
+														 #######
+														 dup_session_action = 'fill', # if an automatic reply, this is the logical option
 														 session_name = session_name,
+														 replication = NULL, # the replication will be taken by the previous annotation
+														 compute_performance = compute_performance,
 														 sessions_folder = sessions_folder, limits = limits,
 														 autorun = autorun, use_prev_labels = use_prev_labels,
-														 prev_records = prev_records,
-														 test_data = test_data, rebuild = FALSE, ...)
+														 prev_classification = NULL, # if present it was already imported
+														 test_data = test_data,
+														 rebuild = TRUE, # redundant since the model backup was removed, but just to be on the safe side
+														 ...)
 		} else {
 			message('Manual labeling needed!')
 		}
