@@ -1,26 +1,56 @@
 
 # Setup -------------------------------------------------------------------
+Sys.setenv(LANG = "en")
+if (is.null(options('BartMem')[[1]])) {
+	mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
 
-options(java.parameters = "-Xmx14g")
+	if (is.na(as.numeric(mem))) stop('input should be a number.')
 
-if (!('librarian' %in% installed.packages())) install.packages('librarian')
+	mem <- paste0("-Xmx", mem, "g")
 
-library(librarian)
-shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
-			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri,
-			bakaburg1/tidytrees)
+	options(BartMem = mem)
+}
 
-# Packages required but not loaded
-required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
-													 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms'),
-												 installed.packages())
+options(java.parameters = options('BartMem'))
 
-if (length(required.pkgs) > 0) install.packages(required.pkgs)
+# if (!('librarian' %in% installed.packages())) install.packages('librarian')
+#
+# library(librarian)
+# shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
+# 			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri,
+# 			bakaburg1/tidytrees)
+#
+# # Packages required but not loaded
+# required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
+# 													 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms'),
+# 												 installed.packages())
+#
+# if (length(required.pkgs) > 0) install.packages(required.pkgs)
 
-### Uncomment if mclapply fails on windows
-# mclapply <- lapply
-# pbmclapply <- pblapply
+local({
+	install_and_load <- c("dplyr", "stringr", "glue", "readr", "readxl", "lubridate", "Matrix", "igraph", "pbapply",
+												"pbmcapply", "rpart", "bartMachine", "tm", "patchwork", "ggplot2", "ggrepel", "RLesur/crrri",
+												"bakaburg1/tidytrees")
+	only_install <- c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
+										'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms')
 
+	if (!('devtools' %in% installed.packages())) install.packages('devtools')
+
+	for (pkg in setdiff(c(install_and_load, only_install), installed.packages())) {
+		if (grepl('/', pkg)) try(devtools::install_github(pkg)) else install.packages(pkg)
+	}
+
+	for (pkg in install_and_load) {
+		try(library(stringr::str_remove(pkg, '.*^/'), character.only = TRUE))
+	}
+})
+
+
+### Windows do not support mclapply
+if  (.Platform$OS.type != 'unix') {
+	mclapply <- lapply
+	pbmclapply <- pblapply
+}
 
 if (bart_machine_num_cores() != parallel::detectCores()) {
 
@@ -1102,7 +1132,7 @@ create_session <- function(Records, session_name,
 
 		# At the moment csv files will be converted to excel, eventually both file
 		# type will be supported
-		if (str_detect(Records, '\\.csv$')) Records <- import_data(Records)
+		if (is.character(Records) && str_detect(Records, '\\.csv$')) Records <- import_data(Records)
 
 		# Copy or write the Record data
 
@@ -1402,7 +1432,7 @@ tokenize_authors <- function(corpus) {
 					str_replace(x, '([\\w \\.]+)\\.([\\w ]+)', '\\2_\\1') #use the rightmost dot to separate first and last names
 				}) %>% str_remove_all('\\.')
 		}
-	}, mc.cores = 8) %>% unlist %>%
+	}) %>% unlist %>%
 		str_replace_all('; *', ' ')
 
 	tictoc::toc()
