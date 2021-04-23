@@ -1434,6 +1434,8 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 	order.ids <- 1:length(corpus)
 	names(ids) <- order.ids
 
+	if (is.na(min.freq)) stop('"min.freq" is NA.')
+
 	if (!is.null(tokenize.fun)) {
 		corpus <- tokenize.fun(corpus)
 	}
@@ -1879,7 +1881,7 @@ coalesce_labels <- function(data, label_cols = c('Rev_prediction_new','Rev_predi
 }
 
 
-create_training_set <- function(Records, pos_mult = 10L) {
+create_training_set <- function(Records, pos_mult = 10L, min_freq_pos_rate = 0.03) {
 
 	if (pos_mult < 1) stop('pos_mult should be at least 1')
 
@@ -1894,13 +1896,17 @@ create_training_set <- function(Records, pos_mult = 10L) {
 		}
 
 	if (all(is.na(Records$Target))) {
-		stop('There are no classified records')
+		stop('There are no labelled records')
 	}
+
+	min_freq = max(floor(sum(Records$Target == 'y', na.rm = T) * min_freq_pos_rate), 1)
+
+	message('(min term freq: ', min_freq, ')')
 
 	message('Title DTM')
 	Title_DTM <- with(
 		Records,
-		text_to_DTM(Title, min.freq = 20, label = 'TITLE__', ids = ID,
+		text_to_DTM(Title, min.freq = min_freq, label = 'TITLE__', ids = ID,
 								freq.subset.ids = ID[!is.na(Target)])
 	)
 
@@ -1911,7 +1917,7 @@ create_training_set <- function(Records, pos_mult = 10L) {
 		Records,
 		Abstract %>%
 			str_remove_all(regex('\\b(background|introduction|method\\w*|result\\w*|conclusion\\w*|discussion)',ignore_case = T)) %>%
-			text_to_DTM(min.freq = 20, label = 'ABSTR__', ids = ID,
+			text_to_DTM(min.freq = min_freq, label = 'ABSTR__', ids = ID,
 									freq.subset.ids = ID[!is.na(Target)])
 	)
 
@@ -1920,7 +1926,7 @@ create_training_set <- function(Records, pos_mult = 10L) {
 	message('\nAuthors DTM')
 	Authors_DTM <- with(
 		Records,
-		text_to_DTM(Authors, tokenize.fun = tokenize_authors, min.freq = 20,
+		text_to_DTM(Authors, tokenize.fun = tokenize_authors, min.freq = min_freq,
 								label = 'AUTH__', ids = ID, freq.subset.ids = ID[!is.na(Target)],
 								add.ngrams = F, aggr.synonyms = F)
 	)
@@ -1930,7 +1936,7 @@ create_training_set <- function(Records, pos_mult = 10L) {
 	message('\nKeywords DTM')
 	Keywords_DTM <- with(
 		Records,
-		text_to_DTM(Keywords, tokenize.fun = tokenize_keywords, min.freq = 20,
+		text_to_DTM(Keywords, tokenize.fun = tokenize_keywords, min.freq = min_freq,
 								label = 'KEYS__', ids = ID,
 								freq.subset.ids = ID[!is.na(Target)])
 	)
@@ -1940,7 +1946,7 @@ create_training_set <- function(Records, pos_mult = 10L) {
 	message('\nMesh DTM')
 	Mesh_DTM <- with(
 		Records,
-		text_to_DTM(Mesh, tokenize.fun = tokenize_MESH, min.freq = 20,
+		text_to_DTM(Mesh, tokenize.fun = tokenize_MESH, min.freq = min_freq,
 								label = 'MESH__', ids = ID, freq.subset.ids = ID[!is.na(Target)],
 								add.ngrams = F)
 	)
@@ -2429,11 +2435,9 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 	dup_session_action <- match.arg(dup_session_action)
 
-	session_path <- file.path(sessions_folder, session_name)
-
 	dup_session_action <- if (dup_session_action == 'fill') 'skip' else dup_session_action
 
-	create_session(Records = file, session_name = session_name,
+	session_path <- create_session(Records = file, session_name = session_name,
 								 sessions_folder = sessions_folder,
 								 dup_session_action = dup_session_action)
 
@@ -2948,7 +2952,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 														 #
 														 dup_session_action = 'fill', # if an automatic reply, this is the logical option
 														 session_name = session_name,
-														 replication = NULL, # the replication will be taken by the previous annotation
+														 replication = NULL, # the replication number will be taken by the previous annotation
 														 compute_performance = compute_performance,
 														 sessions_folder = sessions_folder, limits = limits,
 														 autorun = autorun, use_prev_labels = use_prev_labels,
@@ -3029,20 +3033,26 @@ perform_test_run <- function(Records, Test_data, session_name = NULL,
 	return(TRUE)
 }
 
-perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
-																		Test_data = file.path(sessions_folder, 'Test_data.xlsx'),
-																		DTM = NULL, resample = c(FALSE, TRUE), rebuild = T,
+perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
+																		prev_classification = records,
+																		## Model parameters
+																		resample = c(FALSE, TRUE),
 																		n_init = c(50, 100, 250, 500),
-																		n_models = c(5, 10, 20, 40, 60), pos_mult = c(1, 10, 20),
-																		perf_quants = list(c(.1, .5, .9), c(.05, .5, .95),
+																		n_models = c(5, 10, 20, 40, 60),
+																		pos_mult = c(1, 10, 20),
+																		perf_quants = list(c(.1, .5, .9),
+																											 c(.05, .5, .95),
 																											 c(.01, .5, .99)),
+																		## Passed arguments
+																		rebuild = TRUE,
 																		limits = list(
-																			stop_after = 4, replication = NULL,
-																			pos_target = 82, labeling_limit = 900
+																			stop_after = 4,
+																			pos_target = NULL, labeling_limit = NULL
 																		)) {
 
 	# file: 'Sessions/Session1/Records_2021-03-18T13.09.24.xlsx'
 
+	# prepare the parameter grid
 	Grid <- tidyr::expand_grid(
 		resample, n_init, n_models, pos_mult, perf_quants
 	) %>%
@@ -3059,22 +3069,61 @@ perform_grid_evaluation <- function(Records, sessions_folder = 'Grid_Search',
 			) %>% str_replace_all('\\.+', '.')
 		)
 
-	Records <- import_data(Records)
-	Test_data <- import_data(Test_data)
+	Records <- import_data(records)
+	Classification_data <- import_data(prev_classification)
+
+	# import the test classifications and remove unclassified records
+	Records <- Records %>%
+		import_classification(Classification_data) %>%
+		filter(!is.na(Rev_previous))
 
 	pblapply(1:nrow(Grid), function(i) {
-		str(Grid[i,], give.attr = F)
+		str(Grid[i,], give.attr = FALSE)
 
 		file.remove('Model_backup.rds')
 
+		session_path <- file.path(sessions_folder, Grid[i,]$session)
+
+		# if no record files are present, recreate the session folder
+		if (length(list.files(session_path, pattern = 'Records', recursive = TRUE)) == 0) {
+			Records <- Records %>%
+				# remove labels in excess of "n_init"
+				mutate(across(
+					any_of(c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new')),
+					~ replace(.x, Order > Grid[i,]$n_init, NA)
+				))
+
+			create_session(Records, session_name = Grid[i,]$session,
+																		 sessions_folder = sessions_folder,
+																		 dup_session_action = 'replace')
+		}
+
+		# pick the last annotated record file or the source one if any
+		last_record_file <- tibble(
+			path = list.files(session_path, recursive = T) %>% str_subset('Records'),
+			iter = str_remove(path, 'Annotations.') %>% # the dot stands for the file system separator
+				str_extract('^\\d+') %>%
+				as.numeric() %>%
+				pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
+		) %>% with(path[iter == max(iter)])
+
+		last_record_file <- file.path(session_path, last_record_file)
+
 		with(Grid[i,],
-				 perform_test_run(Records, session_name = session,
+				 enrich_annotation_file(last_record_file, session_name = session,
 				 								 sessions_folder = sessions_folder, rebuild = TRUE,
-				 								 Test_data = Test_data, DTM = DTM,
-				 								 compute_performance = FALSE, resample = resample,
-				 								 num_init_labels = n_init, n_models = n_models,
-				 								 pos_mult = pos_mult, perf_quants = perf_quants[[1]],
-				 								 limits = limits)
+				 								 prev_classification = Classification_data, DTM = NULL,
+				 								 use_prev_labels = TRUE,
+				 								 autorun = TRUE, replication = NULL,
+				 								 compute_performance = FALSE,
+				 								 test_data = NULL,
+				 								 dup_session_action = 'fill',
+				 								 limits = limits,
+				 								 ## Model parameters
+				 								 resample = resample,
+				 								 n_models = n_models,
+				 								 pos_mult = pos_mult,
+				 								 perf_quants = perf_quants[[1]])
 		)
 	}) %>% unlist() %>% table()
 }
