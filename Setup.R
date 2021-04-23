@@ -134,6 +134,20 @@ import_data <- function(input) {
 	stop('Input should be an existing csv/excel file path or a data.frame')
 }
 
+summarise_args <- function(args) {
+	print(args %>% names())
+	args %>%
+		names %>% lapply(function(name) {
+
+			if (name == '' || !exists(name)) return(NULL)
+			obj <- get(name)
+			data.frame(
+				name,
+				value = if (is.data.frame(obj)) paste(class(obj), collapse = ', ') else capture.output(str(obj)) %>% head() %>% paste(collapse = '\n') %>% str_trim()
+			)
+		}) %>% bind_rows()
+}
+
 
 
 # Record search -----------------------------------------------
@@ -2431,6 +2445,18 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		stop('"perf_quants" should be 3 quantiles, between 0 and 1 (included).')
 	}
 
+	# log arguments. useful for error checking
+	Arguments <- match.call() %>%
+		as.list() %>% names() %>% lapply(function(name) {
+
+			if (name == '' || !exists(name)) return(NULL)
+			obj <- get(name)
+			data.frame(
+				name,
+				value = if (is.data.frame(obj)) paste(class(obj), collapse = ', ') else capture.output(str(obj)) %>% head() %>% paste(collapse = '\n') %>% str_trim()
+			)
+		}) %>% bind_rows()
+
 	perf_quants <- sort(perf_quants)[c(2, 1, 3)]
 
 	dup_session_action <- match.arg(dup_session_action)
@@ -2881,21 +2907,12 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		Annotated_data = Annotated_data,
 		Results = Results,
 		Performance = Performance,
-		Variable_importance = Var_imp
+		Variable_importance = Var_imp,
+		Arguments = Arguments
 	) %>% Filter(f = Negate(is.null))
 
 	common_tag <- glue('{if (repl > 1) paste0("rep", repl, "_") else ""}{safe_now()}')
 	iter <- with(Results, Value[Indicator == 'Iter'])
-
-	message('...arguments')
-
-	# capture.output(
-	# 	match.call() %>%
-	# 		as.list() %>%
-	# 		str(),
-	# 	file = file.path(session_path, 'Arguments.txt')
-	# )
-
 
 	message('- DTM...')
 	tictoc::tic()
