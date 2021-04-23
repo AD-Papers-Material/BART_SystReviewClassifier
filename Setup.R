@@ -1544,6 +1544,9 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 		tictoc::toc()
 	}
 
+	# The synonyms creation procedure can create very long names
+	DTM <- DTM %>% setNames(str_sub(colnames(DTM), 1, 10000))
+
 	message('- managing missings...')
 
 	if (nrow(DTM) < length(raw.corpus)) { # Add documents with no content, ie. NAs
@@ -1925,33 +1928,33 @@ coalesce_labels <- function(data, label_cols = c('Rev_prediction_new','Rev_predi
 }
 
 
-create_training_set <- function(Records, pos_mult = 10L, min_freq_pos_rate = 0.03) {
+create_training_set <- function(Records, min_freq = 0.05) {
 
-	if (pos_mult < 1) stop('pos_mult should be at least 1')
+	if (min_freq <= 0 | min_freq > 1) stop('"min_freq" should be between 0 and 1.')
 
-	Records <- Records %>%
+	Records <- import_data(Records) %>%
 		transmute(
 			Target = coalesce_labels(.),
 			ID, Title, Abstract, Authors, Keywords, Mesh
-		) %>% {
-			.[c(
-				rep(which(.$Target %in% 'y'), pos_mult),
-				which(!(.$Target %in% 'y'))),]
-		}
+		)
+
+	min_freq <- max(floor(sum(Records$Target %in% c('y', 'n')) * min_freq), 1)
+
+	Records <- Records[c(
+				rep(which(Records$Target %in% 'y'), min_freq),
+				which(Records$Target %nin% 'y')),]
 
 	if (all(is.na(Records$Target))) {
 		stop('There are no labelled records')
 	}
 
-	min_freq = max(floor(sum(Records$Target == 'y', na.rm = T) * min_freq_pos_rate), 1)
-
-	message('(min term freq: ', min_freq, ')')
+	message('(min term freq in negatives: ', min_freq, ')')
 
 	message('Title DTM')
 	Title_DTM <- with(
 		Records,
 		text_to_DTM(Title, min.freq = min_freq, label = 'TITLE__', ids = ID,
-								freq.subset.ids = ID[!is.na(Target)])
+								freq.subset.ids = ID[Target %in% c('y', 'n')])
 	)
 
 	message('dimensions: ', paste(dim(Title_DTM), collapse = ', '))
@@ -1962,7 +1965,7 @@ create_training_set <- function(Records, pos_mult = 10L, min_freq_pos_rate = 0.0
 		Abstract %>%
 			str_remove_all(regex('\\b(background|introduction|method\\w*|result\\w*|conclusion\\w*|discussion)',ignore_case = T)) %>%
 			text_to_DTM(min.freq = min_freq, label = 'ABSTR__', ids = ID,
-									freq.subset.ids = ID[!is.na(Target)])
+									freq.subset.ids = ID[Target %in% c('y', 'n')])
 	)
 
 	message('dimensions: ', paste(dim(Abstract_DTM), collapse = ', '))
@@ -1971,7 +1974,7 @@ create_training_set <- function(Records, pos_mult = 10L, min_freq_pos_rate = 0.0
 	Authors_DTM <- with(
 		Records,
 		text_to_DTM(Authors, tokenize.fun = tokenize_authors, min.freq = min_freq,
-								label = 'AUTH__', ids = ID, freq.subset.ids = ID[!is.na(Target)],
+								label = 'AUTH__', ids = ID, freq.subset.ids = ID[Target %in% c('y', 'n')],
 								add.ngrams = F, aggr.synonyms = F)
 	)
 
@@ -1982,7 +1985,7 @@ create_training_set <- function(Records, pos_mult = 10L, min_freq_pos_rate = 0.0
 		Records,
 		text_to_DTM(Keywords, tokenize.fun = tokenize_keywords, min.freq = min_freq,
 								label = 'KEYS__', ids = ID,
-								freq.subset.ids = ID[!is.na(Target)])
+								freq.subset.ids = ID[Target %in% c('y', 'n')])
 	)
 
 	message('dimensions: ', paste(dim(Keywords_DTM), collapse = ', '))
@@ -1991,21 +1994,24 @@ create_training_set <- function(Records, pos_mult = 10L, min_freq_pos_rate = 0.0
 	Mesh_DTM <- with(
 		Records,
 		text_to_DTM(Mesh, tokenize.fun = tokenize_MESH, min.freq = min_freq,
-								label = 'MESH__', ids = ID, freq.subset.ids = ID[!is.na(Target)],
+								label = 'MESH__', ids = ID, freq.subset.ids = ID[Target %in% c('y', 'n')],
 								add.ngrams = F)
 	)
 
 	message('dimensions: ', paste(dim(Mesh_DTM), collapse = ', '))
 
-	data.frame(
+	DTM <- data.frame(
 		Target = Records$Target,
 		Title_DTM,
 		Abstract_DTM[,-1],
 		Authors_DTM[,-1],
 		Keywords_DTM[,-1],
 		Mesh_DTM[,-1]
-	) %>% distinct()
-
+	) %>% distinct() %>%
+		select(
+			where(~ !is.numeric(.x)),
+			where(~ suppressWarnings(sum(as.numeric(.x), na.rm = T)) > 1)
+		)
 }
 
 summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
@@ -2517,10 +2523,10 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 	# If the file is an annotated file the replication is extracted
 	if (basename(dirname(file)) == 'Annotations') {
 
-			# replication is extracted from the file title or set to one
-			prev_run <- str_extract(file, '(?<=_rep)\\d+') %>% as.numeric()
+		# replication is extracted from the file title or set to one
+		prev_run <- str_extract(file, '(?<=_rep)\\d+') %>% as.numeric()
 
-			repl <- max(1, prev_run, na.rm = T)
+		repl <- max(1, prev_run, na.rm = T)
 
 		# increase the replication if no new positives
 		iter_data <- compute_changes(Records) %>%
@@ -2528,7 +2534,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 		new_positives <- iter_data %>% select(matches('-> y')) %>% rowSums()
 
-		if (new_positives == 0) repl <- repl + 1
+		if (new_positives == 0) repl <- repl + 1 else repl <- 1
 	}
 
 	if (!is.null(limits) & !isFALSE(limits)) {
@@ -2617,22 +2623,19 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 	tictoc::tic()
 	if (is.null(DTM)) {
+		DTM <- file.path(sessions_folder, session_name, 'DTM.rds')
+	}
 
-		DTM_path <- file.path(sessions_folder, session_name, 'DTM.rds')
-		if (file.exists(DTM_path)) {
-			message('Loading DTM')
-
-			DTM <- read_rds(DTM_path)
-		} else {
-			message('Creating DTM')
-
-			DTM <- create_training_set(Records, pos_mult)
-		}
-
-	} else if (is.character(DTM)) {
+	# Reload DTM if existing and there were no new positive matches
+	if (is.character(DTM) && file.exists(DTM) & repl > 1) {
 		message('Loading DTM')
 
-		DTM <- readr::read_rds(DTM)
+		DTM <- read_rds(DTM)
+
+	} else {
+		message('Creating DTM')
+
+		DTM <- create_training_set(Records)
 	}
 
 	if (!(all(Records$ID %in% DTM$ID))) {
@@ -2894,6 +2897,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 							str_subset('~\\$', negate = T) %>% length()) + 1,
 		'Parent file' = file,
 		'Replication n.' = repl,
+		'N. features' = select(DTM, -ID, -Target) %>% ncol,
 		'New labels' = Annotated_data$Rev_prediction_new %>%
 			summarise_vector(),
 		'Records to review' = with(Annotated_data, Predicted_label[Rev_prediction_new %in% '*']) %>%
@@ -2947,9 +2951,9 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 	message('- DTM...')
 	tictoc::tic()
 	DTM_file <- file.path(session_path, 'DTM.rds')
-	if (!file.exists(DTM_file)) {
-		readr::write_rds(DTM, file = DTM_file, compress = 'gz')
-	}
+
+	readr::write_rds(DTM, file = DTM_file, compress = 'gz')
+
 	tictoc::toc()
 
 	message('- annotated records...')
