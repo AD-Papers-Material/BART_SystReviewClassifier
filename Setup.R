@@ -3003,7 +3003,12 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		if ('*' %nin% Annotated_data$Rev_prediction_new) {
 			message('\n\nAutomatic restart')
 
+			rm(Predicted_data, Annotated_data, Var_imp, Samples)
+			gc()
+
 			if (file.exists('Model_backup.rds')) file.remove('Model_backup.rds')
+
+			file.remove(process_id)
 
 			enrich_annotation_file(output_file_ann, DTM = DTM_file,
 														 ## Model parameters
