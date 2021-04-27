@@ -2477,6 +2477,17 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 																	 prev_classification = NULL,
 																	 rebuild = FALSE, ...) {
 
+	process_id <- paste0('.pID__', str_replace_all(file, fixed(.Platform$file.sep), '__'))
+
+	if (file.exists(process_id)) {
+		warning('File already being processed. Skip.')
+		return(NULL)
+	}
+
+	writeLines(paste('Process started on:', safe_now()), process_id)
+
+	on.exit(file.remove(process_id))
+
 	if (length(perf_quants) != 3 & any(perf_quants >= 1 | perf_quants <= 0)) {
 		stop('"perf_quants" should be 3 quantiles, between 0 and 1 (included).')
 	}
@@ -2545,7 +2556,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 		# All records have been labeled
 		if (length(Target) == nrow(Records)) {
-			message('No unlabeled records left!')
+			warning('No unlabeled records left!')
 
 			return(NULL)
 		}
@@ -2553,7 +2564,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		# Enough positives found
 		if (!is.null(limits$pos_target) &&
 				sum(Target %in% 'y') >= limits$pos_target) {
-			message('Positive records target reached!')
+			warning('Positive records target reached!')
 			return(NULL)
 		}
 
@@ -2569,13 +2580,13 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		if (!is.null(limits$labeling_limit)) {
 			if ((limits$labeling_limit <= 1 & length(Target) / nrow(Records) >= limits$labeling_limit) |
 					(limits$labeling_limit > 1 & length(Target) >= limits$labeling_limit)) {
-				message('Num/Ratio of labeled records above threshold!')
+				warning('Num/Ratio of labeled records above threshold!')
 				return(NULL)
 			}
 		}
 
 		if (!is.null(limits$stop_after) && (repl > limits$stop_after)) {
-			message('Reached limit of consecutive iterations without new positive records!')
+			warning('Reached limit of consecutive iterations without new positive records!')
 			return(NULL)
 		}
 
@@ -2992,7 +3003,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		if ('*' %nin% Annotated_data$Rev_prediction_new) {
 			message('\n\nAutomatic restart')
 
-			file.remove('Model_backup.rds')
+			if (file.exists('Model_backup.rds')) file.remove('Model_backup.rds')
 
 			enrich_annotation_file(output_file_ann, DTM = DTM_file,
 														 ## Model parameters
@@ -3131,7 +3142,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 	pblapply(1:nrow(Grid), function(i) {
 		str(Grid[i,], give.attr = FALSE)
 
-		file.remove('Model_backup.rds')
+		if (file.exists('Model_backup.rds')) file.remove('Model_backup.rds')
 
 		session_path <- file.path(sessions_folder, Grid[i,]$session)
 
