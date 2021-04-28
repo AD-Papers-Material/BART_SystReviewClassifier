@@ -13,20 +13,6 @@ if (is.null(options('BartMem')[[1]])) {
 
 options(java.parameters = options('BartMem'))
 
-# if (!('librarian' %in% installed.packages())) install.packages('librarian')
-#
-# library(librarian)
-# shelf(dplyr, stringr, glue, readr, readxl, lubridate, Matrix, igraph, pbapply,
-# 			pbmcapply, rpart, bartMachine, tm, patchwork, ggplot2, ggrepel, RLesur/crrri,
-# 			bakaburg1/tidytrees)
-#
-# # Packages required but not loaded
-# required.pkgs <- setdiff(c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
-# 													 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms'),
-# 												 installed.packages())
-#
-# if (length(required.pkgs) > 0) install.packages(required.pkgs)
-
 local({
 	install_and_load <- c("dplyr", "stringr", "glue", "readr", "readxl", "lubridate", "Matrix", "igraph", "pbapply",
 												"pbmcapply", "rpart", "bartMachine", "tm", "patchwork", "ggplot2", "ggrepel", "RLesur/crrri",
@@ -41,7 +27,7 @@ local({
 	}
 
 	for (pkg in install_and_load) {
-		try(library(stringr::str_remove(pkg, '.*^/'), character.only = TRUE))
+		try(library(stringr::str_remove(pkg, '^.*/'), character.only = TRUE))
 	}
 })
 
@@ -2007,11 +1993,13 @@ create_training_set <- function(Records, min_freq = 0.05) {
 		Authors_DTM[,-1],
 		Keywords_DTM[,-1],
 		Mesh_DTM[,-1]
-	) %>% distinct() %>%
+	) %>%
+		distinct() %>% # remove the duplicated positive matches
 		select(
 			where(~ !is.numeric(.x)),
 			where(~ suppressWarnings(sum(as.numeric(.x), na.rm = T)) > 1)
 		)
+
 }
 
 summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
