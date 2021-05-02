@@ -2468,7 +2468,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 	process_id <- paste0('.pID__', str_replace_all(file, fixed(.Platform$file.sep), '__'))
 
 	if (file.exists(process_id)) {
-		warning('File already being processed. Skip.')
+		message('File already being processed. Skipping.')
 		return(NULL)
 	}
 
@@ -2544,7 +2544,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 		# All records have been labeled
 		if (length(Target) == nrow(Records)) {
-			warning('No unlabeled records left!')
+			message('No unlabeled records left!')
 
 			return(NULL)
 		}
@@ -2552,7 +2552,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		# Enough positives found
 		if (!is.null(limits$pos_target) &&
 				sum(Target %in% 'y') >= limits$pos_target) {
-			warning('Positive records target reached!')
+			message('Positive records target reached!')
 			return(NULL)
 		}
 
@@ -2568,13 +2568,13 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 		if (!is.null(limits$labeling_limit)) {
 			if ((limits$labeling_limit <= 1 & length(Target) / nrow(Records) >= limits$labeling_limit) |
 					(limits$labeling_limit > 1 & length(Target) >= limits$labeling_limit)) {
-				warning('Num/Ratio of labeled records above threshold!')
+				message('Num/Ratio of labeled records above threshold!')
 				return(NULL)
 			}
 		}
 
 		if (!is.null(limits$stop_after) && (repl > limits$stop_after)) {
-			warning('Reached limit of consecutive iterations without new positive records!')
+			message('Reached limit of consecutive iterations without new positive records!')
 			return(NULL)
 		}
 
