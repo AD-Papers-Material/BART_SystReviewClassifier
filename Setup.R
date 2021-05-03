@@ -1231,6 +1231,8 @@ summarise_by_source <- function(annotation_file) {
 
 import_classification <- function(records, prev_records, IDs = records$ID) {
 
+	prev_records <- import_data(prev_records)
+
 	records$uID = with(records,
 										 ifelse(!is.na(DOI), DOI, str_to_lower(Title) %>%
 										 			 	str_remove_all('[^\\w\\d\\s]+')))
