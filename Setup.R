@@ -11,7 +11,7 @@ if (is.null(options('BartMem')[[1]])) {
 	options(BartMem = mem)
 }
 
-options(java.parameters = options('BartMem'))
+options(java.parameters = options('BartMem')$BartMem)
 
 local({
 	install_and_load <- c("dplyr", "stringr", "glue", "readr", "readxl", "lubridate", "Matrix", "igraph", "pbapply",
@@ -1148,7 +1148,10 @@ create_session <- function(Records, session_name,
 
 	if (dir.exists(session_path)) {
 		switch(dup_session_action,
-					 skip = return(session_path),
+					 skip = {
+					 	warning('Session "', session_name, '" exists. Skipping...')
+					 	return(session_path)
+					 	},
 					 add = {
 					 	warning('Session "', session_name, '" exists. Adding a replicate...')
 					 	cur_rep <- max(str_extract(session_name, '(?<=_r)\\d+') %>% as.numeric(), 1, na.rm = T)
