@@ -1103,7 +1103,7 @@ create_annotation_file <- function(records, reorder_query = NULL,
 
 create_session <- function(Records, session_name,
 													 sessions_folder = 'Sessions', DTM = NULL,
-													 dup_session_action = c('skip', 'stop', 'add', 'replace'),
+													 dup_session_action = c('skip', 'stop', 'add', 'replace', 'silent'),
 													 use_time_stamp = TRUE) {
 
 	dup_session_action <- match.arg(dup_session_action)
@@ -1148,6 +1148,9 @@ create_session <- function(Records, session_name,
 
 	if (dir.exists(session_path)) {
 		switch(dup_session_action,
+					 silent = {
+					 	return(session_path)
+					 }
 					 skip = {
 					 	warning('Session "', session_name, '" exists. Skipping...')
 					 	return(session_path)
@@ -2502,7 +2505,7 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 	dup_session_action <- match.arg(dup_session_action)
 
-	dup_session_action <- if (dup_session_action == 'fill') 'skip' else dup_session_action
+	dup_session_action <- if (dup_session_action == 'fill') 'silent' else dup_session_action
 
 	session_path <- create_session(Records = file, session_name = session_name,
 								 sessions_folder = sessions_folder,
