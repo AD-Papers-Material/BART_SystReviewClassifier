@@ -1242,20 +1242,21 @@ import_classification <- function(records, prev_records, IDs = records$ID) {
 	target_uID <- records$uID[records$ID %in% IDs]
 	prev_records <- filter(prev_records, uID %in% target_uID)
 
-	if ('Rev_title' %in% colnames(prev_records)) {
-		prev_records <- prev_records %>%
-			transmute(
-				Rev_manual = coalesce_labels(., c('Rev_abstract', 'Rev_title')),
-				Rev_prediction = Rev_prediction,
-				uID
-			)
-	}
+	# if ('Rev_title' %in% colnames(prev_records)) {
+	# 	prev_records <- prev_records %>%
+	# 		transmute(
+	# 			Rev_manual = coalesce_labels(., c('Rev_abstract', 'Rev_title')),
+	# 			Rev_prediction = Rev_prediction,
+	# 			uID
+	# 		)
+	# }
 
 	prev_records <- prev_records %>% transmute(
 		uID,
 		Rev_previous = coalesce_labels(cur_data(), c('Rev_previous',
 																								 'Rev_prediction_new',
-																								 'Rev_prediction', 'Rev_manual'))
+																								 'Rev_prediction', 'Rev_manual',
+																								 'Rev_abstract', 'Rev_title'))
 	) %>% distinct()
 
 	left_join(records, prev_records, by = 'uID') %>% {
@@ -3185,7 +3186,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 
 analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 																tot_records = NULL,  plot = TRUE,
-																score = c('Pos_rate_adj_sens', 'Sens_adj_eff',
+																score = c('Sens_adj_eff', 'Pos_rate_adj_sens',
 																					'Pos_rate')) {
 
 	score <- match.arg(score)
