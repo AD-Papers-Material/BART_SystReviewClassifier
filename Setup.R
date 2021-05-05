@@ -1150,7 +1150,7 @@ create_session <- function(Records, session_name,
 		switch(dup_session_action,
 					 silent = {
 					 	return(session_path)
-					 }
+					 },
 					 skip = {
 					 	warning('Session "', session_name, '" exists. Skipping...')
 					 	return(session_path)
@@ -1181,6 +1181,23 @@ create_session <- function(Records, session_name,
 
 	return(session_path)
 }
+
+get_last_annotation_file <- function(session_path) {
+	files <- list.files(session_path, recursive = T) %>% str_subset('Records')
+
+	if (length(files) == 0) return(NULL)
+
+	last_record_file <- tibble(
+		files,
+		iter = basename(files) %>%
+			str_extract('^\\d+') %>%
+			as.numeric() %>%
+			pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
+	) %>% with(files[iter == max(iter)])
+
+	file.path(session_path, last_record_file)
+}
+
 
 fix_duplicated_records <- function(records) {
 
@@ -2453,7 +2470,7 @@ compute_changes <- function(Annotations) {
 
 
 
-enrich_annotation_file <- function(file, session_name, DTM = NULL,
+enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 ## Model parameters
 																	 pos_mult = 10,
 																	 n_models = 10,
@@ -2473,6 +2490,16 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 																	 use_prev_labels = T,
 																	 prev_classification = NULL,
 																	 rebuild = FALSE, ...) {
+
+	# pick the last annotated record file or the source one if any
+	if (is.null(file)) {
+		file <- get_last_annotation_file(file.path(sessions_folder, session_name))
+
+		if (is.null(file)) {
+			stop('No annotation files in this session, or the session folder doesn\'t exists.')
+		}
+		message('Processing file: ', file)
+	}
 
 	process_id <- paste0('.pID__', str_replace_all(file, fixed(.Platform$file.sep), '__'))
 
@@ -2996,16 +3023,16 @@ enrich_annotation_file <- function(file, session_name, DTM = NULL,
 
 	tictoc::toc()
 
+	if (file.exists('Model_backup.rds')) file.remove('Model_backup.rds')
+
+	file.remove(process_id)
+
 	if (autorun) {
 		if ('*' %nin% Annotated_data$Rev_prediction_new) {
 			message('\n\nAutomatic restart')
 
 			rm(Predicted_data, Annotated_data, Var_imp, Samples)
 			gc()
-
-			if (file.exists('Model_backup.rds')) file.remove('Model_backup.rds')
-
-			file.remove(process_id)
 
 			enrich_annotation_file(output_file_ann, DTM = DTM_file,
 														 ## Model parameters
@@ -3098,15 +3125,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 		}
 
 		# pick the last annotated record file or the source one if any
-		last_record_file <- tibble(
-			path = list.files(session_path, recursive = T) %>% str_subset('Records'),
-			iter = str_remove(path, 'Annotations.') %>% # the dot stands for the file system separator
-				str_extract('^\\d+') %>%
-				as.numeric() %>%
-				pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
-		) %>% with(path[iter == max(iter)])
-
-		last_record_file <- file.path(session_path, last_record_file)
+		last_record_file <- get_last_annotation_file(session_path)
 
 		with(Grid[i,],
 				 enrich_annotation_file(last_record_file, session_name = session,
