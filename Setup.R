@@ -13,23 +13,32 @@ if (is.null(options('BartMem')[[1]])) {
 
 options(java.parameters = options('BartMem')$BartMem)
 
-local({
-	install_and_load <- c("dplyr", "stringr", "glue", "readr", "readxl", "lubridate", "Matrix", "igraph", "pbapply",
-												"pbmcapply", "rpart", "bartMachine", "tm", "patchwork", "ggplot2", "ggrepel", "RLesur/crrri",
-												"bakaburg1/tidytrees")
-	only_install <- c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
-										'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms')
+pkg.require <- function(install_and_load = c(), only_install = c()) {
 
 	if (!('devtools' %in% installed.packages())) install.packages('devtools')
 
-	for (pkg in setdiff(c(install_and_load, only_install), installed.packages())) {
-		if (grepl('/', pkg)) try(devtools::install_github(pkg)) else install.packages(pkg)
-	}
+	all_packages <- unique(c(install_and_load, only_install))
+	all_packages_clean <- sub(pattern = '^.*/', replacement = '', x = all_packages)
 
-	for (pkg in install_and_load) {
-		try(library(stringr::str_remove(pkg, '^.*/'), character.only = TRUE))
-	}
-})
+	only_install <- all_packages %in% only_install
+	is_github <- grepl('/', all_packages)
+	not_installed <- !(all_packages_clean %in% installed.packages()[,1])
+
+	# Install
+	sapply(all_packages[!is_github & not_installed], install.packages)
+	sapply(all_packages[is_github & not_installed], devtools::install_github)
+
+	# Load
+	sapply(all_packages_clean[!only_install], library, character.only = TRUE)
+}
+
+pkg.require(
+	install_and_load = c("dplyr", "stringr", "glue", "readr", "readxl", "lubridate", "Matrix", "igraph", "pbapply",
+												"pbmcapply", "rpart", "bartMachine", "tm", "patchwork", "ggplot2", "ggrepel", "RLesur/crrri",
+												"bakaburg1/tidytrees"),
+	only_install = c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
+										'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms')
+	)
 
 
 ### Windows do not support mclapply

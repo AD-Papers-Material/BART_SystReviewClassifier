@@ -81,13 +81,14 @@ Annotation_data <- extract_source_file_paths(journal) %>%
 			.before = DOI
 		)
 
-# Store the file
-dir.create(file.path('Annotations', 'Session1'))
-folder <- file.path('Annotations', 'Session1')
-dir.create(folder, recursive = T)
-file <- file.path(folder, paste0('Records_', safe_now(), '.xlsx'))
-WriteXLS::WriteXLS(records, ExcelFileName = file)
 ```
+
+This annotation file needs to be stored in an **Annotation Session** folder which will contain all annotation information. This operation is streamlined by the `create_session()`, which also help manage duplicated sessions.
+
+```{r managing records, echo = TRUE, eval = FALSE}
+create_session(Annotation_data, session_name = 'Session1')
+```
+
 
 Actually all these step are more easily performed by `save_annotation_file()`. This function can take as input either the path to record files, or the parsed records (one data frame or a list of data frames) or a group of folders where to look for files into./
 In addition, it also allows to add the new records to a previous annotation file (arg `prev_annotation`), useful with subsequent searching sessions with different queries. Finally, previous manual classifications of records can be imported using `prev_classification`.
@@ -128,7 +129,9 @@ Records <- perform_search_session(query = query, year_query = year_filter,
 	# return the record file paths
 	extract_source_file_paths() %>%
 	# read, join, reorder records and save them in the Sessions folder
-	save_annotation_file(reorder_query = query, session_name = 'Session1') 
+	save_annotation_file(reorder_query = query) %>%  
+	# Create a new session with the records
+	create_session(session_name = 'Session1')
 ```
 
 
