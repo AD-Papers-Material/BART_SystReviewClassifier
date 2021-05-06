@@ -1191,7 +1191,7 @@ create_session <- function(Records, session_name,
 	return(session_path)
 }
 
-get_last_session_files <- function(session_path, which = c('Records', 'DTM', 'Samples')) {
+get_session_last_files <- function(session_path, which = c('Records', 'DTM', 'Samples')) {
 
 	files <- list.files(session_path, recursive = T) %>% str_subset('Records')
 
@@ -2503,7 +2503,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	# pick the last annotated record file or the source one if any
 	if (is.null(file)) {
-		file <- get_last_session_files(file.path(sessions_folder, session_name))$Records
+		file <- get_session_last_files(file.path(sessions_folder, session_name))$Records
 
 		if (is.null(file)) {
 			stop('No annotation files in this session, or the session folder doesn\'t exists.')
@@ -3135,7 +3135,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 		}
 
 		# pick the last annotated record file or the source one if any
-		last_record_file <- get_last_session_files(session_path)$Records
+		last_record_file <- get_session_last_files(session_path)$Records
 
 		with(Grid[i,],
 				 enrich_annotation_file(last_record_file, session_name = session,
@@ -3486,8 +3486,13 @@ extract_rules <- function(Model_output, vimp.threshold = 1.25, n.trees = 800, ..
 	)
 }
 
-extract_rules <- function(Session, rebuild_dtm = F, vimp.threshold = 1.25,
+extract_rules <- function(session_path, rebuild_dtm = F, vimp.threshold = 1.25,
 													n.trees = 800, ...) {
+
+	files <- get_session_last_files(session_path)
+
+	Records <- import_data(files$Records)
+	DTM <- read_rds(files$DTM)
 
 	DTM <- Model_output$Annotated_data %>% mutate(
 		Target = case_when(
