@@ -1191,7 +1191,8 @@ create_session <- function(Records, session_name,
 	return(session_path)
 }
 
-get_last_annotation_file <- function(session_path) {
+get_last_session_files <- function(session_path, which = c('Records', 'DTM', 'Samples')) {
+
 	files <- list.files(session_path, recursive = T) %>% str_subset('Records')
 
 	if (length(files) == 0) return(NULL)
@@ -2502,7 +2503,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	# pick the last annotated record file or the source one if any
 	if (is.null(file)) {
-		file <- get_last_annotation_file(file.path(sessions_folder, session_name))
+		file <- get_last_session_files(file.path(sessions_folder, session_name))$Records
 
 		if (is.null(file)) {
 			stop('No annotation files in this session, or the session folder doesn\'t exists.')
@@ -3134,7 +3135,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 		}
 
 		# pick the last annotated record file or the source one if any
-		last_record_file <- get_last_annotation_file(session_path)
+		last_record_file <- get_last_session_files(session_path)$Records
 
 		with(Grid[i,],
 				 enrich_annotation_file(last_record_file, session_name = session,
@@ -3280,6 +3281,9 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 			tidyr::pivot_longer(everything(), names_to = 'Parameter', 'Value')
 	)
 }
+
+
+# Rule building tools -----------------------------------------------------
 
 select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
 															only.inclusive.rules = F, target.vec, target.data,
@@ -3458,6 +3462,56 @@ extract_rules <- function(Model_output, vimp.threshold = 1.25, n.trees = 800, ..
 		mutate_all(~ replace(.x, is.na(.x), 0))
 
 	print(paste('N. features:', ncol(SpecificDTM)))
+
+	message('Computing trees')
+
+	if (n.trees > ncol(Draws)) warning('Number of trees > than number of MCMC draws. Will use all of them.')
+
+	trees <- pbmclapply(sample(1:ncol(Draws), min(n.trees, ncol(Draws))), function(i) {
+
+		df <- data.frame(
+			Pred = Draws[,i],
+			SpecificDTM
+		)
+
+		rpart(Pred ~ ., data = df, control = rpart.control(...)) %>%
+			get_tree_rules(eval.ready = T)
+	}) %>% bind_rows()
+
+	message('Extracting rules')
+
+	list(
+		linear = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'lin'),
+		seq = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'seq')
+	)
+}
+
+extract_rules <- function(Session, rebuild_dtm = F, vimp.threshold = 1.25,
+													n.trees = 800, ...) {
+
+	DTM <- Model_output$Annotated_data %>% mutate(
+		Target = case_when(
+			!is.na(Rev_prediction) ~ Rev_prediction,
+			T ~ Predicted_label
+		)
+	) %>% select(Target, ID) %>%
+		right_join(Model_output$DTM %>% select(-Target), by = 'ID')
+
+	Draws <- Model_output$Prediction_matrix
+
+	message('Generating feature dataset')
+
+	specific.terms <- Model_output$Variable_importance %>% filter(Score > vimp.threshold) %>% pull(Term) %>%
+		str_subset('^MESH', negate = T) %>% str_remove('.+__') %>% unique()
+
+	SpecificDTM <- pbmclapply(specific.terms, function(term) {
+		factor((select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = T) > 0) + 0)
+	}) %>% bind_cols() %>% setNames(paste0('V__', specific.terms)) %>%
+		mutate_all(~ replace(.x, is.na(.x), 0))
+
+	print(paste('N. features:', ncol(SpecificDTM)))
+
+	tictoc::toc()
 
 	message('Computing trees')
 
