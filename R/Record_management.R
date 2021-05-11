@@ -397,17 +397,21 @@ get_session_last_files <- function(session_path, which = c('Records', 'DTM', 'Sa
 
 	files <- list.files(session_path, recursive = T) %>% str_subset('Records')
 
-	if (length(files) == 0) return(NULL)
+	lapply(which, function(type) {
+		files <- list.files(session_path, recursive = T) %>% str_subset(type)
 
-	last_record_file <- tibble(
-		files,
-		iter = basename(files) %>%
-			str_extract('^\\d+') %>%
-			as.numeric() %>%
-			pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
-	) %>% with(files[iter == max(iter)])
+		if (length(files) == 0) return(NULL)
 
-	file.path(session_path, last_record_file)
+		last_record_file <- tibble(
+			files,
+			iter = basename(files) %>%
+				str_extract('^\\d+') %>%
+				as.numeric() %>%
+				pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
+		) %>% with(files[iter == max(iter)])
+
+		file.path(session_path, last_record_file)
+	}) %>% setNames(which)
 }
 
 
