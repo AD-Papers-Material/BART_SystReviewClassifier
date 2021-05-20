@@ -2,7 +2,6 @@
 # Initialize --------------------------------------------------------------
 
 
-
 Sys.setenv(LANG = "en")
 if (is.null(options('BartMem')[[1]])) {
 	mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
@@ -151,13 +150,13 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 }
 
 # Parse an excel/csv file or return data if already parsed
-import_data <- function(input) {
+import_data <- function(input, ...) {
 
 	if (is.character(input) | is.factor(input)) {
 		if (str_detect(input, '\\.xlsx?$')) {
-			return(read_excel(input, guess_max = 10^6))
+			return(read_excel(input, guess_max = 10^6, ...))
 		} else if (str_detect(input, '\\.xlsx?$')) {
-			return(read_csv(input, guess_max = 10^6))
+			return(read_csv(input, guess_max = 10^6, ...))
 		}
 	} else if (is.data.frame(input)) {
 		return(input)
