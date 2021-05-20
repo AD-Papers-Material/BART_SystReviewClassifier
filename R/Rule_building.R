@@ -92,7 +92,7 @@ select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
 		target.data.filtered <- target.data
 
 		while (nrow(temp.trees) > 0 & any(temp.trees$pos > 0)) {
-			best <- temp.trees %>% filter(pos > 0) %>% slice_max(score, n = 1)
+			best <- temp.trees %>% filter(pos > 0) %>% slice_max(score, n = 1, with_ties = T)
 			res <- bind_rows(res, best)
 
 			setTxtProgressBar(pb, sum(res$pos))
@@ -150,82 +150,49 @@ select_best_rules <- function(trees, stat.filter = NULL, only.terminal = F,
 	if (!is.null(stat.filter)) filter(res, cum.score > stat.filter) else res
 }
 
-
-extract_rules <- function(Model_output, vimp.threshold = 1.25, n.trees = 800, ...) {
-
-	DTM <- Model_output$Annotated_data %>% mutate(
-		Target = case_when(
-			!is.na(Rev_prediction) ~ Rev_prediction,
-			T ~ Predicted_label
-		)
-	) %>% select(Target, ID) %>%
-		right_join(Model_output$DTM %>% select(-Target), by = 'ID')
-
-	Draws <- Model_output$Prediction_matrix
-
-	message('Generating feature dataset')
-	tictoc::tic()
-
-	specific.terms <- Model_output$Variable_importance %>% filter(Score > vimp.threshold) %>% pull(Term) %>%
-		str_subset('^MESH', negate = T) %>% str_remove('.+__') %>% unique()
-
-	SpecificDTM <- pbmclapply(specific.terms, function(term) {
-		factor((select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = T) > 0) + 0)
-	}) %>% bind_cols() %>% setNames(paste0('V__', specific.terms)) %>%
-		mutate_all(~ replace(.x, is.na(.x), 0))
-
-	print(paste('N. features:', ncol(SpecificDTM)))
-
-	message('Computing trees')
-
-	if (n.trees > ncol(Draws)) warning('Number of trees > than number of MCMC draws. Will use all of them.')
-
-	trees <- pbmclapply(sample(1:ncol(Draws), min(n.trees, ncol(Draws))), function(i) {
-
-		df <- data.frame(
-			Pred = Draws[,i],
-			SpecificDTM
-		)
-
-		rpart(Pred ~ ., data = df, control = rpart.control(...)) %>%
-			get_tree_rules(eval.ready = T)
-	}) %>% bind_rows()
-
-	message('Extracting rules')
-
-	list(
-		linear = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'lin'),
-		seq = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'seq')
-	)
-}
-
 extract_rules <- function(session_path, rebuild_dtm = F, vimp.threshold = 1.25,
 													n.trees = 800, ...) {
+
+	message('Preparing the data')
 
 	files <- get_session_last_files(session_path)
 
 	Records <- import_data(files$Records)
-	DTM <- read_rds(files$DTM)
 
-	DTM <- Model_output$Annotated_data %>% mutate(
-		Target = case_when(
-			!is.na(Rev_prediction) ~ Rev_prediction,
-			T ~ Predicted_label
-		)
-	) %>% select(Target, ID) %>%
-		right_join(Model_output$DTM %>% select(-Target), by = 'ID')
+	DTM <- if (rebuild_dtm | is.null(files$DTM)) {
+		message('Rebuilding the DTM')
 
-	Draws <- Model_output$Prediction_matrix
+		create_training_set(Records)
+	} else read_rds(files$DTM)
+
+	Draws <- read_rds(files$Samples)
+
+	Variable_importance <- import_data(files$Records, sheet = 'Variable_importance')
+
+	DTM <- Records %>% transmute(
+		ID,
+		Target = coalesce_labels(cur_data(), c('Rev_prediction_new','Rev_prediction',
+																					 'Rev_manual', 'Predicted_label'))
+	) %>%
+		right_join(DTM %>% select(-Target), by = 'ID')
 
 	message('Generating feature dataset')
 
-	specific.terms <- Model_output$Variable_importance %>% filter(Score > vimp.threshold) %>% pull(Term) %>%
-		str_subset('^MESH', negate = T) %>% str_remove('.+__') %>% unique()
+	specific.terms <- Variable_importance %>% filter(Score > vimp.threshold) %>% pull(Term) %>%
+		str_subset('^MESH', negate = T) %>% str_remove('.+__') %>%
+		str_sub(1, 2500) %>% # str_sub() is necessary since many functions cannot use such long names
+		unique()
+
 
 	SpecificDTM <- pbmclapply(specific.terms, function(term) {
-		factor((select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = T) > 0) + 0)
-	}) %>% bind_cols() %>% setNames(paste0('V__', specific.terms)) %>%
-		mutate_all(~ replace(.x, is.na(.x), 0))
+			values <- select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = T)
+
+			factor((values > 0) + 0)
+		}) %>%
+		setNames(paste0('V__', specific.terms)) %>%
+		bind_cols() %>%
+		mutate_all(~ replace(.x, is.na(.x), 0)) %>%
+		select(where(~ n_distinct(.x) > 1))
 
 	print(paste('N. features:', ncol(SpecificDTM)))
 
@@ -233,9 +200,14 @@ extract_rules <- function(session_path, rebuild_dtm = F, vimp.threshold = 1.25,
 
 	message('Computing trees')
 
-	if (n.trees > ncol(Draws)) warning('Number of trees > than number of MCMC draws. Will use all of them.')
+	if (n.trees > ncol(Draws)) warning('Number of trees > than number of MCMC draws. All draws will be used')
 
-	trees <- pbmclapply(sample(1:ncol(Draws), min(n.trees, ncol(Draws))), function(i) {
+	# Add the median estimate and ensure it is included among the candidate draws
+	Draws <- cbind(Draws[,-1], Records$Pred_Med)
+	candidate_draws <- sample(1:ncol(Draws), min(n.trees, ncol(Draws))) %>%
+		c(ncol(Draws)) %>% unique()
+
+	trees <- pbmclapply(candidate_draws, function(i) {
 
 		df <- data.frame(
 			Pred = Draws[,i],
@@ -243,20 +215,25 @@ extract_rules <- function(session_path, rebuild_dtm = F, vimp.threshold = 1.25,
 		)
 
 		rpart(Pred ~ ., data = df, control = rpart.control(...)) %>%
-			get_tree_rules(eval.ready = T)
+			tidy_tree(eval_ready = T)
 	}) %>% bind_rows()
 
-	message('Extracting rules')
-
 	list(
-		linear = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'lin'),
-		seq = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'seq')
+		SpecificDTM = SpecificDTM,
+		DTM = DTM,
+		trees
 	)
+	# message('Extracting rules')
+	#
+	# list(
+	# 	linear = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'lin'),
+	# 	seq = select_best_rules(trees, target.vec = DTM$Target, target.data = SpecificDTM, only.terminal = T, only.inclusive.rules = T, algorithm = 'seq')
+	# )
 }
 
 rules_to_query <- function(rules) {
 
-	str_remove_all(rules, '^V__') %>% sapply( function(r) {
+	str_remove_all(rules, '\\bV__') %>% sapply( function(r) {
 
 		rules <- str_split(r, ' & ') %>% unlist %>% sapply(function(x) {
 			if (str_detect(x, '.?_.?')) paste0('(', str_replace_all(x, fixed('._.'), ' '), ')') else x
