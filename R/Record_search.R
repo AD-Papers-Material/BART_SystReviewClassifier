@@ -68,7 +68,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 																									"ISSHP", "BSCI", "BHCI", "IC", "CCR", "ESCI"), sid = auth(Sys.getenv("WOS_USERNAME"),
 																																																						Sys.getenv("WOS_PASSWORD")), ...)
 		{
-			parse_wos <- function (all_resps)
+			parse_wos <- function(all_resps)
 			{
 				pbmcapply::pbmclapply(all_resps, wosr:::one_parse)
 			}
