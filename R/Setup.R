@@ -183,6 +183,7 @@ summarise_args <- function(args) {
 
 # Load the infrastructure -------------------------------------------------
 
+if (file.exists('secrets.R')) source('secrets.R')
 
 for (file in file.path('R', list.files('R') %>% str_subset('Setup', negate = T))) {
 	source(file)
