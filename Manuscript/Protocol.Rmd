@@ -34,7 +34,7 @@ year_filter <- '2010-2020'
 
 ```
 
-The query is passed to the `perform_search_session()` function, together with an unique identifier for the **search session** and **search query**. A session identifies a homogeneus group of complementary or alternative queries (e.g. sometimes it is easier to create two different simpler queries than a complex and long one that returns the same results).\
+The query is passed to the `perform_search_session()` function, together with an unique identifier for the **search session** and **search query**. A session identifies a homogeneous group of complementary or alternative queries (e.g. sometimes it is easier to create two different simpler queries than a complex and long one that returns the same results).\
 In our implementation we define as sessions the group of actions that includes the utilization of a search query and the subsequent cycle of manual review and relevancy prediction of its results.\
 
 `perform_search_session()` will use common scientific research database APIs (at the moment Pubmed/Medline, Web of Science and IEEE) to look for records related to query, store them in a csv format and returns or update **journal** (a csv or excel file) with all the information about sessions, queries and search results. The records will be stored in folders with the following structure: Records/\*session_id\*/\*query_id\*.\
