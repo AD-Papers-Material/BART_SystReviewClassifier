@@ -181,9 +181,10 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	year_query <- clean_date_filter_arg(year_query, cases = list(
 		gt = '{year_piece + 1}[PDAT]:{year(today())}[PDAT]',
 		ge = '{year_piece}[PDAT]:{year(today())}[PDAT]',
-		eq = '{year_piece}[PDAT]:{year_piece}[PDAT]', le = '1000[PDAT]:{year_piece}[PDAT]',
-		range = '{year_piece[1]}[PDAT]:{year_piece[2]}[PDAT]',
+		eq = '{year_piece}[PDAT]:{year_piece}[PDAT]',
+		le = '1000[PDAT]:{year_piece}[PDAT]',
 		lt = '1000[PDAT]:{year_piece - 1}[PDAT]'),
+		range = '{year_piece[1]}[PDAT]:{year_piece[2]}[PDAT]',
 		arg_in_query_test = '[PDAT]', query = query)
 
 	year_query <- glue('({year_query})') # adding parenthesis around the dates
