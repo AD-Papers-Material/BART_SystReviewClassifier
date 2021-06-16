@@ -235,10 +235,7 @@ order_by_query_match <- function(records, query) {
 
 create_annotation_file <- function(records, reorder_query = NULL,
 																	 prev_records = NULL,
-																	 prev_classification = NULL,
-																	 out_type = c('xlsx', 'csv')) {
-
-	out_type <- match.arg(out_type)
+																	 prev_classification = NULL) {
 
 	if (class(records) %nin% c('character', 'list', 'data.frame')) {
 		stop('"records" should be either of vector of file/folder paths, a list of data.frame or a single data.frame')
