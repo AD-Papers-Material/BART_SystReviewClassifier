@@ -721,12 +721,13 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	} else Test_data <- NULL
 
 	tictoc::tic()
-	if (is.null(DTM)) {
+
+	if (is.null(DTM) & repl > 1) {
 		DTM <- file.path(sessions_folder, session_name, 'DTM.rds')
 	}
 
 	# Reload DTM if existing and there were no new positive matches
-	if (is.character(DTM) && file.exists(DTM) & repl > 1) {
+	if (is.character(DTM) && file.exists(DTM)) {
 		message('Loading DTM')
 
 		DTM <- read_rds(DTM)
@@ -735,6 +736,14 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 		message('Creating DTM')
 
 		DTM <- create_training_set(Records)
+
+		message('Saving DTM')
+
+		##
+		DTM_file <- file.path(session_path, 'DTM.rds')
+
+		readr::write_rds(DTM, file = DTM_file, compress = 'gz')
+		##
 	}
 
 	if (!(all(Records$ID %in% DTM$ID))) {
@@ -825,6 +834,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 		on.exit(closepb(pb))
 
 		for (i in 1:n_models) {
+			print(i)
 			train_data <- DTM %>% filter(!is.na(Target))
 
 			if (resample) {
@@ -839,7 +849,9 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			bart.mod <- suppressMessages(compute_BART_model(train_data %>% select(-ID), 'Target',
 																											name = 'BartModel', rebuild = T, save = F,
 																											verbose = F, ...))
-
+			rm(train_data)
+			gc()
+		#browser()
 			preds <- bart_machine_get_posterior(
 				bart.mod,
 				new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
@@ -854,6 +866,8 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			Var_imp[[i]] <- bartMachine::get_var_props_over_chain(bart.mod, 'trees')
 
 			rm(bart.mod, preds, train_data)
+
+			gc()
 
 			setpb(pb, i)
 		}
@@ -990,7 +1004,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	#
 	# 	}
 	# }
-
+	#browser()
 	Results <- tibble(
 		Iter = (list.files(file.path(session_path, 'Annotations'), pattern = '.xlsx') %>%
 							str_subset('~\\$', negate = T) %>% length()) + 1,
@@ -1047,13 +1061,13 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	common_tag <- glue('{if (repl > 1) paste0("rep", repl, "_") else ""}{safe_now()}')
 	iter <- with(Results, Value[Indicator == 'Iter'])
 
-	message('- DTM...')
-	tictoc::tic()
-	DTM_file <- file.path(session_path, 'DTM.rds')
-
-	readr::write_rds(DTM, file = DTM_file, compress = 'gz')
-
-	tictoc::toc()
+	# message('- DTM...')
+	# tictoc::tic()
+	# DTM_file <- file.path(session_path, 'DTM.rds')
+	#
+	# readr::write_rds(DTM, file = DTM_file, compress = 'gz')
+	#
+	# tictoc::toc()
 
 	message('- annotated records...')
 	tictoc::tic()
