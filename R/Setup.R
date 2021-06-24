@@ -155,8 +155,8 @@ import_data <- function(input, ...) {
 	if (is.character(input) | is.factor(input)) {
 		if (str_detect(input, '\\.xlsx?$')) {
 			return(read_excel(input, guess_max = 10^6, ...))
-		} else if (str_detect(input, '\\.xlsx?$')) {
-			return(read_csv(input, guess_max = 10^6, ...))
+		} else if (str_detect(input, '\\.csv$')) {
+			return(read_csv(input, guess_max = 10^6, col_types = cols(), ...))
 		}
 	} else if (is.data.frame(input)) {
 		return(input)
