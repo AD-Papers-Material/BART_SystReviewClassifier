@@ -317,6 +317,8 @@ create_session <- function(Records, session_name,
 													 dup_session_action = c('skip', 'stop', 'add', 'replace', 'silent'),
 													 use_time_stamp = TRUE) {
 
+	message("Creating session: ", session_name)
+
 	dup_session_action <- match.arg(dup_session_action)
 
 	initialise_session <- function(Records, session_path, DTM = NULL,
@@ -325,13 +327,16 @@ create_session <- function(Records, session_name,
 		if (use_time_stamp) ts <- glue('_{safe_now()}') else ''
 
 		# Create the session folder
-		dir.create(session_path, recursive = T, showWarnings = FALSE)
+		if (!dir.exists(session_path)) {
+			message('- create session folder "', session_path, '".')
+			dir.create(session_path, recursive = T, showWarnings = FALSE)
+		}
 
 		# At the moment csv files will be converted to excel, eventually both file
 		# type will be supported
 		if (is.character(Records) && str_detect(Records, '\\.csv$')) Records <- import_data(Records)
 
-		# Copy or write the Record data
+		message("- copy or write the Record data")
 
 		file_path <- file.path(session_path, glue('Records{ts}.xlsx'))
 		if (is.character(Records) | is.factor(Records)) {
@@ -342,7 +347,7 @@ create_session <- function(Records, session_name,
 			openxlsx::write.xlsx(Records, file = file_path, asTable = T)
 		}
 
-		# Copy or write the DTM data
+		message("- Copy or write the DTM data")
 		file_path <- file.path(session_path, 'DTM.rds')
 		if (!is.null(DTM)) {
 			if (is.character(DTM) | is.factor(DTM)) {
@@ -384,8 +389,6 @@ create_session <- function(Records, session_name,
 					 },
 					 stop = stop('Session "', session_name, '" is already existing. Stopping...')
 		)
-	} else {
-		message('Create session folder "', session_path, '".')
 	}
 
 	initialise_session(Records, session_path, DTM, use_time_stamp)
