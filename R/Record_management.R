@@ -462,7 +462,7 @@ fix_duplicated_records <- function(records) {
 
 summarise_by_source <- function(annotation_file) {
 	data <- if (is.character(annotation_file)) {
-		read_excel(annotation_file)
+		import_data(annotation_file)
 	} else annotation_file
 
 	sources <- data$Source %>% str_split(., '; ') %>% unlist() %>% table()
