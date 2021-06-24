@@ -289,9 +289,7 @@ create_annotation_file <- function(records, reorder_query = NULL,
 	if (!is.null(prev_classification)) {
 		message('- importing previous classifications...')
 
-		imported_records <- import_data(prev_classification)
-
-		records <- import_classification(records, prev_records = prev_records)
+		records <- import_classification(records, prev_records = prev_classification)
 	}
 
 	if (!is.null(reorder_query)) {
