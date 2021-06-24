@@ -183,8 +183,8 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		ge = '{year_piece}[PDAT]:{year(today())}[PDAT]',
 		eq = '{year_piece}[PDAT]:{year_piece}[PDAT]',
 		le = '1000[PDAT]:{year_piece}[PDAT]',
-		lt = '1000[PDAT]:{year_piece - 1}[PDAT]'),
-		range = '{year_piece[1]}[PDAT]:{year_piece[2]}[PDAT]',
+		lt = '1000[PDAT]:{year_piece - 1}[PDAT]',
+		range = '{year_piece[1]}[PDAT]:{year_piece[2]}[PDAT]'),
 		arg_in_query_test = '[PDAT]', query = query)
 
 	year_query <- glue('({year_query})') # adding parenthesis around the dates
@@ -438,6 +438,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 			str_extract('(?<=xplGlobal\\.document\\.metadata=).+') %>%
 			str_remove(';$') %>% jsonlite::fromJSON()
 
+		if (!is.null(data$keywords)) {
 		Keys <- data$keywords %>%
 			group_by(type = case_when(
 				str_detect(type, 'MeSH') ~ 'Mesh',
@@ -447,6 +448,9 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 			summarise(kwd = paste(unlist(kwd), collapse = '; '))
 
 		Keys <- setNames(as.list(Keys$kwd), Keys$type)
+		} else {
+			Keys = data.frame(IEEE = NA, Mesh = NA, Author = NA)
+		}
 
 		ret <- bind_cols(
 			URL = URL,
