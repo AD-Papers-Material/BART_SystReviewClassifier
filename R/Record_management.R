@@ -50,6 +50,7 @@ parse_medline <- function(entries, timestamp = now()) {
 		Journal = JT, Journal_short = TA, Article_type = PT, Mesh = MH,
 		Author_keywords = OT, Published = DP,
 		Source = 'Pubmed',
+		Source_type = 'parsed',
 		Creation_date = timestamp
 	) %>% clean_record_textfields()
 }
@@ -150,7 +151,7 @@ read_bib_files <- function(files) {
 		if (str_detect(file, '(parsed|API)\\.csv')) {  # no parsing necessary
 			message('Reading ', basename(file), '...')
 
-			return(read_csv(file, col_types = cols()))
+			return(import_data(file))
 		}
 
 		message('Parsing ', basename(file), '...')
@@ -163,7 +164,7 @@ read_bib_files <- function(files) {
 			if (str_detect(entries, 'PMID-')) type <- 'medline'
 
 		} else if (str_detect(file, '\\.(xlsx?|csv)$')) {
-			entries <- if (str_detect(file, '\\.csv$')) read_csv(file, col_types = cols()) else read_excel(file)
+			entries <- import_data(file)
 
 			if ('UT (Unique WOS ID)' %in% colnames(entries)) type <- 'wos'
 			else if ('IEEE Terms' %in% colnames(entries)) type <- 'ieee'
@@ -182,6 +183,7 @@ read_bib_files <- function(files) {
 }
 
 join_records <- function(record.list) {
+
 	lapply(record.list, function(source) {
 		source %>%
 			transmute(
@@ -216,10 +218,12 @@ join_records <- function(record.list) {
 }
 
 order_by_query_match <- function(records, query) {
-	terms <- str_remove_all(query, '[^\\w\\s\\*]+|(?<= )(AND|OR)(?= )') %>%
+	terms <- str_remove_all(query, "NOT ?(\\w+|\\(.*?\\))") %>%
+		str_remove_all('[^\\w\\s\\*]+|(?<= )(AND|OR)(?= )') %>%
 		str_split('\\s+') %>%
 		unlist() %>% unique() %>%
-		str_replace_all('\\*', '\\\\w*')
+		str_replace_all('\\*', '\\\\w*') %>%
+		Filter(function(x) str_length(x) > 2, .)
 
 	records %>%
 		mutate(
@@ -244,7 +248,8 @@ create_annotation_file <- function(records, reorder_query = NULL,
 	if (is.character(records)) {
 		records <- c(
 			list.files(records, full.names = T, recursive = T) %>%
-				str_subset('~\\$', negate = T),
+				str_subset('~\\$', negate = T) %>%
+				str_subset('(parsed|API)\\.csv'),
 			records[!dir.exists(records)]
 		)
 
