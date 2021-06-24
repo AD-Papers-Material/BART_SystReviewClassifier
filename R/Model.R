@@ -524,7 +524,8 @@ compute_changes <- function(Annotations) {
 						sum(!is.na(Annotations$Rev_prediction_new))
 					} else NA,
 					across(c(Total_labeled, New_labels), ~ if (!is.na(.x)) {
-						glue('{.x} ({percent(.x/nrow(Annotations))})')
+						x <- .x # Some changes in glue or dplyr made glue not recognizing .x anymore
+						glue('{x} ({percent(x/nrow(Annotations))})')
 					} else NA),
 					.after = matches('Target')
 				)
@@ -851,7 +852,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																											verbose = F, ...))
 			rm(train_data)
 			gc()
-		#browser()
+
 			preds <- bart_machine_get_posterior(
 				bart.mod,
 				new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
@@ -1004,7 +1005,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	#
 	# 	}
 	# }
-	#browser()
+
 	Results <- tibble(
 		Iter = (list.files(file.path(session_path, 'Annotations'), pattern = '.xlsx') %>%
 							str_subset('~\\$', negate = T) %>% length()) + 1,
