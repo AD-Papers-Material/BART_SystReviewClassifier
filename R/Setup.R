@@ -6,7 +6,7 @@ Sys.setenv(LANG = "en")
 if (is.null(options('BartMem')[[1]])) {
 	mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
 
-	if (is.na(as.numeric(mem))) stop('input should be a number.')
+	if (is.na(as.numeric(mem))) stop('Input should be a number.')
 
 	mem <- paste0("-Xmx", mem, "g")
 
