@@ -544,6 +544,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 #
 																	 sessions_folder = 'Sessions',
 																	 autorun = T, replication = NULL,
+																	 stop_on_unreviewed = TRUE,
 																	 dup_session_action = c('fill', 'add',
 																	 											 'replace', 'stop'),
 																	 limits = list(
@@ -688,6 +689,14 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			mutate(Rev_prediction = NA, .after = Rev_manual)
 	}
 
+	if ('*' %in% Records$Rev_prediction_new & stop_on_unreviewed) {
+		stop('There are unreviewed predictions.')
+	} else {
+		Records$Rev_prediction_new <- replace(Records$Rev_prediction_new,
+																					Records$Rev_prediction_new == '*',
+																					NA)
+	}
+
 	# Coalesce Rev_prediction_new into Rev_prediction and clear the former
 	Records <- Records %>%
 		mutate(
@@ -695,8 +704,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			Rev_prediction_new = NA,
 			.after = Rev_prediction
 		)
-
-	if ('*' %in% Records$Rev_prediction) stop('There are unreviewed predictions.')
 	tictoc::toc()
 
 	if (!is.null(prev_classification)) {
