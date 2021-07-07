@@ -543,6 +543,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 perf_quants = c(.01, .5, .99),
 																	 #
 																	 sessions_folder = 'Sessions',
+																	 pred_batch_size = 5000,
 																	 autorun = T, replication = NULL,
 																	 stop_on_unreviewed = TRUE,
 																	 dup_session_action = c('fill', 'add',
@@ -860,10 +861,23 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			rm(train_data)
 			gc()
 
-			preds <- bart_machine_get_posterior(
-				bart.mod,
-				new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
-			)$y_hat_posterior_samples
+			#message("predicting...")
+			#pred_batch_size = 2 * 10^4
+			#browser()
+			preds <- pblapply(0:floor(nrow(DTM) / pred_batch_size), function (i) {
+				gc()
+				start <- i * pred_batch_size + 1
+				stop <- min((i + 1) * pred_batch_size, nrow(DTM))
+				idx <- start:stop
+
+				bart_machine_get_posterior(
+					bart.mod,
+					new_data = DTM[idx,] %>% select(all_of(colnames(bart.mod$X)))
+				)$y_hat_posterior_samples
+
+			}) %>% do.call(what = 'rbind')
+
+			#print(dim(preds))
 
 			if (!exists('Samples')) {
 				Samples <- preds
@@ -873,7 +887,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 			Var_imp[[i]] <- bartMachine::get_var_props_over_chain(bart.mod, 'trees')
 
-			rm(bart.mod, preds, train_data)
+			rm(bart.mod, preds)
 
 			gc()
 
