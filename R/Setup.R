@@ -4,13 +4,15 @@
 
 Sys.setenv(LANG = "en")
 if (is.null(options('BartMem')[[1]])) {
-	mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
+	local({
+		mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
 
-	if (is.na(as.numeric(mem))) stop('Input should be a number.')
+		if (is.na(as.numeric(mem))) stop('Input should be a number.')
 
-	mem <- paste0("-Xmx", mem, "g")
+		mem <- paste0("-Xmx", mem, "g")
 
-	options(BartMem = mem)
+		options(BartMem = mem)
+	})
 }
 
 options(java.parameters = options('BartMem')$BartMem)
@@ -185,6 +187,9 @@ summarise_args <- function(args) {
 
 if (file.exists('secrets.R')) source('secrets.R')
 
-for (file in file.path('R', list.files('R') %>% str_subset('Setup', negate = T))) {
-	source(file)
-}
+local({
+	for (file in file.path('R', list.files('R') %>% str_subset('Setup', negate = T))) {
+		source(file)
+	}
+})
+
