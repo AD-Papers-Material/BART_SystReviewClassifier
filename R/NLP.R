@@ -235,7 +235,8 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 	DTM %>% mutate(ID = ids[ID])
 }
 
-DTM.add_ngrams <- function(DTM, min.sim = .5) {
+DTM.add_ngrams <- function(DTM, min.sim = .5, max.terms = 10, min.freq = 0) {
+
 	mat <- as.matrix(DTM[,-1])
 
 	mat.sparse <- as(mat, "dgCMatrix") # Using sparse matrices
@@ -247,6 +248,7 @@ DTM.add_ngrams <- function(DTM, min.sim = .5) {
 
 	if (length(ngram.cliques) > 0) {
 		new_cols <- lapply(ngram.cliques, function(clique) { # For each clique
+			if (length(clique) <= max.terms) {
 			new_col <- data.frame(
 				as.numeric(DTM[, clique] %>% rowSums() == length(clique)) # TRUE if all words are present in the doc
 			)
@@ -254,6 +256,7 @@ DTM.add_ngrams <- function(DTM, min.sim = .5) {
 			colnames(new_col) <- paste0(str_extract(clique[1], '\\w+__'), str_remove(clique, '\\w+__') %>% paste(collapse = '._.'))
 
 			new_col
+			}
 		}) %>% bind_cols()
 
 		DTM <- DTM %>% bind_cols(new_cols) # Add joined terms
