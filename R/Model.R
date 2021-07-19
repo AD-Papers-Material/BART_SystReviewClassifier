@@ -861,7 +861,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			rm(train_data)
 			gc()
 
-			#message("predicting...")
+			message("predicting...")
 			#pred_batch_size = 2 * 10^4
 			#browser()
 			preds <- pblapply(0:floor(nrow(DTM) / pred_batch_size), function (i) {
