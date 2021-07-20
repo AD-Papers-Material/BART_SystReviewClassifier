@@ -518,6 +518,7 @@ import_classification <- function(records, prev_records, IDs = records$ID) {
 check_classification_trend <- function(records, column = NULL,
 																			 step_size = 20, limit = NULL) {
 
+	# Join manual classifications in one target column
 	if (is.null(column)) {
 		records <- records %>%
 			mutate(Target = coalesce_labels(., c('Rev_prediction', 'Rev_manual')))
@@ -526,9 +527,11 @@ check_classification_trend <- function(records, column = NULL,
 	records <- records %>% arrange(Order) %>%
 		filter(!is.na(Target))
 
+	# Define plot breaks according to a limit of reviewed records
 	if (is.null(limit)) limit <- max(which(!is.na(records$Target)))
 	steps <- seq(step_size, limit, by = step_size) %>% c(limit) %>% unique()
 
+	# Count positive and negative matches in every break
 	df <- pblapply(steps, function(step) {
 		records %>% head(step) %>%
 			summarise(
@@ -537,6 +540,7 @@ check_classification_trend <- function(records, column = NULL,
 			)
 	}) %>% bind_rows()
 
+	# Plot trends
 	p <- df %>%
 		ggplot(aes(x = steps)) +
 		geom_line(aes(y = Yes, color = 'yes'), size = 1) +
@@ -544,13 +548,16 @@ check_classification_trend <- function(records, column = NULL,
 		labs(y = 'Records', x = 'Batch size', color = 'Classification') +
 		theme_minimal()
 
+	# Remove consecutive non changing values to avoid label cluttering
 	df <- mutate(
 		df,
-		across(c(Yes, No), ~ c(.x[1], sapply(2:(n() - 1), function(i) {
-			if (.x[i] == .x[i-1]) NA else .x[i]
-		}), .x[n()]))
+		across(c(Yes, No), function(x) {
+			c(x[1], sapply(2:(n() - 1), function(i) {
+				if (x[i] == x[i-1]) NA else x[i]
+			}), x[n()]) })
 	)
 
+	# Add labels
 	p +
 		geom_label(aes(y = Yes, x = steps, label = Yes), data = df, alpha = .8) +
 		geom_label(aes(y = No, x = steps, label = No), alpha = .8)
