@@ -47,6 +47,8 @@ pkg.require(
 
 ### Windows do not support mclapply
 if  (.Platform$OS.type != 'unix') {
+	warning('Forked parallel operations not allowed on Windows. Falling back to sequential.')
+
 	mclapply <- lapply
 	pbmclapply <- pblapply
 }
