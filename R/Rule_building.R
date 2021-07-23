@@ -1,9 +1,9 @@
-extract_rules <- function(session_path, rebuild_dtm = F, vimp.threshold = 1.25,
-													n.trees = 800, ...) {
+extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
+													n.trees = 800, session_folder = 'Sessions', ...) {
 
 	message('Preparing the data')
 
-	files <- get_session_last_files(session_path)
+	files <- get_session_last_files(file.path(session_name, session_folder))
 
 	Records <- import_data(files$Records)
 
