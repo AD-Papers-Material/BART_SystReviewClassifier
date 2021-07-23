@@ -544,7 +544,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 #
 																	 sessions_folder = 'Sessions',
 																	 pred_batch_size = 5000,
-																	 autorun = T, replication = NULL,
+																	 autorun = TRUE, replication = NULL,
 																	 stop_on_unreviewed = TRUE,
 																	 dup_session_action = c('fill', 'add',
 																	 											 'replace', 'stop'),
@@ -552,10 +552,11 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 	stop_after = 4, pos_target = NULL,
 																	 	labeling_limit = NULL
 																	 ),
-																	 compute_performance = T,
+																	 compute_performance = TRUE,
 																	 test_data = NULL,
-																	 use_prev_labels = T,
+																	 use_prev_labels = TRUE,
 																	 prev_classification = NULL,
+																	 save_samples = TRUE,
 																	 rebuild = FALSE, ...) {
 
 	# pick the last annotated record file or the source one if any
@@ -987,6 +988,8 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																							test_data = Test_data,
 																							perf_quants = perf_quants)
 			tictoc::toc()
+		} else {
+			warning('compute_performance is TRUE but no test data')
 		}
 	}
 
@@ -1112,16 +1115,18 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	tictoc::toc()
 
-	message('- posterior samples...')
-	tictoc::tic()
+	if (save_samples) {
+		message('- posterior samples...')
+		tictoc::tic()
 
-	output_file_samp <- file.path(session_path, 'Samples',
-																glue('{iter}.Samples_{common_tag}.rds'))
-	dir.create(dirname(output_file_samp), showWarnings = F, recursive = T)
+		output_file_samp <- file.path(session_path, 'Samples',
+																	glue('{iter}.Samples_{common_tag}.rds'))
+		dir.create(dirname(output_file_samp), showWarnings = F, recursive = T)
 
-	readr::write_rds(Samples, file = output_file_samp, compress = 'gz')
+		readr::write_rds(Samples, file = output_file_samp, compress = 'gz')
 
-	tictoc::toc()
+		tictoc::toc()
+	}
 
 	if (file.exists('Model_backup.rds')) file.remove('Model_backup.rds')
 
