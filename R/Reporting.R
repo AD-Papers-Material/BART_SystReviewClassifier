@@ -1,3 +1,94 @@
+summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
+																add_totals = TRUE) {
+	data <- import_data(annotation_file)
+
+	sources <- data$Source %>% str_split(., '; *') %>% unlist() %>% unique
+
+	total_records <- nrow(data)
+
+	res <- lapply(sources, function(source) {
+		Records <- str_detect(data$Source, glue('{source}')) %>% sum
+		Perc_over_total <- percent(Records/total_records)
+		Source_specific <- str_detect(data$Source, glue('^{source}$')) %>% sum
+		Source_specific_perc <- percent(Source_specific / Records)
+
+		list(Records = Records, Perc_over_total = Perc_over_total,
+				 Source_specific = Source_specific, Source_specific_perc = Source_specific_perc)
+	}) %>% setNames(sources)
+
+	if (add_totals) {
+		res$Total <- list(
+			Records = nrow(data),
+			Perc_over_total = '',
+			Source_specific = NA,
+			Source_specific_perc = ''
+		)
+	}
+
+	if (as_data_frame) {
+		res <- res %>% lapply(as.data.frame.list) %>% bind_rows() %>%
+			mutate(
+				Sources = names(res),
+				.before = 1
+			) %>%
+			arrange(desc(Records))
+	}
+
+	res
+}
+
+summarise_sources_by_sessions <- function(sessions, sessions_folder = 'Sessions',
+																					add_totals = TRUE, keep_session_label = TRUE) {
+	if (length(sessions) == 1) {
+		res <- get_session_last_files(file.path(sessions_folder, session))$Records %>%
+			summarise_by_source(as_data_frame = TRUE)
+
+		return(res)
+	}
+
+	records <- pbmclapply(sessions, function(session) {
+		get_session_last_files(file.path(sessions_folder, session))$Records %>%
+			import_data()
+	}) %>% setNames(sessions)
+
+	res <- mclapply(1:length(records), function(i) {
+		data <- records[[i]]
+
+		if (i > 1) {
+			previous_records <- bind_rows(records[1:(i - 1)])$ID
+			data <- data %>% filter(ID %nin% previous_records)
+		}
+
+		summarise_by_source(data, as_data_frame = TRUE) %>%
+			mutate(
+				Session_label = sessions[i]
+			)
+	})
+
+	if (add_totals) {
+	res <- bind_rows(
+			res,
+			summarise_by_source(last(records), as_data_frame = TRUE) %>%
+				mutate(
+					Session_label = 'All Sessions'
+				)
+		)
+	}
+
+	res <- res %>%
+		group_by(Session_label) %>%
+		mutate(
+			Session = c(Session_label[1], rep('', n() - 1)),
+			.before = 1
+		) %>% ungroup()
+
+	if (!keep_session_label) {
+		res$Session_label <- NULL
+	}
+
+	res
+}
+
 
 summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
 	# list.files('Models') %>% pbmclapply(function(file) {

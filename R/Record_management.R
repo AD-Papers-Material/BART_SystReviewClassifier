@@ -461,16 +461,6 @@ fix_duplicated_records <- function(records) {
 		filter(!duplicated(ID))
 }
 
-summarise_by_source <- function(annotation_file) {
-	data <- if (is.character(annotation_file)) {
-		import_data(annotation_file)
-	} else annotation_file
-
-	sources <- data$Source %>% str_split(., '; ') %>% unlist() %>% table()
-
-	c(setNames(as.vector(sources), names(sources)), Total = nrow(data))
-}
-
 import_classification <- function(records, prev_records, IDs = records$ID) {
 
 	prev_records <- import_data(prev_records)
