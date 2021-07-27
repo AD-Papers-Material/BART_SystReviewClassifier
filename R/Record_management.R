@@ -396,25 +396,30 @@ create_session <- function(Records, session_name,
 	return(session_path)
 }
 
-get_session_last_files <- function(session_path, which = c('Records', 'DTM', 'Samples')) {
+get_session_files <- function(session_path, which = c('Records', 'Annotations', 'DTM', 'Samples')) {
 
-	files <- list.files(session_path, recursive = T) %>% str_subset('Records')
 
-	lapply(which, function(type) {
+	sapply(which, function(type) {
 		files <- list.files(session_path, recursive = T) %>% str_subset(type)
+
+		files <- files[str_detect(basename(files), '^\\w')]
+
+		if (type == 'Records') {
+			files <- files[!str_detect(files, 'Annotations')]
+		}
 
 		if (length(files) == 0) return(NULL)
 
-		last_record_file <- tibble(
+		files <- tibble(
 			files,
 			iter = basename(files) %>%
 				str_extract('^\\d+') %>%
 				as.numeric() %>%
 				pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
-		) %>% with(files[iter == max(iter)])
+		) %>% arrange(iter) %>% pull(files)
 
-		file.path(session_path, last_record_file)
-	}) %>% setNames(which)
+		file.path(session_path, files)
+	})
 }
 
 

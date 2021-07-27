@@ -3,9 +3,10 @@ extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
 
 	message('Preparing the data')
 
-	files <- get_session_last_files(file.path(session_name, session_folder))
+	files <- get_session_files(file.path(session_name, session_folder)) %>%
+		lapply(last) # get only last files
 
-	Records <- import_data(files$Records)
+	Records <- import_data(files$Annotations)
 
 	DTM <- if (rebuild_dtm | is.null(files$DTM)) {
 		message('Rebuilding the DTM')
@@ -15,7 +16,7 @@ extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
 
 	Draws <- read_rds(files$Samples)
 
-	Variable_importance <- import_data(files$Records, sheet = 'Variable_importance')
+	Variable_importance <- import_data(files$Annotations, sheet = 'Variable_importance')
 
 	DTM <- Records %>% transmute(
 		ID,
