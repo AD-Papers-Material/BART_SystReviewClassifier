@@ -453,6 +453,7 @@ fix_duplicated_records <- function(records) {
 			Keywords = Keywords %>% str_split('; ') %>% unlist() %>% na.omit() %>% unique() %>%
 				purrr::keep(~ str_length(.x) > 0) %>%
 				paste(collapse = '; '),
+			## TODO: clean up is necessary for Source and Source_type
 			N_citations = suppressWarnings(na.omit(N_citations) %>% max(na.rm = T) %>% purrr::modify_if(~ !is.finite(.x), ~ NA))
 		)
 
