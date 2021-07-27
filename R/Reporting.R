@@ -28,7 +28,7 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 	if (as_data_frame) {
 		res <- res %>% lapply(as.data.frame.list) %>% bind_rows() %>%
 			mutate(
-				Sources = names(res),
+				Source = names(res),
 				.before = 1
 			) %>%
 			arrange(desc(Records))
@@ -84,6 +84,18 @@ summarise_sources_by_sessions <- function(sessions, sessions_folder = 'Sessions'
 
 	if (!keep_session_label) {
 		res$Session_label <- NULL
+	}
+
+	res
+}
+
+get_source_distribution <- function(annotation_file, as_propr, format_fun = percent) {
+	res <- import_data(annotation_file)$Source %>%
+		pbmclapply(function(sources) str_split(sources, '; *') %>% unlist %>% n_distinct) %>%
+		unlist() %>% table()
+
+	if (as_propr) {
+		res <- prop.table(res) %>% format_fun()
 	}
 
 	res
