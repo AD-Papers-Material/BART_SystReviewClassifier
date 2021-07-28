@@ -1162,6 +1162,44 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	invisible(out)
 }
 
+consolidate_results <- function(session_name, sessions_folder = 'Sessions') {
+	annotations <- get_session_files(session_name)$Annotations %>%
+		pbmclapply(function(file) {
+			import_data(file)
+		})
+
+	results_files <- get_session_files(session_name)$Results
+
+	if (length(annotations) != length(results_files)) {
+		stop('Error: the number of annotation file derived results and existing results file do not concide.')
+	}
+
+	mclapply(1:length(results_files), function(i) {
+		final_results <- annotations[[i]] %>%
+			compute_changes() %>%
+			mutate_all(as.character) %>%
+			tidyr::pivot_longer(
+				cols = everything(),
+				names_to = 'Indicator',
+				values_to = 'Value'
+			)
+
+		results_files[[i]] %>%
+			import_data() %>%
+			filter(Indicator %nin% c(
+				final_results$Indicator, "New labels", "Records to review",
+				"Final labeling")) %>%
+			filter(!str_detect(Indicator, '\\*')) %>%
+			bind_rows(final_results) %>%
+			bind_rows(
+				data.frame(
+					Indicator = 'Reviewed predictions',
+					Value = summarise_vector(annotations[[i]]$Rev_prediction_new)
+				)
+			) %>%
+			write_csv(results_files[[i]])
+	}) %>% invisible()
+}
 
 
 perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
