@@ -396,10 +396,12 @@ create_session <- function(Records, session_name,
 	return(session_path)
 }
 
-get_session_files <- function(session_path, which = c('Records', 'Annotations',
+get_session_files <- function(session_name, which = c('Records', 'Annotations',
 																											'DTM', 'Samples',
-																											'Results')) {
+																											'Results'),
+															sessions_folder = 'Sessions') {
 
+	session_path <- file.path(sessions_folder, session_name)
 
 	sapply(which, function(type) {
 		files <- list.files(session_path, recursive = T) %>% str_subset(type)

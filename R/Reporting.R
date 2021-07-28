@@ -40,14 +40,14 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 summarise_sources_by_sessions <- function(sessions, sessions_folder = 'Sessions',
 																					add_totals = TRUE, keep_session_label = TRUE) {
 	if (length(sessions) == 1) {
-		res <- get_session_files(file.path(sessions_folder, session))$Records %>%
+		res <- get_session_files(session)$Records %>%
 			summarise_by_source(as_data_frame = TRUE)
 
 		return(res)
 	}
 
 	records <- pbmclapply(sessions, function(session) {
-		get_session_files(file.path(sessions_folder, session))$Records %>%
+		get_session_files(session)$Records %>%
 			import_data()
 	}) %>% setNames(sessions)
 

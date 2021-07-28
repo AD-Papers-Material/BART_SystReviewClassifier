@@ -561,7 +561,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	# pick the last annotated record file or the source one if any
 	if (is.null(file)) {
-		file <- get_session_files(file.path(sessions_folder, session_name))$Annotations %>%
+		file <- get_session_files(session_name)$Annotations %>%
 			last()
 
 		if (is.null(file)) {
@@ -1231,7 +1231,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 		}
 
 		# pick the last annotated record file or the source one if any
-		last_record_file <- get_session_files(session_path)$Annotations %>% last()
+		last_record_file <- get_session_files(Grid[i,]$session)$Annotations %>% last()
 
 		with(Grid[i,],
 				 enrich_annotation_file(last_record_file, session_name = session,
