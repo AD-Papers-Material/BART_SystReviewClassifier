@@ -396,7 +396,9 @@ create_session <- function(Records, session_name,
 	return(session_path)
 }
 
-get_session_files <- function(session_path, which = c('Records', 'Annotations', 'DTM', 'Samples')) {
+get_session_files <- function(session_path, which = c('Records', 'Annotations',
+																											'DTM', 'Samples',
+																											'Results')) {
 
 
 	sapply(which, function(type) {
