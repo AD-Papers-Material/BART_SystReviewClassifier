@@ -166,7 +166,7 @@ import_data <- function(input, ...) {
 		return(input)
 	}
 
-	stop('Input should be an existing csv/excel file path or a data.frame')
+	stop('Input should be an existing csv/excel file path or a data.frame, found "', class(input),'".')
 }
 
 summarise_args <- function(args) {
