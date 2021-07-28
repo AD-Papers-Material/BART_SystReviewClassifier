@@ -525,15 +525,12 @@ compute_changes <- function(Annotations) {
 					} else NA,
 					across(c(Total_labeled, New_labels), ~ if (!is.na(.x)) {
 						x <- .x # Some changes in glue or dplyr made glue not recognizing .x anymore
-						glue('{x} ({percent(x/nrow(Annotations))})')
+						glue('{x} ({percent(x/nrow(Annotations))})') %>% as.character()
 					} else NA),
 					.after = matches('Target')
 				)
 		}
 }
-
-
-
 
 enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 ## Model parameters
@@ -1164,6 +1161,8 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	invisible(out)
 }
+
+
 
 perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 																		prev_classification = records,
