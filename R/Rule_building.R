@@ -3,7 +3,7 @@ extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
 
 	message('Preparing the data')
 
-	files <- get_session_files(session_name) %>%
+	files <- get_session_files(session_name, sessions_folder) %>%
 		lapply(last) # get only last files
 
 	Records <- import_data(files$Annotations)

@@ -40,14 +40,14 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 summarise_sources_by_sessions <- function(sessions, sessions_folder = 'Sessions',
 																					add_totals = TRUE, keep_session_label = TRUE) {
 	if (length(sessions) == 1) {
-		res <- get_session_files(session)$Records %>%
+		res <- get_session_files(session, sessions_folder)$Records %>%
 			summarise_by_source(as_data_frame = TRUE)
 
 		return(res)
 	}
 
 	records <- pbmclapply(sessions, function(session) {
-		get_session_files(session)$Records %>%
+		get_session_files(session, sessions_folder)$Records %>%
 			import_data()
 	}) %>% setNames(sessions)
 
@@ -102,7 +102,7 @@ get_source_distribution <- function(annotation_file, as_propr, format_fun = perc
 }
 
 summarise_annotation_results <- function(session_name, sessions_folder = 'Sessions') {
-	result_list <- get_session_files(session_name, sessions_folder = sessions_folder)$Results %>%
+	result_list <- get_session_files(session_name, sessions_folder)$Results %>%
 		lapply(function(file) {
 			file %>%
 				import_data() %>%

@@ -396,10 +396,9 @@ create_session <- function(Records, session_name,
 	return(session_path)
 }
 
-get_session_files <- function(session_name, which = c('Records', 'Annotations',
-																											'DTM', 'Samples',
-																											'Results'),
-															sessions_folder = 'Sessions') {
+get_session_files <- function(session_name, sessions_folder = 'Sessions',
+															which = c('Records', 'Annotations',
+																				'DTM', 'Samples', 'Results')) {
 
 	session_path <- file.path(sessions_folder, session_name)
 
