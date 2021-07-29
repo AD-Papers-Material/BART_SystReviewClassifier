@@ -119,6 +119,7 @@ summarise_annotation_results <- function(session_name, sessions_folder = 'Sessio
 		template <- tibble(
 			'Change: unlab. -> y' = 0,
 			'Change: unlab. -> n' = 0,
+			'Change: unlab. -> *' = 0,
 			'Change: y -> n' = 0,
 			'Change: n -> y' = 0
 		)
@@ -126,6 +127,7 @@ summarise_annotation_results <- function(session_name, sessions_folder = 'Sessio
 
 		if (i == 0) {
 			result_data <- result_list[[1]] %>%
+				select(!any_of(colnames(template))) %>% # Remove all changes info
 				mutate(
 					Iter = 'Initial labelling',
 					'Target: y' = result_list[[1]] %>% select(matches('Change: y')) %>%
@@ -152,6 +154,7 @@ summarise_annotation_results <- function(session_name, sessions_folder = 'Sessio
 			'Total labelled (%)' = glue('{tot_reviewed_} ({percent(tot_reviewed_ / total_records)})'),
 			'Unlab. -> y' = `Change: unlab. -> y`,
 			'Unlab. -> n' = `Change: unlab. -> n`,
+			'Unlab. -> *' = `Change: unlab. -> *`,
 			'y -> n' = `Change: y -> n`,
 			'n -> y' = `Change: n -> y`,
 		) %>%
