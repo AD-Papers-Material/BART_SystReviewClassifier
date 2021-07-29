@@ -101,6 +101,65 @@ get_source_distribution <- function(annotation_file, as_propr, format_fun = perc
 	res
 }
 
+summarise_annotation_results <- function(session_name, sessions_folder = 'Sessions') {
+	result_list <- get_session_files(session_name, sessions_folder = sessions_folder)$Results %>%
+		lapply(function(file) {
+			file %>%
+				import_data() %>%
+				mutate(
+					Value = suppressWarnings(as.numeric(Value))
+				) %>%
+				tidyr::pivot_wider(everything(), names_from = Indicator, values_from = Value)
+		})
+
+	total_records <- result_list[[1]] %>% select(matches('Change:')) %>% rowSums()
+
+	lapply(0:length(result_list), function(i) {
+
+		template <- tibble(
+			'Change: unlab. -> y' = 0,
+			'Change: unlab. -> n' = 0,
+			'Change: y -> n' = 0,
+			'Change: n -> y' = 0
+		)
+
+
+		if (i == 0) {
+			result_data <- result_list[[1]] %>%
+				mutate(
+					Iter = 'Initial labelling',
+					'Target: y' = result_list[[1]] %>% select(matches('Change: y')) %>%
+						rowSums(),
+					'Target: n' = result_list[[1]] %>% select(matches('Change: n')) %>%
+						rowSums(),
+					'Change: unlab. -> y' = `Target: y`,
+					'Change: unlab. -> n' = `Target: n`,
+				)
+		} else {
+			result_data <-  result_list[[i]]
+		}
+
+		result_data %>%
+			bind_cols(
+				template %>% select(!any_of(colnames(result_data)))
+				) %>%
+		transmute(
+			Iteration = as.character(Iter),
+			Positives = `Target: y`,
+			Negatives = `Target: n`,
+			tot_reviewed_ = Positives + Negatives,
+			total_records_ = total_records,
+			'Total labelled (%)' = glue('{tot_reviewed_} ({percent(tot_reviewed_ / total_records)})'),
+			'Unlab. -> y' = `Change: unlab. -> y`,
+			'Unlab. -> n' = `Change: unlab. -> n`,
+			'y -> n' = `Change: y -> n`,
+			'n -> y' = `Change: n -> y`,
+		) %>%
+			mutate(
+				Changes = select(., matches('->')) %>% rowSums()
+			)
+	}) %>% bind_rows()
+}
 
 summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
 	# list.files('Models') %>% pbmclapply(function(file) {
