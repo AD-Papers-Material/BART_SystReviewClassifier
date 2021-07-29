@@ -525,6 +525,17 @@ summarise_annotations_by_session <- function(session_folder = 'Sessions',
 # 	output
 # }
 
+summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
+	summarise(
+		out,
+		pAUC = percent(mean(AUC >= AUC.thr)),
+		across(-pAUC, .fns = ~ {
+			val <- quantile(.x, quants) %>% sort %>% percent
+			glue("{val[2]} [{val[1]}, {val[3]}]")
+		})
+	)
+}
+
 
 plot_predicted_pos_rate <- function(Ann_data, block_size = 50) {
 

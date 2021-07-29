@@ -92,18 +92,6 @@ create_training_set <- function(Records, min_freq = 0.05) {
 
 }
 
-summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
-	summarise(
-		out,
-		pAUC = percent(mean(AUC >= AUC.thr)),
-		across(-pAUC, .fns = ~ {
-			val <- quantile(.x, quants) %>% sort %>% percent
-			glue("{val[2]} [{val[1]}, {val[3]}]")
-		})
-	)
-}
-
-
 compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 															 folder = getwd(), name = as.character(Y),
 															 rebuild = F, num_trees = 50, k = 2,
