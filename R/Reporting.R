@@ -37,7 +37,7 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 	res
 }
 
-summarise_sources_by_sessions <- function(sessions = list.files(sessions_folder),
+summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 																					sessions_folder = 'Sessions',
 																					add_totals = TRUE, keep_session_label = TRUE) {
 	if (length(sessions) == 1) {
