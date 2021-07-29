@@ -90,7 +90,7 @@ summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 	res
 }
 
-get_source_distribution <- function(annotation_file, as_propr, format_fun = percent) {
+get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun = percent) {
 	res <- import_data(annotation_file)$Source %>%
 		pbmclapply(function(sources) str_split(sources, '; *') %>% unlist %>% n_distinct) %>%
 		unlist() %>% table()
@@ -198,6 +198,7 @@ summarise_annotations_by_session <- function(session_folder = 'Sessions',
 		res %>%
 			mutate(
 				Session = c(glue("{session} (n = {res$total_records_[1]})"), rep('', nrow(res) - 1)),
+				Session_ = session,
 				.before = 1
 			)
 	}) %>% bind_rows() %>%  {
