@@ -525,95 +525,30 @@ summarise_annotations_by_session <- function(session_folder = 'Sessions',
 # 	output
 # }
 
-summarise_pred_perf <- function(out, quants = c(.5, .05, .95), AUC.thr = .9) {
-	summarise(
-		out,
-		pAUC = percent(mean(AUC >= AUC.thr)),
-		across(-pAUC, .fns = ~ {
-			val <- quantile(.x, quants) %>% sort %>% percent
-			glue("{val[2]} [{val[1]}, {val[3]}]")
+format_performance <- function(..., session_names = NULL) {
+
+	elements <- list(...)
+
+	if (is.null(session_names)) session_names <- paste('Session', 1:length(elements))
+
+	lapply(1:length(elements), function(i) {
+
+		elements[[i]] %>% with({
+			tibble(
+				#Session = session_names[i],
+				'Tot. records' = total_records,
+				'N. reviewed records (% over total)' = glue("{n_reviewed} ({percent(n_reviewed/total_records)})"),
+				'N. positive matches (% over total)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
+				'Expected efficiency [PrI]' = percent(efficiency) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
+				'Expected sensitivity [PrI]' = percent(sensitivity) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
+		) %>%
+				mutate_all(as.character) %>%
+				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%
+				{
+					if (i > 1) .$Indicator <- NULL
+					.
+				}
 		})
-	)
-}
+	}) %>% bind_cols()
 
-
-plot_predicted_pos_rate <- function(Ann_data, block_size = 50) {
-
-	# plot_predicted_pos_rate(a %>% mutate(Rev_previous = coalesce_labels(., c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new', 'Rev_previous')) %>% replace(Order > 1200, NA)), block_size = 50)
-
-	Ann_data <- Ann_data %>%
-		transmute(
-			Order,
-			Train = Rev_previous == 'y',
-			Target = coalesce_labels(., c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new', 'Rev_previous')) == 'y'
-		) %>%
-		group_by(Block = ceiling(1:n()/block_size)) %>%
-		summarise(
-			Order = last(Order),
-			block_size = n(),
-			Train = sum(Train),
-			Target = sum(Target, na.rm = T)
-		)
-	#
-	# mod <- brm(Train | trials(block_size) ~ Order, family = binomial, data = Ann_data,
-	# 					 cores = 8, refresh = 0, iter = 8000,
-	# 					 backend = 'cmdstan',
-	# 					 prior = c(prior(student_t(1, 0, 5), class = 'Intercept'),
-	# 					 					prior(student_t(1, 0, 2.5), class = 'b')))
-
-	mod <- brms::brm(bf(Train | trials(block_size) ~ a * Order ^ b, a + b ~ 1, nl = T), family = binomial, data = Ann_data,
-									 cores = 8, refresh = 0, iter = 8000,
-									 backend = 'cmdstan',
-									 prior = c(set_prior('student_t(1, 0, 5)', nlpar = "a"),
-									 					set_prior('student_t(1, 0, 2.5)', nlpar = "b")))
-
-	## To estimate the total number of positives and from there the positives in a
-	## random subsample
-	# posterior_predict(mod, newdata = data.frame( block_size,
-	# Order = seq(1200, nrow(a), block_size) )) %>% rowSums() %>% quantile(c(.01,
-	# .05, .5, .95, .99)) %>% {qhyper(p = .95, (96+ .)/nrow(a) * 1200, 1200 * (1 -
-	# (96+ .)/nrow(a)), 500)} print(mod)
-
-	posterior_predict(mod, newdata = data.frame(
-		block_size,
-		Order = seq(block_size, limit, block_size)
-	)) %>% rowSums() %>% quantile(seq(0,1, .1)) %>%
-		print()
-
-	limit <- min(Ann_data$Order[last(which(Ann_data$Target > 0))], last(Ann_data$Order))
-
-	train_limit = max(Ann_data$Order[!is.na(Ann_data$Train)])
-
-	data.frame(
-		block_size,
-		Order = seq(block_size, limit, block_size)
-	) %>%
-		left_join(Ann_data) %>%
-		mutate(
-			Target_lab = Target,
-			Target = Target / block_size,
-			(posterior_predict(mod, newdata = cur_data()) / block_size) %>%
-				apply(2, quantile, c(.05, .5, .95)) %>% t %>%
-				as.data.frame() %>%
-				setNames(c('Low', 'Med', 'Up')),
-			across(c(Target_lab, Target), ~ replace(.x, .x == 0, NA))
-		) %>%
-		ggplot(aes(Order)) +
-		geom_ribbon(aes(ymin = Low, ymax = Up), alpha = .25) +
-		geom_vline(xintercept = train_limit, linetype = 'dashed', alpha = .5) +
-		geom_segment(aes(xend = Order, y = 0, yend = Target, color = 'Obs.'), size = 1) +
-		geom_line(aes(y = Med, color = 'Pred.'), size = 1, linetype = 'dashed', alpha = .8) +
-		geom_label(aes(y = Target, label = Target_lab)) +
-		theme_minimal() +
-		scale_x_continuous(breaks = seq(block_size, limit, block_size)) +
-		scale_y_continuous(trans = 'log1p', breaks = seq(0, .3, .01)) +
-		labs(y = 'Pos. rate', x = 'Records', color = NULL) +
-		theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-	# ggplot(Ann_data, aes(Order)) +
-	# 	#geom_line(aes(y = Pred_Up, color = 'Up')) +
-	# 	#geom_line(aes(y = Pred_Low, color = 'Low')) +
-	# 	geom_errorbar(aes(ymin = Pred_Low, ymax = Pred_Up, color = coalesce_labels(a)), width = 0) +
-	# 	geom_point(aes(y = Pred_Med, color = Predicted_label), alpha = .8) +
-	# 	scale_y_continuous(trans = 'logit') + theme_minimal()
 }
