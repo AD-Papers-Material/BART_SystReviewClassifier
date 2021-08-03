@@ -3,7 +3,8 @@
 
 
 Sys.setenv(LANG = "en")
-if (is.null(options('BartMem')[[1]])) {
+
+if (is.null(options('BartMem')[[1]]) & interactive()) {
 	local({
 		mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
 
@@ -46,7 +47,7 @@ pkg.require(
 
 
 ### Windows do not support mclapply
-if  (.Platform$OS.type != 'unix') {
+if (.Platform$OS.type != 'unix') {
 	warning('Forked parallel operations not allowed on Windows. Falling back to sequential.')
 
 	mclapply <- lapply
