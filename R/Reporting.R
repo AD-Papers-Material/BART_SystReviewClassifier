@@ -558,8 +558,6 @@ plot_predictive_densities <- function(session_name, sessions_folder = 'Sessions'
 																			seed = 2402938) {
 	set.seed(seed)
 
-	#invlogit_trans <- scales::trans_new('invlogit', arm::invlogit, arm::logit)
-
 	records_files <- get_session_files(session_name, sessions_folder)$Annotations
 	samples_files <- get_session_files(session_name, sessions_folder)$Samples
 
@@ -594,14 +592,20 @@ plot_predictive_densities <- function(session_name, sessions_folder = 'Sessions'
 			}) %>% bind_rows()
 	}) %>% bind_rows() %>%
 		mutate(
-			Label = factor(Label, c('n', 'y', '*'), c('Negative', 'Positive', 'To review'))#, Samples = arm::logit(Samples)
-			) %>%
-		ggplot(aes(x = Samples, y = factor(Iteration, max(Iteration):min(Iteration)),
-							 fill = Label, color = Label)) +
-		geom_density_ridges(alpha = .5, scale = 1) +
-		scale_color_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
-		scale_fill_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
-		#scale_x_continuous(labels = arm::invlogit, breaks = c(.01, .25, .5, .75, .99) %>% arm::logit()) + coord_trans(x = invlogit_trans) +
-		theme_minimal() +
-		labs(x = 'Positive match probability', y = 'Iteration')
+			Label = factor(Label, c('n', 'y', '*'), c('Negative', 'Positive', 'To review'))
+			) %>% {
+			. <- mutate(., Iteration = factor(Iteration, sort(unique(Iteration), TRUE)))
+			df <- select(., -Samples) %>% distinct()
+
+			ggplot(., aes(y = Iteration)) +
+				geom_density_ridges(aes(x = Samples, fill = Label, color = Label), alpha = .5, scale = 1) +
+				geom_segment(data = df, aes(yend = as.numeric(Iteration) + .1, x = Neg_lim, xend = Neg_lim, color = 'Negative')) +
+				geom_segment(data = df, aes(yend = as.numeric(Iteration) + .1, x = Pos_lim, xend = Pos_lim, color = 'Positive')) +
+				geom_label(data = df, aes(y = as.numeric(Iteration) - .1, x = Pos_lim, label = Pos_lim)) +
+				geom_label(data = df, aes(y = as.numeric(Iteration) - .1, x = Neg_lim, label = Neg_lim)) +
+				scale_color_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
+				scale_fill_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
+				theme_minimal() +
+				labs(x = 'Positive match probability', y = 'Iteration')
+		}
 }
