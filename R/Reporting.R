@@ -538,9 +538,10 @@ format_performance <- function(..., session_names = NULL) {
 				#Session = session_names[i],
 				'Tot. records' = total_records,
 				'N. reviewed records (% over total)' = glue("{n_reviewed} ({percent(n_reviewed/total_records)})"),
-				'N. positive matches (% over total)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
 				'Expected efficiency [PrI]' = percent(efficiency) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
-				'Expected sensitivity [PrI]' = percent(sensitivity) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
+				'N. positive matches (% over total)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
+				'Expected sensitivity [PrI]' = percent(sensitivity) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
+				'Model R^2' = percent(mod_r2) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
 		) %>%
 				mutate_all(as.character) %>%
 				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%
@@ -551,4 +552,56 @@ format_performance <- function(..., session_names = NULL) {
 		})
 	}) %>% bind_cols()
 
+}
+
+plot_predictive_densities <- function(session_name, sessions_folder = 'Sessions',
+																			seed = 2402938) {
+	set.seed(seed)
+
+	#invlogit_trans <- scales::trans_new('invlogit', arm::invlogit, arm::logit)
+
+	records_files <- get_session_files(session_name, sessions_folder)$Annotations
+	samples_files <- get_session_files(session_name, sessions_folder)$Samples
+
+	pbmclapply(1:length(records_files), function(i) {
+		records <- records_files[[i]] %>%
+			import_data() %>%
+			mutate(Rev_prediction_new = replace(Rev_prediction_new, !is.na(Rev_prediction_new), '*')) %>%
+			transmute(
+				Pred_Low, Pred_Up,
+				ID,
+				Target = coalesce_labels(.)
+			)
+
+		neg_lim <- with(records, max(Pred_Up[Target %in% 'n']))
+		pos_lim <- with(records, min(Pred_Low[Target %in% 'y']))
+
+		samples <- samples_files[[i]] %>% read_rds()
+
+		unique(records$Target) %>% na.omit %>%
+			lapply(function(lab) {
+				IDs <- records %>% with(ID[Target %in% lab])
+				postsamples <- samples[samples$ID %in% IDs, -1] %>%
+					as.matrix %>% as.vector %>% sample(size = 5000)
+
+				data.frame(
+					Iteration = i,
+					Label = lab,
+					Samples = postsamples,
+					Neg_lim = neg_lim,
+					Pos_lim = pos_lim
+				)
+			}) %>% bind_rows()
+	}) %>% bind_rows() %>%
+		mutate(
+			Label = factor(Label, c('n', 'y', '*'), c('Negative', 'Positive', 'To review'))#, Samples = arm::logit(Samples)
+			) %>%
+		ggplot(aes(x = Samples, y = factor(Iteration, max(Iteration):min(Iteration)),
+							 fill = Label, color = Label)) +
+		geom_density_ridges(alpha = .5, scale = 1) +
+		scale_color_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
+		scale_fill_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
+		#scale_x_continuous(labels = arm::invlogit, breaks = c(.01, .25, .5, .75, .99) %>% arm::logit()) + coord_trans(x = invlogit_trans) +
+		theme_minimal() +
+		labs(x = 'Positive match probability', y = 'Iteration')
 }
