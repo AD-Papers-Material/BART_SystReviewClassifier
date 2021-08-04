@@ -57,7 +57,7 @@ if (.Platform$OS.type != 'unix') {
 if (bart_machine_num_cores() != parallel::detectCores()) {
 
 	message('Using ', parallel::detectCores(), ' cores')
-	set_bart_machine_num_cores(parallel::detectCores())
+	invisible(capture.output(set_bart_machine_num_cores(parallel::detectCores())))
 	options(mc.cores = parallel::detectCores())
 }
 
