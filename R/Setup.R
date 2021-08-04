@@ -46,7 +46,7 @@ pkg.require(
 )
 
 
-### Windows do not support mclapply
+# Windows do not support mclapply
 if (.Platform$OS.type != 'unix') {
 	warning('Forked parallel operations not allowed on Windows. Falling back to sequential.')
 
@@ -60,6 +60,10 @@ if (bart_machine_num_cores() != parallel::detectCores()) {
 	invisible(capture.output(set_bart_machine_num_cores(parallel::detectCores())))
 	options(mc.cores = parallel::detectCores())
 }
+
+# Setting up other general parameters for the framework
+options(basren.probs = c(.05, .5, .95))
+options(basren.sessions_folder = 'Sessions')
 
 
 # Helper functions --------------------------------------------------------
