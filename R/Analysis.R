@@ -89,9 +89,13 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 # 		rowSums()
 # }
 
-estimate_performance <- function(records, model, preds = NULL, plot = TRUE, quants = c(.05, .5, .95),
+estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE, quants = c(.05, .5, .95),
 																 nsamples = min(2500, sum(model$fit@sim$n_save)), seed = 14129189,
-																 save_preds = FALSE) {
+																 save_preds = FALSE, save_model = FALSE) {
+
+	if (is.null(model)) {
+		model <- estimate_positivity_rate_model(records, seed)
+	}
 
 	quants <- sort(quants)
 
@@ -142,6 +146,10 @@ estimate_performance <- function(records, model, preds = NULL, plot = TRUE, quan
 
 	if (save_preds) {
 		res$preds <- preds
+	}
+
+	if (save_model) {
+		res$model <- model
 	}
 
 	if (plot) {
