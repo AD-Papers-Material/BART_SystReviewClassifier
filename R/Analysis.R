@@ -72,7 +72,7 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 			Target = coalesce_labels(.) %>% factor()
 			)
 
-	brm(bf(Target ~ Pred_Med), family = bernoulli,
+	brm(bf(Target ~ Pred_Low), family = bernoulli,
 						data = train_data,
 						cores = 8, chains = 8, refresh = 0, iter = 8000, control = list(adapt_delta = .95),
 						backend = 'cmdstan', seed = seed,
@@ -127,6 +127,7 @@ estimate_performance <- function(records, model, preds = NULL, plot = TRUE, quan
 	res <- list(
 		obs_positives = obs_pos,
 		pred_positives = quantile(tot_pos, quants),
+		mod_r2 = bayes_R2(model, probs = quants)[3:5],
 		n_reviewed = tot_reviewed,
 		total_records = tot_records,
 		used_prop = quantile(tot_reviewed / n_needed, quants),
