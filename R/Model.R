@@ -931,27 +931,25 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	Performance <- NULL
 
 	if (compute_performance) {
-		message('Adding performance summary')
+		message('Adding performance summary (may take a while...)')
 
-		if (!is.null(Test_data)) {
+		# if (!is.null(Test_data)) {
+		#
+		# 	tictoc::tic()
+		#
+		# 	Performance <- compute_pred_performance(Annotated_data, samples = Samples,
+		# 																					test_data = Test_data,
+		# 																					perf_quants = perf_quants)
+		# 	tictoc::toc()
+		# } else {
+		# 	warning('compute_performance is TRUE but no test data')
+		# }
 
-			tictoc::tic()
+		Performance <- estimate_performance(Annotated_data) %>%
+			format_performance(session_names = session_name)
 
-			Performance <- compute_pred_performance(Annotated_data, samples = Samples,
-																							test_data = Test_data,
-																							perf_quants = perf_quants)
-			tictoc::toc()
-		} else {
-			warning('compute_performance is TRUE but no test data')
-		}
+		print(Performance)
 	}
-
-	## Prints the performance summaries out, but it's a bit messy and this data is already in excel
-	# Performance[,-1] %>%
-	# 	lapply(function(perf) setNames(as.character(perf), Performance[[1]])) %>%
-	# 	print()
-
-
 
 	message('Adding variables\' importance')
 
