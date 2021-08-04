@@ -89,7 +89,7 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 # 		rowSums()
 # }
 
-estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE, quants = c(.05, .5, .95),
+estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE, quants = options('basren.probs')[[1]],
 																 nsamples = min(2500, sum(model$fit@sim$n_save)), seed = 14129189,
 																 save_preds = FALSE, save_model = FALSE) {
 

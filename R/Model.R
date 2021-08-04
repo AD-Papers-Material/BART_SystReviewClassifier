@@ -146,7 +146,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 }
 
 # compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F,
-# 																		 quants = c(.05, .5, .95), AUC.thr = .9) {
+# 																		 quants = options('basren.probs')[[1]], AUC.thr = .9) {
 #
 # 	library(scales)
 # 	library(pROC)
@@ -194,7 +194,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 #
 # }
 
-# compute_pred_performance2 <- function(DTM, models, perf_quants = c(.01, .5, .99),
+# compute_pred_performance2 <- function(DTM, models, pred_quants = c(.01, .5, .99),
 # 																			negLim = NULL, posLim = NULL) {
 # 	message('Build indexes')
 # 	index_data <- pblapply(1:length(models), function(i) {
@@ -226,7 +226,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # 			data.frame(
 # 				ID,
 # 				Target = DTM$Target[DTM$ID == ID],
-# 				ID_preds %>% quantile(perf_quants) %>% t %>%
+# 				ID_preds %>% quantile(pred_quants) %>% t %>%
 # 					as.data.frame() %>%
 # 					setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up')),
 # 				set = set,
@@ -258,7 +258,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # 		summarise(
 # 			'AUC [CrI]' =  cur_data() %>% select(starts_with('X')) %>% pbmclapply(function(p) {
 # 				suppressMessages(pROC::roc(response = Target, predictor = p) %>% pROC::auc() %>% as.vector())
-# 			}) %>% unlist() %>% quantile(perf_quants) %>% percent() %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
+# 			}) %>% unlist() %>% quantile(pred_quants) %>% percent() %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
 # 			'SetLimits, neg/pos' = sprintf('%s/%s',
 # 																		 min(Pred_Low[Target %in% 'y']) %>% percent,
 # 																		 max(Pred_Up[Target %in% 'n']) %>% percent
@@ -301,7 +301,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
 # 																		 negLim = NULL, posLim = NULL,
 # 																		 truePos = NULL, trueNeg = NULL,
-# 																		 perf_quants = c(.01, .5, .99),
+# 																		 pred_quants = c(.01, .5, .99),
 # 																		 show_progress = T) {
 #
 # 	if (show_progress) {
@@ -369,7 +369,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # 								pROC::auc() %>% as.vector()
 # 						}) %>% unlist() %>% {
 # 							if (length(.) > 1) {
-# 								quantile(., perf_quants) %>% percent() %>%
+# 								quantile(., pred_quants) %>% percent() %>%
 # 									{glue("{.[2]} [{.[1]}, {.[3]}]")}
 # 							} else percent(.)
 # 						}
@@ -428,7 +428,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # 				# 		'check')
 # 				#
 # 				# 	mean(Predicted_label[Target_test == 'n'] == 'n')
-# 				# }) %>% unlist %>% quantile(perf_quants)
+# 				# }) %>% unlist %>% quantile(pred_quants)
 #
 # 				PPV = percent(mean(
 # 					Target_test[Predicted_label == 'y' |
@@ -440,11 +440,11 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # 				## Similar results to the next indicators, but have finite bounds (no divisions by zero)
 # 				# 'Pos per sample rate [CrI] (prob. > random)' = {
 # 				# 	obsPos <- sum(Target_test %in% 'y')
-# 				# 	obs <- (obsPos/qhyper(perf_quants, truePos, trueNeg, n())) %>%
+# 				# 	obs <- (obsPos/qhyper(pred_quants, truePos, trueNeg, n())) %>%
 # 				# 		signif(3)
 # 				# 	obs_p <- phyper(obsPos, truePos, trueNeg, n()) %>% percent()
 # 				#
-# 				# 	pred <- (obsPos/qhyper(perf_quants, predPos, predNeg, n())) %>%
+# 				# 	pred <- (obsPos/qhyper(pred_quants, predPos, predNeg, n())) %>%
 # 				# 		signif(3)
 # 				# 	pred_p <- phyper(obsPos, predPos, predNeg, n()) %>% percent()
 # 				#
@@ -456,11 +456,11 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 # 					pnhyper <- extraDistr::pnhyper
 #
 # 					obsPos <- sum(Target_test %in% 'y')
-# 					obs <- (qnhyper(perf_quants, trueNeg, truePos, obsPos) / n()) %>%
+# 					obs <- (qnhyper(pred_quants, trueNeg, truePos, obsPos) / n()) %>%
 # 						signif(3) %>% sort()
 # 					obs_p <- (1 - pnhyper(n(), trueNeg, truePos, obsPos)) %>% percent()
 #
-# 					pred <- (qnhyper(perf_quants, predNeg, predPos, obsPos) / n()) %>%
+# 					pred <- (qnhyper(pred_quants, predNeg, predPos, obsPos) / n()) %>%
 # 						signif(3) %>% sort()
 # 					pred_p <- (1 - pnhyper(n(), predNeg, predPos, obsPos)) %>% percent()
 #
@@ -492,9 +492,9 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 pos_mult = 10,
 																	 n_models = 10,
 																	 resample = F,
-																	 perf_quants = c(.01, .5, .99),
+																	 pred_quants = c(.01, .5, .99),
 																	 #
-																	 sessions_folder = 'Sessions',
+																	 sessions_folder = options(basren.sessions_folder)[[1]],
 																	 pred_batch_size = 5000,
 																	 autorun = TRUE, replication = NULL,
 																	 stop_on_unreviewed = TRUE,
@@ -533,8 +533,8 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	on.exit(file.remove(process_id))
 
-	if (length(perf_quants) != 3 & any(perf_quants >= 1 | perf_quants <= 0)) {
-		stop('"perf_quants" should be 3 quantiles, between 0 and 1 (included).')
+	if (length(pred_quants) != 3 & any(pred_quants >= 1 | pred_quants <= 0)) {
+		stop('"pred_quants" should be 3 quantiles, between 0 and 1 (included).')
 	}
 
 	# log arguments. useful for error checking
@@ -549,7 +549,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			)
 		}) %>% bind_rows()
 
-	perf_quants <- sort(perf_quants)[c(2, 1, 3)]
+	pred_quants <- sort(pred_quants)[c(2, 1, 3)]
 
 	dup_session_action <- match.arg(dup_session_action)
 
@@ -780,7 +780,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 		# 		# ),
 		# 		# oos.perf = compute_pred_performance(
 		# 		# 	bart.mod, data = test_data, Y = 'Target', AUC.thr = AUC.thr,
-		# 		# 	quants = perf_quants),
+		# 		# 	quants = pred_quants),
 		#
 		# 		var.imp = bartMachine::get_var_props_over_chain(bart.mod, 'trees')
 		# 	)
@@ -880,7 +880,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	Predicted_data <- DTM %>% select(ID, Target) %>%
 		data.frame(
-			apply(Samples[,-1], 1, quantile, perf_quants) %>% t %>%
+			apply(Samples[,-1], 1, quantile, pred_quants) %>% t %>%
 				as.data.frame() %>%
 				setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up'))
 		) %>%
@@ -939,7 +939,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 		#
 		# 	Performance <- compute_pred_performance(Annotated_data, samples = Samples,
 		# 																					test_data = Test_data,
-		# 																					perf_quants = perf_quants)
+		# 																					pred_quants = pred_quants)
 		# 	tictoc::toc()
 		# } else {
 		# 	warning('compute_performance is TRUE but no test data')
@@ -1094,7 +1094,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 														 ## Model parameters
 														 pos_mult = pos_mult,
 														 n_models = n_models,
-														 perf_quants = perf_quants,
+														 pred_quants = pred_quants,
 														 resample = resample,
 														 #
 														 dup_session_action = 'fill', # if an automatic reply, this is the logical option
@@ -1115,7 +1115,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	invisible(out)
 }
 
-consolidate_results <- function(session_name, sessions_folder = 'Sessions') {
+consolidate_results <- function(session_name, sessions_folder = options(basren.sessions_folder)[[1]]) {
 	annotations_files <- get_session_files(session_name, sessions_folder)$Annotations
 
 	message('Loading annotations...')
@@ -1160,7 +1160,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 																		n_init = c(50, 100, 250, 500),
 																		n_models = c(5, 10, 20, 40, 60),
 																		pos_mult = c(1, 10, 20),
-																		perf_quants = list(c(.1, .5, .9),
+																		pred_quants = list(c(.1, .5, .9),
 																											 c(.05, .5, .95),
 																											 c(.01, .5, .99)),
 																		## Passed arguments
@@ -1174,7 +1174,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 
 	# prepare the parameter grid
 	Grid <- tidyr::expand_grid(
-		resample, n_init, n_models, pos_mult, perf_quants
+		resample, n_init, n_models, pos_mult, pred_quants
 	) %>%
 		mutate(
 			iteration = glue('{1:n()} / {n()}'),
@@ -1184,7 +1184,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 				glue('{ifelse(resample, "y", "n")}Resamp'),
 				glue('{n_init}Init'),
 				glue('{pos_mult}Mult'),
-				glue('{(sapply(perf_quants, max)-sapply(perf_quants, min))*100}Quant'),
+				glue('{(sapply(pred_quants, max)-sapply(pred_quants, min))*100}Quant'),
 				sep = '.'
 			) %>% str_replace_all('\\.+', '.')
 		)
@@ -1235,7 +1235,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 				 											 resample = resample,
 				 											 n_models = n_models,
 				 											 pos_mult = pos_mult,
-				 											 perf_quants = perf_quants[[1]])
+				 											 pred_quants = pred_quants[[1]])
 		)
 	}) %>% unlist() %>% table()
 }
