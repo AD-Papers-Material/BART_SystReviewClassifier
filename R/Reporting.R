@@ -91,6 +91,23 @@ summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 	res
 }
 
+source_session_summary_to_list <- function(source_summary) {
+	source_summary$Session_label %>% unique() %>%
+		lapply(function(session) {
+			df <- source_summary %>% filter(Session_label == session)
+			df$Source %>%
+				lapply(function(source) {
+					df <- source_summary %>% filter(Session_label == session, Source == source)
+					list(
+						Records = df$Records,
+						Perc_over_total = df$`% over total`,
+						Source_specific = df$`Source specific records`,
+						Source_specific_perc = df$`% over source total`
+					)
+				}) %>% setNames(df$Source)
+		}) %>% setNames(unique(source_summary$Session_label))
+}
+
 get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun = percent) {
 	res <- import_data(annotation_file)$Source %>%
 		pbmclapply(function(sources) str_split(sources, '; *') %>% unlist %>% n_distinct) %>%
