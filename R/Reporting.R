@@ -556,9 +556,7 @@ format_performance <- function(..., session_names = NULL) {
 }
 
 plot_predictive_densities <- function(session_name,
-																			sessions_folder = options("basren.sessions_folder")[[1]],
-																			seed = 2402938) {
-	set.seed(seed)
+																			sessions_folder = options("basren.sessions_folder")[[1]]) {
 
 	records_files <- get_session_files(session_name, sessions_folder)$Annotations
 	samples_files <- get_session_files(session_name, sessions_folder)$Samples
@@ -596,15 +594,27 @@ plot_predictive_densities <- function(session_name,
 		mutate(
 			Label = factor(Label, c('n', 'y', '*'), c('Negative', 'Positive', 'To review'))
 			) %>% {
-			. <- mutate(., Iteration = factor(Iteration, sort(unique(Iteration), TRUE)))
-			df <- select(., -Samples) %>% distinct()
+			df <- mutate(., Iteration = factor(Iteration, sort(unique(Iteration), TRUE)))
 
-			ggplot(., aes(y = Iteration)) +
-				geom_density_ridges(aes(x = Samples, fill = Label, color = Label), alpha = .5, scale = 1) +
-				geom_segment(data = df, aes(yend = as.numeric(Iteration) + .1, x = Neg_lim, xend = Neg_lim, color = 'Negative')) +
-				geom_segment(data = df, aes(yend = as.numeric(Iteration) + .1, x = Pos_lim, xend = Pos_lim, color = 'Positive')) +
-				geom_label(data = df, aes(y = as.numeric(Iteration) - .1, x = Pos_lim, label = Pos_lim)) +
-				geom_label(data = df, aes(y = as.numeric(Iteration) - .1, x = Neg_lim, label = Neg_lim)) +
+			unc_range_df <- select(df, -Samples) %>% distinct()
+
+			group_split(df, Iteration, Label) %>%
+				lapply(function(g) {
+					dens <- density(arm::logit(g$Samples))
+
+					data.frame(
+						Iteration = g$Iteration[1],
+						Label = g$Label[1],
+						Prob = arm::invlogit(dens$x),
+						Dens = dens$y
+					)
+				}) %>% bind_rows() %>%
+				ggplot(aes(y = Iteration)) +
+				geom_ridgeline(aes(x = Prob, height = Dens, fill = Label, color = Label), alpha = .5, scale = 1) +
+				geom_segment(data = unc_range_df, aes(yend = as.numeric(Iteration) + .1, x = Neg_lim, xend = Neg_lim, color = 'Negative')) +
+				geom_segment(data = unc_range_df, aes(yend = as.numeric(Iteration) + .1, x = Pos_lim, xend = Pos_lim, color = 'Positive')) +
+				geom_label(data = unc_range_df, aes(y = as.numeric(Iteration) - .1, x = Pos_lim, label = Pos_lim)) +
+				geom_label(data = unc_range_df, aes(y = as.numeric(Iteration) - .1, x = Neg_lim, label = Neg_lim)) +
 				scale_color_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
 				scale_fill_manual(values = c("Negative" = "darkred", "Positive" = "steelblue", "To review" = "violet")) +
 				theme_minimal() +
