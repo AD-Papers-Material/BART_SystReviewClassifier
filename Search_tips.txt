@@ -1,7 +1,7 @@
 Search tips
 
 WOS:
-- activate your institution proxy or log in in some way (it is only needed for the key, then you can log off the proxy)
+- activate your institution proxy or log in in some way (it is only needed to get the API key, then you can log off the proxy)
 - go to https://apps.webofknowledge.com/
 - extract the API key from the URL, is denominated by SID
 - put the key in the secrets.R file and source it or source Setup.R
