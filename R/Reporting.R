@@ -621,3 +621,22 @@ plot_predictive_densities <- function(session_name,
 				labs(x = 'Positive match probability', y = 'Iteration')
 		}
 }
+
+format_var_imp <- function(var_imp, as_data_frame = TRUE) {
+	var_imp <- var_imp %>%
+		transmute(
+			Component = str_extract(Term, '^\\w+(?=__)') %>%
+				factor(c('ABSTR', 'TITLE', 'AUTH', 'KEYS', 'MESH'),
+							 c('Abstract', 'Title', 'Author', 'Keyword', 'Mesh term')),
+			Term = str_replace_all(Term, c('^\\w+__' = '', '\\._\\.' = ' & ', '\\.' = ' | ', '_' = ' ')) %>% str_to_title(),
+			'Value (on 10K trees)' = signif(Value * 10000, 3),
+			RR = signif(exp(estimate), 3) %>% str_remove('\\.?0+$'),
+			Statistic = signif(statistic, 3) %>% str_remove('\\.?0+$'),
+		)
+
+	if (!as_data_frame) {
+		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Value (on 10K trees)`} [{Statistic}]'))
+	}
+
+	var_imp
+}

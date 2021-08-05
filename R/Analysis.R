@@ -70,9 +70,9 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 	train_data$Target = factor(coalesce_labels(train_data))
 
 	brm(bf(Target ~ Pred_Low), family = bernoulli,
-						data = train_data,
-						cores = 8, chains = 8, refresh = 0, iter = 8000, control = list(adapt_delta = .95),
-						backend = 'cmdstan', seed = seed,
+			data = train_data,
+			cores = 8, chains = 8, refresh = 0, iter = 8000, control = list(adapt_delta = .95),
+			backend = 'cmdstan', seed = seed,
 			prior = c(
 				prior(student_t(3, 0, 2.5), class = "Intercept"),
 				prior(student_t(3, 0, 1.5), class = "b")
@@ -137,10 +137,10 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 		sensitivity = quantile(obs_pos / tot_pos, quants)
 	) %>%
 		sapply(function(el) { # if quantile, sort them
-		if (length(el) == 3) {
-			sort(el) %>% setNames(percent(quants))
-		} else el
-	})
+			if (length(el) == 3) {
+				sort(el) %>% setNames(percent(quants))
+			} else el
+		})
 
 	if (save_preds) {
 		res$preds <- preds
@@ -270,3 +270,39 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 # 	# 	geom_point(aes(y = Pred_Med, color = Predicted_label), alpha = .8) +
 # 	# 	scale_y_continuous(trans = 'logit') + theme_minimal()
 # }
+
+extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, recompute_DTM = FALSE,
+														sessions_folder = options("basren.sessions_folder")[[1]]) {
+
+	message('Retrieving data')
+	session_files <- get_session_files(session_name, sessions_folder)
+
+	Records <- last(session_files$Annotations) %>% import_data() %>%
+		mutate(Target = coalesce_labels(.) %>% tidyr::replace_na('n')) %>%
+		select(ID, Target)
+
+	Variables <- last(session_files$Annotations) %>%
+		import_data(sheet = 'Variable_importance') %>%
+		filter(!str_detect(Term, '^\\w+\\.count'), Score > score_filter) %>%
+		arrange(desc(Value)) %>%
+		head(num_vars)
+
+	if (recompute_DTM) {
+		DTM <- create_training_set(Records)
+	} else DTM <- read_rds(session_files$DTM)
+
+	DTM$Target <- as.numeric(Records[match(DTM$ID, Records$ID),]$Target == 'y')
+
+	message('Computing variable importance')
+	pbmclapply(1:nrow(Variables), function(i) {
+		Term_data <- Variables[i,]
+		term <- Term_data$Term
+
+		data.frame(
+			Term_data,
+			glm(Target ~ get(term), poisson(), DTM) %>% broom::tidy() %>%
+				tail(-1) %>% select(-term, -std.error, -p.value)
+		)
+	}) %>% bind_rows()
+
+}
