@@ -575,6 +575,8 @@ format_performance <- function(..., session_names = NULL) {
 plot_predictive_densities <- function(session_name,
 																			sessions_folder = options("basren.sessions_folder")[[1]]) {
 
+	library(ggridges)
+
 	records_files <- get_session_files(session_name, sessions_folder)$Annotations
 	samples_files <- get_session_files(session_name, sessions_folder)$Samples
 

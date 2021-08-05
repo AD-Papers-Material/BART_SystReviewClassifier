@@ -41,8 +41,8 @@ pkg.require(
 	install_and_load = c("dplyr", "stringr", "glue", "readr", "readxl", "lubridate", "Matrix", "igraph", "pbapply",
 											 "pbmcapply", "rpart", "bartMachine", "tm", "patchwork", "ggplot2", "ggrepel", "RLesur/crrri",
 											 "bakaburg1/tidytrees"),
-	only_install = c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm',
-									 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms')
+	only_install = c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm', 'english',
+									 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms', 'ggridges')
 )
 
 
