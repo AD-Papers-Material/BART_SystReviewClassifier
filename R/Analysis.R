@@ -67,10 +67,7 @@ compute_changes <- function(Annotations) {
 estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 	library(brms)
 
-	train_data <- train_data %>%
-		mutate(
-			Target = coalesce_labels(.) %>% factor()
-			)
+	train_data$Target = factor(coalesce_labels(train_data))
 
 	brm(bf(Target ~ Pred_Low), family = bernoulli,
 						data = train_data,
@@ -94,6 +91,7 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 																 save_preds = FALSE, save_model = FALSE) {
 
 	if (is.null(model)) {
+		message('- build model...')
 		model <- estimate_positivity_rate_model(records, seed)
 	}
 
