@@ -1,5 +1,5 @@
 summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
-																add_totals = TRUE) {
+																add_session_totals = TRUE) {
 	data <- import_data(annotation_file)
 
 	sources <- data$Source %>% str_split(., '; *') %>% unlist() %>% unique
@@ -16,7 +16,7 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 				 Source_specific = Source_specific, Source_specific_perc = Source_specific_perc)
 	}) %>% setNames(sources)
 
-	if (add_totals) {
+	if (add_session_totals) {
 		res$Total <- list(
 			Records = nrow(data),
 			Perc_over_total = '',
@@ -31,7 +31,8 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 				Source = names(res),
 				.before = 1
 			) %>%
-			arrange(desc(Records))
+			arrange(desc(Records)) %>%
+			setNames(c('Source', 'Records', '% over total', 'Source specific records', '% over source total'))
 	}
 
 	res
@@ -39,10 +40,10 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 
 summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 																				 sessions_folder = options("basren.sessions_folder")[[1]],
-																				 add_totals = TRUE, keep_session_label = F) {
+																				 add_global_totals = TRUE, keep_session_label = FALSE, ...) {
 	if (length(sessions) == 1) {
 		res <- get_session_files(session, sessions_folder)$Records %>%
-			summarise_by_source(as_data_frame = TRUE)
+			summarise_by_source(as_data_frame = TRUE, ...)
 
 		return(res)
 	}
@@ -60,16 +61,16 @@ summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 			data <- data %>% filter(ID %nin% previous_records)
 		}
 
-		summarise_by_source(data, as_data_frame = TRUE) %>%
+		summarise_by_source(data, as_data_frame = TRUE, ...) %>%
 			mutate(
 				Session_label = sessions[i]
 			)
 	})
 
-	if (add_totals) {
+	if (add_global_totals) {
 		res <- bind_rows(
 			res,
-			summarise_by_source(last(records), as_data_frame = TRUE) %>%
+			summarise_by_source(last(records), as_data_frame = TRUE, ...) %>%
 				mutate(
 					Session_label = 'All Sessions'
 				)
@@ -179,16 +180,16 @@ summarise_annotations <- function(session_name, sessions_folder = options("basre
 summarise_annotations_by_session <- function(sessions_folder = options("basren.sessions_folder")[[1]],
 																						 remove_empty_columns = TRUE,
 																						 remove_raw_data = TRUE) {
-	sessions <- list.files(session_folder)
+	sessions <- list.files(sessions_folder)
 
 	if (length(sessions) == 0) {
-		stop('No session found in "', session_folder, '". Are you sure the name is not mispelled?')
+		stop('No session found in "', sessions_folder, '". Are you sure the name is not mispelled?')
 	}
 
 	mclapply(1:length(sessions), function(i) {
 		session <- sessions[i]
 
-		res <- summarise_annotations(session, session_folder,
+		res <- summarise_annotations(session, sessions_folder,
 																 remove_empty_columns = F, remove_raw_data = F)
 
 		if (i > 1) {
