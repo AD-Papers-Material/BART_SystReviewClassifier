@@ -543,6 +543,14 @@ summarise_annotations_by_session <- function(sessions_folder = options("basren.s
 # 	output
 # }
 
+format_interval <- function(interval, percent = FALSE) {
+	interval <- sort(interval)
+
+	if (percent) interval <- percent(interval)
+
+	interval %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
+}
+
 format_performance <- function(..., session_names = NULL) {
 
 	elements <- list(...)
@@ -556,10 +564,11 @@ format_performance <- function(..., session_names = NULL) {
 				#Session = session_names[i],
 				'Tot. records' = total_records,
 				'N. reviewed records (% over total)' = glue("{n_reviewed} ({percent(n_reviewed/total_records)})"),
-				'Expected efficiency [PrI]' = percent(efficiency) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
+				'Expected efficiency [PrI]' = efficiency %>% format_interval(percent = TRUE),
 				'N. positive matches (% over total)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
-				'Expected sensitivity [PrI]' = percent(sensitivity) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
-				'Model R^2' = percent(mod_r2) %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
+				'Predicted positive matches [PrI]' = pred_positives %>% format_interval(),
+				'Expected sensitivity [PrI]' = sensitivity %>% format_interval(percent = TRUE),
+				'Model R^2' = mod_r2 %>% format_interval(percent = TRUE)
 		) %>%
 				mutate_all(as.character) %>%
 				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%

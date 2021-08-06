@@ -87,7 +87,7 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 # }
 
 estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE, quants = options('basren.probs')[[1]],
-																 nsamples = min(2500, sum(model$fit@sim$n_save)), seed = 14129189,
+																 nsamples = min(2500, sum(model$fit@sim$n_save)), seed = 23797297,
 																 save_preds = FALSE, save_model = FALSE) {
 
 	if (is.null(model)) {
@@ -122,7 +122,6 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 	tot_reviewed <- sum(!is.na(records$Target))
 	tot_pos <- pmax(preds %>% rowSums(), obs_pos)
 	tot_neg <- tot_records - tot_pos
-
 
 	n_needed <- extraDistr::rnhyper(n_sims, tot_neg, tot_pos, obs_pos)
 
@@ -184,7 +183,7 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 			guides(alpha = 'none') +
 			labs(x = 'Records', y = 'Cum. positive matches', color = '')
 
-		print(res$plot)
+		#print(res$plot)
 	}
 
 	res
