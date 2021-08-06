@@ -1,6 +1,6 @@
 ---
 title: "Study protocol"
-date: Feb 1, 2021
+date: `r lubridate::today()`
 author:
   - first_name: "Angelo"
     last_name: "D'Ambrosio"
@@ -11,8 +11,22 @@ author:
 output: distill::distill_article
 ---
 
-# Research Protocol
+```{r setup, echo = FALSE, eval = TRUE}
 
+knitr::opts_chunk$set(
+	echo = TRUE,
+	error = FALSE,
+	message = FALSE,
+	warning = FALSE,
+	include = TRUE,
+	eval = FALSE,
+	dpi = 400,
+	fig.pos = "H", out.extra = ""
+)
+
+```
+
+# Research Protocol
 
 This document will guide the reader along the steps to utilize the framework and reproduce our results.
 
@@ -20,11 +34,16 @@ This document will guide the reader along the steps to utilize the framework and
 
 Once the framework is loaded, the user defines an initial search query which needs to be as specific as possible while still generating a sufficient number of positive matches:
 
-```{r setup, echo = TRUE, eval = FALSE}
+```{r query creation, echo = TRUE, eval = TRUE}
+
 source('Setup.R') # Load the framework
 
 # Initial query to be built on domain knowledge
-query <- '((model OR models OR modeling OR network OR networks) AND (dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR hospital OR "long-term-care" OR "long term care" OR "longterm care" OR "long-term care" OR "healthcare associated") AND (infection OR resistance OR resistant))'
+query <- '((model OR models OR modeling OR network OR networks) AND
+(dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR
+hospital OR "long-term-care" OR "long term care" OR "longterm care" OR
+"long-term care" OR "healthcare associated") AND (infection OR resistance OR
+resistant))'
 
 # Year filter. The framework convert it to the API specific format seamlessly.
 # common logical comparators can be used, i.e. <, <=, >, >=, while dashes
@@ -37,13 +56,24 @@ year_filter <- '2010-2020'
 The query is passed to the `perform_search_session()` function, together with an unique identifier for the **search session** and **search query**. A session identifies a homogeneous group of complementary or alternative queries (e.g. sometimes it is easier to create two different simpler queries than a complex and long one that returns the same results).\
 In our implementation we define as sessions the group of actions that includes the utilization of a search query and the subsequent cycle of manual review and relevancy prediction of its results.\
 
-`perform_search_session()` will use common scientific research database APIs (at the moment Pubmed/Medline, Web of Science and IEEE) to look for records related to query, store them in a csv format and returns or update **journal** (a csv or excel file) with all the information about sessions, queries and search results. The records will be stored in folders with the following structure: Records/\*session_id\*/\*query_id\*.\
-If manually downloaded results are already available, users can create these folders manually and put the data there (the file name needs to contain the source name as written in the `sources` argument) and the function will acquire and parse them into a common format, even if split in multiple files due to download limits (e.g. Pubmed1.nbib, Pubmed2.nib, etc.). In addition of Pubmed, WOS and IEEE, this method permits to import also Embase and Scopus records, for which an API search was not yet implemented.\
+`perform_search_session()` will use common scientific research database APIs (at the moment Pubmed/Medline, Web of Science and IEEE) to look for records related to query, store them in a csv format and returns or update **journal** (a csv or excel file) with all the information about sessions, queries and search results. The records will be stored in folders with the following structure: Records/\*session_id\*/\*query_id\*. Some API requires API key to access the data. These keys can be stored in the secret.R file with the following structure:
+
+```{r secrets}
+options(ieee_api_key = 'bb58ndv4xbv535b5779u93ka')
+options(ncbi_api_key = '5cd65c6d044db651af2bf8e9c78fc54fa409')
+options(wos_api_key = 'C4O2SHqGc1rf3jmNxqI')
+```
+
+This file will be automatically parsed from the framework.
+
+If manually downloaded results are available, users can create the Record folders manually and put the data there (the file names need to contain the source name as written in the `sources` argument of `perform_search_session()`) and the function will acquire and parse them into a common format, even if split in multiple files due to download limits (e.g. Pubmed1.nbib, Pubmed2.nib, etc.). In addition of Pubmed, WOS and IEEE, this method permits to import also Embase and Scopus records, for which an API search was not yet implemented.\
 Users can choose whether to perform an API search, parse already downloaded results, or both using the `actions` argument.
 
-Note that for Pubmed, the API search may return slightly less records than a manual one due to a different query expansion algorithm (check Pubmed documentation) between the two services; therefore is advisable to perform also a manual search and put the .nbib file in the Session/Query folder. `perform_search_session()` will acquire them seamlessly.
+Note that for Pubmed, the API search may return slightly less records than a manual one due to a different query expansion algorithm (check Pubmed documentation) between the two services; therefore is advisable to perform also a manual search and put the resulting .nbib files in the Session/Query folder. `perform_search_session()` will acquire them seamlessly.
 
-```{r perform searches, echo = TRUE, eval = FALSE}
+If a user wants to perform the API searches and results parsing manually for each source, the framework exposes the individual functions to search for records using the APIs and parsing bibliography files.
+
+```{r perform searches}
 # This call will perform an API search on Pubmed, WOS and IEEE services and/or
 # (based on the `actions` argument) parse already downloaded data (in our case, additional Pubmed results and Embase and Scopus results) manually added to the Session1/Query1 folder.
 journal <- perform_search_session(query = query, year_query = year_filter,
@@ -56,7 +86,7 @@ journal <- perform_search_session(query = query, year_query = year_filter,
 Once the records are stored, they must be read and merged into an **annotation file** where the initial manual review of the records will be performed.\
 A series of functions are available to prepare the data for the manual evaluation:
 
-```{r managing records, echo = TRUE, eval = FALSE}
+```{r managing records}
 # Extract the file paths of records. Arguments can be used to filter by session
 # query, source. Only parsed files will be returned, not the raw ones downloaded
 # manually.
@@ -83,44 +113,49 @@ Annotation_data <- extract_source_file_paths(journal) %>%
 
 ```
 
-This annotation file needs to be stored in an **Annotation Session** folder which will contain all annotation information. This operation is streamlined by the `create_session()`, which also help manage duplicated sessions.
+Actually all these step are more easily performed through `create_annotation_file()`. This function can take as input either the path to record files, or the parsed records (one data frame or a list of data frames) or a group of folders where to look for files into./
+In addition, it also allows to add the new records to a previous annotation file (arg `prev_records`), useful with subsequent searching sessions with different queries; previous manual classifications of records can be imported using `prev_classification`. By passing the original query to the `reorder_query` argument, the records are reordered empirically in order to increase the probability to find positive matches first.
 
-```{r managing records, echo = TRUE, eval = FALSE}
-create_session(Annotation_data, session_name = 'Session1')
-```
-
-
-Actually all these step are more easily performed by `save_annotation_file()`. This function can take as input either the path to record files, or the parsed records (one data frame or a list of data frames) or a group of folders where to look for files into./
-In addition, it also allows to add the new records to a previous annotation file (arg `prev_annotation`), useful with subsequent searching sessions with different queries. Finally, previous manual classifications of records can be imported using `prev_classification`.
-
-```{r save annotation file, echo = TRUE, eval = FALSE}
+```{r save annotation file}
 # This function extract the appropriate file paths from a session journal. By
 # default it passes all stored files, otherwise it can be filtered by session,
 # query, and source (i.e. Pubmed, WOS, IEEE)
 record_files <- extract_source_file_paths(journal)
 
-# save_annotation_file accept a great variety of inputs:
+# create_annotation_file() accept a great variety of inputs:
 
 	# record file paths
-save_annotation_file(record_files, session_name = 'Session1')
+input <- record_files
 
 	# specific record file folders
-save_annotation_file(file.path('Records', 'Session1'), session_name = 'Session1')
+input <- file.path('Records', 'Session1', 'Query1')
 
 	# or parent folders, since it search for files recursively
-save_annotation_file(file.path('Records'), session_name = 'Session1')
+input <- 'Records'
 
 	# finally it can accept the already parsed files
-read_bib_files(record_files) %>% save_annotation_file(session_name = 'Session1')
+input <- read_bib_files(record_files)
+
+# We can then call create_annotation_file() with one of the above input
+Annotation_data <- create_annotation_file(record_files, reorder_query = query)
 
 ```
 
+Once created, the annotations needs to be stored in an **Annotation Session** folder which will contain all informations necessary for the automatic classification. This operation is streamlined by the `create_session()` function, which also help manage duplicated sessions.
+
+```{r managing records}
+# Create the first session
+create_session(Annotation_data, session_name = 'Session1')
+```
+
+The file annotation file is called `Records_{date}` in the folder `Sessions/{session_name}` with `date` being the creation timestamp and `session_name` being the name passed by the user.
+
 Notice that the framework is "chaining" friendly and the precedent steps can be all performed in one call (which is the suggested procedure):
 
-```{r one call, echo = TRUE, eval = FALSE}
+```{r one call}
 # First create the Records/Session1/Query1 folder and put the manually
-# downloaded files there if you have any. Otherwise the folders will be created
-# automatically
+# downloaded records there if you have any. Otherwise the folders will be
+# created automatically during the API search
 
 # perform searches and parse files; save and return the journal
 Records <- perform_search_session(query = query, year_query = year_filter,
@@ -129,7 +164,7 @@ Records <- perform_search_session(query = query, year_query = year_filter,
 	# return the record file paths
 	extract_source_file_paths() %>%
 	# read, join, reorder records and save them in the Sessions folder
-	save_annotation_file(reorder_query = query) %>%  
+	create_annotation_file(reorder_query = query) %>%  
 	# Create a new session with the records
 	create_session(session_name = 'Session1')
 ```
@@ -137,8 +172,144 @@ Records <- perform_search_session(query = query, year_query = year_filter,
 
 ## Manual classification and prediction
 
-Now the annotation file is ready for manual classification of relevant and non-relevant records. The annotation file has a column called `Rev_manual`, where records will be classified as 'y' or 'n'. The suggestion is to classify manually until the rate of positive start to flatten out./
-The function `check_classification_trends` can help to visualize the trend of the positives/negatives as the number of classified records increases./s
-For a limited number of records, abstracts were not present in the API output for Web of Science; it was needed to retrieve them manually from the internet where if existing and add them to the annotation file.
+Now the annotation file is ready for manual classification of relevant and non-relevant records. The annotation file has a column called `Rev_manual`, where records needs to be classified as "positve" (y) or negative (n) by the user. From our experience, around 250 manually classified records are sufficient if a minimum ~20% positivity rate is maintained (see the section about model parameter optimization)./
+The function `check_classification_trends()` can help to visualize the trend of the positives/negatives as the number of classified records increases./
+
+Once the first records are labelled manually, the function `enrich_annotation_file()` will use Bayesian Additive Regression Trees (BART) to learn the labeling pattern of the user and predict the positive match probability for the unlabelled records. This is a summary of the prediction process:
+
+- a Document Term Matrix (DTM) is created, extracting terms from the (lemmatized) title and abstract of the records and adding the authors and keywords. For each term, a 0/1 label specifies if it is present in each record. Also co-occurrying terms are added as ngrams and highly copresent terms are joined as synonyms;
+- the positive records are weighted 10x more than the negative ones to improve sensitivity;
+- the function models the labeling pattern using the manually reviewed records (learning step);
+- after the model is created, it assigns a probability distribution of positivity to each record, labelled and unlabelled (prediction step). If the number of records is large, the prediction step is broken in chunks of 5000 records, to avoid memory saturation problems; the user will need to set up this parameter according to her machine capabilities;
+- this process is repeated 10 times and the distributions are averaged to induce shrinkage of the estimates;
+- the resulting distribution is summarised by its 98% interval and the unlabelled records will receive a positive/negative predicted label if their interval ends up completely in the joint interval of the positively/negatively labelled records. All the other records will be labeled as unknown (unk) and will require manual review.
+
+The user can define parameters like the positives' weight, the number of models to average, whether to apply bootstrap resampling before each repetition, the prediction chunk size, and the prediction distribution interval range.
+To use the function, the only input needed is the session name, the function will automatically identify the relevant file to make predictions on.
+
+```{r automatic annotation}
+New_annotations <- enrich_annotation_file('Session1')
+```
+
+This function will produce a new excel file which is stored in the Annotations folder of the session; the file will contain a column called `Rev_prediction_new` were the user will find records that require manual review marked by "*". These are records with uncertain labelling ("unk"), but also positive predictions and "y"/"n" predictions that contradict previous manually inputed labels (labeled as "check"). This approach allows to increase the accuracy of the predictions, since the machine learning system is set up to favor sensitivity at the expense of specificity. If the function finds prelabelled records (`Rev_previous` column) added when the Annotation file was created or passed as a further input to `enrich_annotation_file()` (`prev_classification` argument), they will be used to relabel the records marked in the `Rev_prediction_new` column.
+
+The function adds a number of diagnostic pages to the annotation file:
+
+- a results summary page which reports the number of records that need manual review (which includes uncertain and unreviewed positive records or records with certain predictions which are different from previous manual labels), the changes, and the final distribution of the labels; it also shows other information like the number of terms in the DTM, the path to the parent file from which the annotation file was created, the replication number (see later). The content of this summary is also saved as a csv file in the Results folder.
+- a variable importance page which list the used terms in order of the fraction of BART trees in which they were used. If more than 1 model repetition is used, a more robust score is computed taking the ratio of the mean of the term tree fraction among models and its standard deviation.
+- the arguments passed to the function if different from the default, useful for reproducibility.
+- a classification performance summary (*this needs implementation*).
+
+Finally, the posterior samples produced by the Bayesian engine are stored on the disk. This feature can be turned off to save disk space, but at least the samples of the last annotation are necessary to build a new search query building (see next section).
+
+Once the manual review of the generated annotation file is completed, the user can **rerun exactly the same function**. The reviewed annotation file will be automatically picked up and used for a new round of classification and review (CR). In case the number of records that require manual review is excessively high (e.g. > 250) the function need to be called setting the `stop_on_unreviewed` argument to `FALSE` to allow the classification to proceed even in the presence of unreviewed records (i.e. marked by "*") in the `Rev_prediction_new` column.
+
+If there are no positive results (after manual review) in a CR round, the framework records the next round as a "replication". After four replication with no positive matches are done, the function will prevent another round and send a warning message. The user can change the replication limit; furthermore it's possible to have the function to stop if either a number (or a fraction of the total records) has been manually reviewed already, or if a certain number of positive matches have been found. These three parameter are passed to the `limits` argument which has the following structure and defaults:
+
+```{r replication limits}
+list(
+	stop_after = 4, pos_target = NULL,
+	labeling_limit = NULL
+)
+```
+
+The result files in the Results folder are generated after the Classification phase but before the Review one, and therefore show preliminary results. The function `consolidate_results(session_name)` will update the results files to show the results after the manual review. The temporary result data is anyway stored in the respective annotations file.
+
+## New search query generation
+
+It's not uncommon that for the first query used in a systematic review not to be the the most effective one, especially in terms of sensitivity. We tried to address the problem by creating automatic query generation system. The solution is experimental and favors sensitivity at the expense of specificity. After a step in which a set of candidate query rules (to be joined by a OR logic) are selected, the user is asked to review them and select rules that make more sense to the topic or deselect too general rules that would generate too many results. The algorithm is, of course, not topic aware and therefore may very likely pick terms that are only casually associated with the topic of study; therefore a human review and selection is still needed.
+
+The steps for generating a query are the following:
+
+```{r new query generation}
+
+# The last annotation file and posterior sample matrix in the session are
+# found; the most predictive terms (based on the importance score) are chosen
+# and simple prediction trees are used to map the terms to a random subset of
+# the posterior probabilities (extracted from the posterior sample matrix saved
+# during the last CR step). The score threshold and the number of trees can be
+# chosen by the user; less stringent values can greatly increase computation
+# time;
+
+candidate_queries <- extract_rules('Session1')
+
+# The 'candidate_queries' contains the rules and the DMT and the labels on which
+# the rules were built, which need to be passed to
+# generate_rule_selection_set(). This function select the most effective (higher
+# positive/negative matches delta) rules; also adds negative terms to increase
+# specificity. A dataframe is generated (or automatically saved if save_path is
+# set). The output proposes groups of equivalent (in terms of number of positive
+# matches found) group of query, ordered by specificity; for each group the user
+# needs to select the best rule by setting the selected_rule column to TRUE. The
+# groups are in order of growing sensitivity/decreasing specificity, so it may
+# make sense to exclude the last groups totally in order to avoid too many
+# search results.
+
+Target <- candidate_queries$DTM$Target
+SpecificDTM <- candidate_queries$SpecificDTM
+
+selection_set <- generate_rule_selection_set(
+	candidate_queries$rule,
+	target_vec = Target,
+	target_data = SpecificDTM)
+
+selection_set_file <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx')
+openxlsx::write.xlsx(selection_set, selection_set_file)
+
+# Once the manual selection is performed the selected rules can be further
+# simplified in order to remove redundant rules and terms. The aim is to provide
+# the shortest rule without loss of retrieving accuracy.
+
+simplified_rules <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx') %>%
+	import_data() %>%
+	simplify_ruleset(ruleset = Target, SpecificDTM) %>%
+	pull(rule)
+
+# Finally, the selected rules need to be joined in a query that scientific
+# search engines can understand
+
+new_query <- rules_to_query(simplified_rules)
+
+```
+
+
+One last thing to keep in mind is that the query generation algorithm is only aware of the literature collected inside the annotation file it's working on; so it will only be able to pick term combinations that identify positive matches inside an already specific set of documents, while not necessarily being discriminant from the rest of the global literature.\
+Therefore, once the final query is generated it is advisable to add a piece with a AND logic to restrict the results in the scope of the general topic of interest.\
+In our case, we added "AND ((antimicrobial resistance) OR (healthcare infection))" since being the global topic of our research, those terms were understandably not selected by the query generation algorithm as discriminant.\
+
+The final query was the following:
+
+```{r second session query}
+query <- "(((Donker T) NOT (bacterium isolate)) OR ((network patient) AND
+(resistant staphylococcus aureus) NOT (monte carlo) NOT isolation) OR
+(facility AND (network patient) AND regional NOT hospitals NOT increase NOT
+(patient transport) NOT (control infection use)) OR ((patient transport) NOT
+(Donker T) NOT worker) OR (hospitals AND (network patient) NOT
+(patient transport) NOT regional NOT clinical) OR (facility AND
+(network patient) NOT hospitals NOT (patient transport) NOT regional NOT
+prevention NOT medical) OR ((healthcare facility) NOT (Donker T) NOT
+worker NOT positive) OR (hospitals NOT (network patient) NOT medical NOT
+environmental NOT outcome NOT global) OR ((network patient) NOT facility NOT
+hospitals NOT (patient transport) NOT therapy NOT global)) AND
+((antimicrobial resistance) OR (healthcare infection))"
+
+```
+
+Another advantage of this technique is an at-glance view of relevant concepts for the topic of interest.
+
+## New search session
+
+Once the new query was generated, a second search session called `Session2` was created, using the strategy described in the protocol. Due to the lower specificity of the second query, particular care was needed in managing the far larger amount of records, since manual downloading may be necessary from Pubmed, Embase, and Scopus (which usually have limits on the amount of records one can download at once), and because the automatic classification processing time increases proportionally to the number of records to label.\
+It is advisable then to cosider removing iteratively the less specific rules from the query until a manageable number of records is found, considering that the probability of finding positive matches not already found by more specific queries drops exponentially.\
+
+Once the new records are collected, `enrich_annotation_file('Session2')` can be used to perform the new CR cycles until no new positive matches are found. It may be possible that, during the first CR round, the number of records that require manual review is a large amount: we suggest to evaluate still not more than 250, keeping in mind to set the `stop_on_unreviewed` argument to `FALSE`.
+
+# Results evaluation
+
+
+# Model parameters' optimization
+
+As many complex machine learning models, the choosing of hyperparameters can greatly influence the framework performance. For a systematic review helper algorithm, we define the performance as the ability to find as many positive matches by manually labelling/reviewing as few records as possible.\
+We added a number of simple tools to the framework to find a set of hyperparameters using by a "grid search" algorithm. We tested these tools on our dataset, manually labeling the first 1200 records (ordered by simple query match, as described when introducing the `create_annotation_file()` function)
 
 
