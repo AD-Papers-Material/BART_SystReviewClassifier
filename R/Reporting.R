@@ -177,9 +177,11 @@ summarise_annotations <- function(session_name, sessions_folder = options("basre
 				'Unlab. -> *' = `Change: unlab. -> *`,
 				'y -> n' = `Change: y -> n`,
 				'n -> y' = `Change: n -> y`,
+				'N. features' = `N. features`
 			) %>%
 			mutate(
-				Changes = select(., matches('->')) %>% rowSums()
+				Changes = select(., matches('->')) %>% rowSums(),
+				.before = `N. features`
 			)
 	}) %>% bind_rows() %>%  {
 		if (remove_empty_columns) {
@@ -568,7 +570,7 @@ format_performance <- function(..., session_names = NULL) {
 				'N. positive matches (% over total)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
 				'Predicted positive matches [PrI]' = pred_positives %>% format_interval(),
 				'Expected sensitivity [PrI]' = sensitivity %>% format_interval(percent = TRUE),
-				'Model R^2' = mod_r2 %>% format_interval(percent = TRUE)
+				'Simple Model R^2 [PrI]' = mod_r2 %>% format_interval(percent = TRUE)
 		) %>%
 				mutate_all(as.character) %>%
 				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%
