@@ -429,7 +429,7 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 
 		p <- patchwork::wrap_plots(p) + legend
 
-		print(p)
+		#print(p)
 	}
 
 	list(
