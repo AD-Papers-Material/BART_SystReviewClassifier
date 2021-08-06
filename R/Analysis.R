@@ -306,3 +306,149 @@ extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, rec
 	}) %>% bind_rows()
 
 }
+
+analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
+																tot_records = NULL,  plot = TRUE,
+																score = c('Sens_adj_eff', 'Pos_rate_adj_sens',
+																					'Pos_rate')) {
+
+	score <- match.arg(score)
+
+	if (is.null(tot_pos) | is.null(tot_records)) {
+		Labels <- list.files(session_folder, pattern = 'Records_', recursive = T, full.names = T)[1] %>%
+			read_excel() %>%
+			mutate(
+				Target = coalesce_labels(., label_cols = c('Rev_prediction_new',
+																									 'Rev_prediction', 'Rev_manual',
+																									 'Rev_previous'))
+			) %>% with(table(Target)) %>% as.list()
+
+
+		if (is.null(tot_pos)) tot_pos <- Labels$y
+		if (is.null(tot_records)) tot_records <- sum(unlist(Labels))
+	}
+
+	out <- list.files(session_folder, pattern = 'Results_', recursive = T, full.names = T) %>%
+		pbmclapply(function(file) {
+
+			readr::read_csv(file, col_types = cols()) %>%
+				tidyr::pivot_wider(names_from = Indicator, values_from = Value) %>%
+				transmute(
+					Iter,
+					Session = file,
+					Rep = `Replication n.`,
+					Tot_labeled = Total_labeled,
+					Pos_labels = `Target: y`
+				)
+		}) %>% bind_rows() %>%
+		mutate(
+			Session = str_remove(Session, 'Results.*') %>% basename(),
+			Tot_labeled = str_remove(Tot_labeled, ' \\(.*'),
+			Session %>% str_remove('.*GridSession\\.') %>%
+				str_split('\\.', simplify = T) %>%
+				as.data.frame() %>%
+				lapply(function(piece) {
+
+					label <- str_remove(piece, '^(\\d+|[yn])')[1]
+					value <- str_remove(piece, fixed(label))
+
+					setNames(data.frame(value), label)
+				}) %>% bind_cols(),
+			across(one_of(c("Tot_labeled", "Pos_labels", "Mods", "Quant", 'Init',
+											'Mult')), as.numeric),
+			Pos_rate = Pos_labels / Tot_labeled,
+			Sensitivity = Pos_labels / tot_pos,
+			Efficiency = 1 - Tot_labeled / tot_records,
+			Pos_rate_adj_sens = Pos_rate * Sensitivity,
+			Sens_adj_eff = Sensitivity * Efficiency,
+			Score = get(score)
+		) %>%
+		group_by(Session) %>%
+		slice_tail(n = 1) %>%
+		ungroup()
+
+	params <- c("Mods", "Quant", "Resamp", "Init", "Mult")
+
+	tree <- out %>%
+		select(Score, one_of(c("Mods", "Quant", "Resamp", "Init", "Mult"))) %>%
+		mutate_at(vars(-Score), as.factor) %>% {
+			df <- .
+			rpart(Score ~ ., df)
+		}
+
+	rules <- tidytrees::tidy_tree(tree)[tree$where - 1,] %>%
+		mutate(
+			rule = sprintf('%s. %s (%.2g)',
+										 as.numeric(factor(rule, unique(rule[order(estimate, decreasing = T)]))),
+										 rule, estimate),
+			rule = factor(rule, unique(rule[order(estimate, decreasing = T)]))
+		)
+
+	out <- mutate(out, Rule = rules$rule)
+
+	p <- NULL
+
+	if (plot) {
+
+		if (R.version$major >= 4) {
+			f <- palette()[1:7] %>% colorRampPalette()
+			colors <- f(n_distinct(out$Rule)) %>% rev()
+		} else colors <- viridis::cividis(n_distinct(out$Rule))
+
+		p <- lapply(params, function(par) {
+			params <- setdiff(params, par)
+
+			out %>%
+				mutate(group = select(cur_data(), one_of(params)) %>%
+							 	apply(1, paste, collapse = ' ')) %>%
+				ggplot(aes(factor(get(par)), Score)) +
+				geom_boxplot(show.legend = F, outlier.shape = NA) +
+				geom_line(aes(group = group, color = Rule), alpha = .5, show.legend = F) +
+				geom_boxplot(aes(fill = Rule), show.legend = F, outlier.shape = NA) +
+				#geom_line(aes(group = group, color = Rule), alpha = .5, show.legend = F) +
+				geom_point(aes(color = Rule), show.legend = F) +
+				theme_minimal() +
+				scale_y_continuous(labels = function(x) round(x, 2)) +
+				scale_color_manual(values = colors) +
+				scale_fill_manual(values = colors) +
+				ylab(score) +
+				xlab(par)
+		})
+
+		p_one <- out %>%
+			ggplot(aes(factor(get(params[1])), Score)) +
+			geom_line(aes( group = Rule, color = Rule), size = 2) +
+			theme_minimal() +
+			scale_color_manual(values = colors) +
+			scale_fill_manual(values = colors) +
+			labs(color = glue('Par. group (mean {score})'))
+
+		tmp <- ggplot_gtable(ggplot_build(p_one))
+		leg <- which(tmp$layout$name == 'guide-box')
+
+		legend <- tmp$grobs[[leg]]
+
+		p <- patchwork::wrap_plots(p) + legend
+
+		print(p)
+	}
+
+	list(
+		iterations = out,
+		best_parms = out %>% filter(str_detect(Rule, '^1\\.')) %>%
+			arrange(desc(Sensitivity), desc(Efficiency)) %>% head(1) %>%
+			# slice_max(Sensitivity, n = 1, with_ties = T) %>%
+			# slice_max(Score, n = 1, with_ties = F) %>%
+			select(Iter, Rep, Pos_labels, Sensitivity, Tot_labeled, Efficiency,
+						 Score, any_of(params)) %>%
+			mutate(
+				Score = glue("{signif(Score, 3)} ({score})"),
+				Pos_labels = glue("{Pos_labels} / {tot_pos}"),
+				Sensitivity = percent(Sensitivity),
+				Tot_labeled = glue("{Tot_labeled} / {tot_records}"),
+				Efficiency = percent(Efficiency),
+				across(.fns = as.character)) %>%
+			tidyr::pivot_longer(everything(), names_to = 'Parameter', 'Value'),
+		plot = p
+	)
+}
