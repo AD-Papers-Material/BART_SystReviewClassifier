@@ -21,6 +21,8 @@ knitr::opts_chunk$set(
 	cache = FALSE
 )
 
+source(file.path('R', 'Setup.R'))
+
 # The following are already the default, but better be explicit
 options(baysren.probs = c(.05, .5, .95))
 options(baysren.sessions_folder = 'Sessions')
@@ -30,8 +32,6 @@ options(baysren.sessions_folder = 'Sessions')
 ## Results
 
 ```{r Results}
-
-source(file.path('R', 'Setup.R'))
 
 session1_files <- get_session_files('Session1')
 session2_files <- get_session_files('Session2')
@@ -179,13 +179,17 @@ In session 2 we observed a drop in the expected sensitivity, especially in the l
 `r knitr::kable(perf_table, caption = "Table 3. Estimated performance summary. For each session, the number of reviewed records and the percentage over the total provide an idea of the work saved against manually labelling all retrieved records. Using a simple logistic model to predict a positive match from the probabilities outputted by the engine, the predictive distribution of the cumulative number of positive matches was computed and used to estimate the sensitivity and the efficiency of the engine for each session. Finally the Bayesian R^2 of the logistic models is reported. [PrI] represents the 90% Predictive Interval.")`
 
 ```{r Performance plot, cache = FALSE, fig.width=12, fig.height=5, fig.cap="Figure 1. 90% Predictive distribution of the cumulative number of positive matches estimated by the logistic Bayesian models applied to the engine output. The distribution is depicted by the shaded area. The distribution is cut at the level of the observed cumulative distribution of positive matches (red dots), since there cannot be false positive in the dataset and predicted value below this line are not possible."}
+
 Performance$s1$plot +
-    guides(color = 'none', fill = 'none') +
-    ggtitle('Session 1') +
-    Performance$s2$plot +
-    ggtitle('Session 2') &
-    theme(
-        legend.position = 'bottom'
-    ) &
-    plot_layout(guides = 'collect')
+	guides(color = 'none', fill = 'none') +
+	ggtitle('Session 1') +
+	Performance$s2$plot +
+	ggtitle('Session 2') +
+	theme(
+		axis.title.y = element_blank()
+	) &
+	theme(
+		legend.position = 'bottom'
+	) &
+	plot_layout(guides = 'collect')
 ```
