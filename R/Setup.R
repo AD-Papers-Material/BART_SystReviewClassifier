@@ -62,8 +62,8 @@ if (bart_machine_num_cores() != parallel::detectCores()) {
 }
 
 # Setting up other general parameters for the framework
-options(basren.probs = c(.05, .5, .95))
-options(basren.sessions_folder = 'Sessions')
+options(baysren.probs = c(.05, .5, .95))
+options(baysren.sessions_folder = 'Sessions')
 
 
 # Helper functions --------------------------------------------------------

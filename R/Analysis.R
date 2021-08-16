@@ -86,8 +86,10 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 # 		rowSums()
 # }
 
-estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE, quants = options('basren.probs')[[1]],
-																 nsamples = min(2500, sum(model$fit@sim$n_save)), seed = 23797297,
+estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE,
+																 quants = options('baysren.probs')[[1]],
+																 nsamples = min(2500, sum(model$fit@sim$n_save)),
+																 seed = 23797297,
 																 save_preds = FALSE, save_model = FALSE) {
 
 	if (is.null(model)) {
@@ -271,7 +273,7 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 # }
 
 extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, recompute_DTM = FALSE,
-														sessions_folder = options("basren.sessions_folder")[[1]]) {
+														sessions_folder = options("baysren.sessions_folder")[[1]]) {
 
 	message('Retrieving data')
 	session_files <- get_session_files(session_name, sessions_folder)

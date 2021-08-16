@@ -22,8 +22,8 @@ knitr::opts_chunk$set(
 )
 
 # The following are already the default, but better be explicit
-options(basren.probs = c(.05, .5, .95))
-options(basren.sessions_folder = 'Sessions')
+options(baysren.probs = c(.05, .5, .95))
+options(baysren.sessions_folder = 'Sessions')
 
 ```
 
@@ -168,7 +168,7 @@ perf_table <- format_performance(Performance$s1, Performance$s2)
 
 <!-- develop more in the methods, the data is not a random sample and it's ordered so performance evaluation needs to take this into account. also note that hyperparameter selection is necessary since even if bayesian methods are robust, the other parameters outside it are not-->
 
-As described in the methods, the selection of hyperparameters was achieved via the evaluation of sensibility and efficiency with a grid search on a subset of 1200 completely manually labelled records (validation set). The best set of parameters suggested an initial input of 250 labelled records, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval. On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated). A summary of the results of the grid search is reported in Table 3 in Suppl. Mat. S2.
+As described in the methods, the selection of hyperparameters was achieved via evaluation of sensibility and efficiency through a grid search on a subset of 1200 completely manually labelled records (validation set). The best set of parameters suggested an initial input of 250 labelled records, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval. On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated). A summary of the results of the grid search is reported in Table 3 in Suppl. Mat. S2.
 
 To evaluate the theoretical performance of the engine on the full datasets (i.e., session1 and session2 data), a Bayesian logistic model was trained on each session dataset to predict the label of the records from the probability estimated by the engine (see methods for details). The performance of such simple models is quite high (Bayesian R2: `r Performance$s1$mod_r2 %>% format_interval(percent = TRUE)` for session 1 and `r Performance$s2$mod_r2 %>% format_interval(percent = TRUE)` for session 2) and the median of their cumulative predictive distribution matches quite well the actual number of cumulative positive records found. The predicted cumulative number of positive matches was used to evaluate the performance in the non-reviewed records (Table 3).\
 
