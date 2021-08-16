@@ -317,7 +317,7 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 
 	if (is.null(tot_pos) | is.null(tot_records)) {
 		Labels <- list.files(session_folder, pattern = 'Records_', recursive = T, full.names = T)[1] %>%
-			read_excel() %>%
+			import_data() %>%
 			mutate(
 				Target = coalesce_labels(., label_cols = c('Rev_prediction_new',
 																									 'Rev_prediction', 'Rev_manual',
