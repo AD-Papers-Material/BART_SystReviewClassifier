@@ -39,7 +39,7 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 }
 
 summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
-																				 sessions_folder = options("basren.sessions_folder")[[1]],
+																				 sessions_folder = options("baysren.sessions_folder")[[1]],
 																				 add_global_totals = TRUE, keep_session_label = FALSE, ...) {
 	if (length(sessions) == 1) {
 		res <- get_session_files(session, sessions_folder)$Records %>%
@@ -120,7 +120,7 @@ get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun
 	res
 }
 
-summarise_annotations <- function(session_name, sessions_folder = options("basren.sessions_folder")[[1]],
+summarise_annotations <- function(session_name, sessions_folder = options("baysren.sessions_folder")[[1]],
 																	remove_empty_columns = TRUE, remove_raw_data = TRUE) {
 	result_list <- get_session_files(session_name, sessions_folder)$Results %>%
 		lapply(function(file) {
@@ -196,7 +196,7 @@ summarise_annotations <- function(session_name, sessions_folder = options("basre
 	}
 }
 
-summarise_annotations_by_session <- function(sessions_folder = options("basren.sessions_folder")[[1]],
+summarise_annotations_by_session <- function(sessions_folder = options("baysren.sessions_folder")[[1]],
 																						 remove_empty_columns = TRUE,
 																						 remove_raw_data = TRUE) {
 	sessions <- list.files(sessions_folder)
@@ -584,7 +584,7 @@ format_performance <- function(..., session_names = NULL) {
 }
 
 plot_predictive_densities <- function(session_name,
-																			sessions_folder = options("basren.sessions_folder")[[1]]) {
+																			sessions_folder = options("baysren.sessions_folder")[[1]]) {
 
 	library(ggridges)
 
