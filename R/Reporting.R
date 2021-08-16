@@ -591,10 +591,19 @@ plot_predictive_densities <- function(session_name,
 	records_files <- get_session_files(session_name, sessions_folder)$Annotations
 	samples_files <- get_session_files(session_name, sessions_folder)$Samples
 
-	pbmclapply(1:length(records_files), function(i) {
-		records <- records_files[[i]] %>%
-			import_data() %>%
-			mutate(Rev_prediction_new = replace(Rev_prediction_new, !is.na(Rev_prediction_new), '*')) %>%
+	pbmclapply(1:(length(records_files) + 1), function(i) {
+		index <- min(i, length(records_files))
+
+		# The last file will be imported twice, the second time will show the final labelling
+		records <- records_files[[index]] %>%
+			import_data()
+
+		if (i <= length(records_files)) {
+		records <- records %>%
+			mutate(Rev_prediction_new = replace(Rev_prediction_new, !is.na(Rev_prediction_new), '*'))
+		}
+
+		records <- records %>%
 			transmute(
 				Pred_Low, Pred_Up,
 				ID,
@@ -604,7 +613,7 @@ plot_predictive_densities <- function(session_name,
 		neg_lim <- with(records, max(Pred_Up[Target %in% 'n']))
 		pos_lim <- with(records, min(Pred_Low[Target %in% 'y']))
 
-		samples <- samples_files[[i]] %>% read_rds()
+		samples <- samples_files[[index]] %>% read_rds()
 
 		unique(records$Target) %>% na.omit %>%
 			lapply(function(lab) {
@@ -613,7 +622,11 @@ plot_predictive_densities <- function(session_name,
 					as.matrix %>% as.vector %>% sample(size = 5000)
 
 				data.frame(
-					Iteration = i,
+					Iteration = factor(
+						i,
+						1:(length(records_files) + 1),
+						c(1:length(records_files), 'Final\nlabelling')
+					),
 					Label = lab,
 					Samples = postsamples,
 					Neg_lim = neg_lim,
