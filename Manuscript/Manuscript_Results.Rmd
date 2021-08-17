@@ -6,9 +6,11 @@ output:
     html_preview: false
 ---
 
-```{r Setup, include=FALSE}
+```{r setup, include=FALSE, message=FALSE, warning=FALSE, error = FALSE}
 
-knitr::opts_knit$set(root.dir = ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd()))
+wd <- ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd())
+
+knitr::opts_knit$set(root.dir = wd)
 
 options(knitr.kable.NA = '')
 
@@ -18,20 +20,25 @@ knitr::opts_chunk$set(
 	message = FALSE,
 	warning = FALSE,
 	dpi = 400,
-	cache = FALSE
+	cache = TRUE,
+	cache.rebuild = FALSE
 )
+# message(wd)
+# sys.source(file.path(wd, 'R', 'Setup.R'), envir = knitr::knit_global())
 
+```
+
+```{r load framework, cache.rebuild=TRUE}
 source(file.path('R', 'Setup.R'))
 
 # The following are already the default, but better be explicit
 options(baysren.probs = c(.05, .5, .95))
 options(baysren.sessions_folder = 'Sessions')
-
 ```
 
 ## Results
 
-```{r Results}
+```{r results}
 
 session1_files <- get_session_files('Session1')
 session2_files <- get_session_files('Session2')
@@ -140,7 +147,7 @@ Again, the evaluation of the relative importance of the terms showed that the en
 
 ### Hyperparameter selection and performance evaluation
 
-```{r Performance, cache = FALSE}
+```{r performance, cache = FALSE}
 
 grid_search <- analyse_grid_search()$best_parms %>%
 	tidyr::pivot_wider(values_from = value, names_from = Parameter)
@@ -168,7 +175,7 @@ perf_table <- format_performance(Performance$s1, Performance$s2)
 
 <!-- develop more in the methods, the data is not a random sample and it's ordered so performance evaluation needs to take this into account. also note that hyperparameter selection is necessary since even if bayesian methods are robust, the other parameters outside it are not-->
 
-As described in the methods, the selection of hyperparameters was achieved via evaluation of sensibility and efficiency through a grid search on a subset of 1200 completely manually labelled records (validation set). The best set of parameters suggested an initial input of 250 labelled records, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval. On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated). A summary of the results of the grid search is reported in Table 3 in Suppl. Mat. S2.
+As described in the methods, the selection of hyperparameters was achieved via evaluation of sensibility and efficiency through a grid search on a subset of 1200 completely manually labelled records (validation set). The best set of parameters suggested an initial input of 250 labelled records with 20x positive matches oversampling, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval. On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated). A summary of the results of the grid search is reported in Table 3 in Suppl. Mat. S2.
 
 To evaluate the theoretical performance of the engine on the full datasets (i.e., session1 and session2 data), a Bayesian logistic model was trained on each session dataset to predict the label of the records from the probability estimated by the engine (see methods for details). The performance of such simple models is quite high (Bayesian R2: `r Performance$s1$mod_r2 %>% format_interval(percent = TRUE)` for session 1 and `r Performance$s2$mod_r2 %>% format_interval(percent = TRUE)` for session 2) and the median of their cumulative predictive distribution matches quite well the actual number of cumulative positive records found. The predicted cumulative number of positive matches was used to evaluate the performance in the non-reviewed records (Table 3).\
 
@@ -178,7 +185,7 @@ In session 2 we observed a drop in the expected sensitivity, especially in the l
 
 `r knitr::kable(perf_table, caption = "Table 3. Estimated performance summary. For each session, the number of reviewed records and the percentage over the total provide an idea of the work saved against manually labelling all retrieved records. Using a simple logistic model to predict a positive match from the probabilities outputted by the engine, the predictive distribution of the cumulative number of positive matches was computed and used to estimate the sensitivity and the efficiency of the engine for each session. Finally the Bayesian R^2 of the logistic models is reported. [PrI] represents the 90% Predictive Interval.")`
 
-```{r Performance plot, cache = FALSE, fig.width=12, fig.height=5, fig.cap="Figure 1. 90% Predictive distribution of the cumulative number of positive matches estimated by the logistic Bayesian models applied to the engine output. The distribution is depicted by the shaded area. The distribution is cut at the level of the observed cumulative distribution of positive matches (red dots), since there cannot be false positive in the dataset and predicted value below this line are not possible."}
+```{r performance plot, cache = FALSE, fig.width=12, fig.height=5, fig.cap="Figure 1. 90% Predictive distribution of the cumulative number of positive matches estimated by the logistic Bayesian models applied to the engine output. The distribution is depicted by the shaded area. The distribution is cut at the level of the observed cumulative distribution of positive matches (red dots), since there cannot be false positive in the dataset and predicted value below this line are not possible."}
 
 Performance$s1$plot +
 	guides(color = 'none', fill = 'none') +

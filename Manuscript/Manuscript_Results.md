@@ -1,6 +1,6 @@
 Manuscript
 ================
-2021-08-06
+2021-08-17
 
 ## Results
 
@@ -190,15 +190,16 @@ Suppl. Mat. S2.
 <!-- develop more in the methods, the data is not a random sample and it's ordered so performance evaluation needs to take this into account. also note that hyperparameter selection is necessary since even if bayesian methods are robust, the other parameters outside it are not-->
 
 As described in the methods, the selection of hyperparameters was
-achieved via the evaluation of sensibility and efficiency with a grid
+achieved via evaluation of sensibility and efficiency through a grid
 search on a subset of 1200 completely manually labelled records
 (validation set). The best set of parameters suggested an initial input
-of 250 labelled records, an averaged ensemble of 10 models, no
-bootstrapping and an uncertainty zone defined by the 98% predictive
-interval. On the validation set, this combination of parameters reached
-a sensitivity of 98.8% (81 / 82 positive matches found) and efficiency
-of 61.5% (462 / 1200 records evaluated). A summary of the results of the
-grid search is reported in Table 3 in Suppl. Mat. S2.
+of 250 labelled records with 20x positive matches oversampling, an
+averaged ensemble of 10 models, no bootstrapping and an uncertainty zone
+defined by the 98% predictive interval. On the validation set, this
+combination of parameters reached a sensitivity of 98.8% (81 / 82
+positive matches found) and efficiency of 61.5% (462 / 1200 records
+evaluated). A summary of the results of the grid search is reported in
+Table 3 in Suppl. Mat. S2.
 
 To evaluate the theoretical performance of the engine on the full
 datasets (i.e., session1 and session2 data), a Bayesian logistic model
@@ -256,4 +257,4 @@ the engine output. The distribution is depicted by the shaded area. The
 distribution is cut at the level of the observed cumulative distribution
 of positive matches (red dots), since there cannot be false positive in
 the dataset and predicted value below this line are not
-possible.](Manuscript_Results_files/figure-gfm/Performance%20plot-1.png)
+possible.](Manuscript_Results_files/figure-gfm/performance%20plot-1.png)
