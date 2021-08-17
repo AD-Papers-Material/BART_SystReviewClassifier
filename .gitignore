@@ -6,7 +6,8 @@ Documentation
 Models
 Records
 Model_backup.rds
-Manuscript_cache*
+_cache*
+_files*
 ~*
 Previous run
 .Rproj.user
