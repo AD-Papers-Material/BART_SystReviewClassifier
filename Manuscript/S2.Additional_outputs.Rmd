@@ -24,8 +24,6 @@ knitr::opts_chunk$set(
 	cache = TRUE,
 	cache.rebuild = FALSE
 )
-# message(wd)
-# sys.source(file.path(wd, 'R', 'Setup.R'), envir = knitr::knit_global())
 
 ```
 
@@ -88,11 +86,12 @@ var_importance_s2 <- extract_var_imp('Session1', num_vars = 50, score_filter = 0
 To select the engine hyperparameter set which would maximize sensitivity and efficiency, we set up a comprehensive grid search by running the algorithm on a fully labeled dataset of 1200 records. Using a partition tree algorithm we grouped the searches in a number of clusters with similar performance and selected the best parameter set in the best cluster.\
 Table 3 shows the best parameter set and their performance for each cluster while figure 2 displays the conditional impact on performance of each parameter.
 
-```{r hyperparameters, fig.width=14, fig.height=9, fig.cap="Performance clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: num. of models in the ensemble; Quant: uncertainty zone interval to trigger manual review; Resamp: bootstrap resampling; Init: num. of initial training records; Multi: oversampling multiplier of positive matches."}
+```{r hyperparameters, fig.width=15, fig.height=9, fig.cap="Figure 2. Performance clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: num. of models in the ensemble; Quant: uncertainty zone interval to trigger manual review; Resamp: bootstrap resampling; Init: num. of initial training records; Multi: oversampling multiplier of positive matches."}
 
 grid_out <- analyse_grid_search() 
 
 grid_out_params <- grid_out$best_by_rule %>% 
+	mutate(Score = str_remove(Score, ' .+')) %>% 
 	rename(
 		`Cluster (mean score)` = Cluster,
 		`Num. iterations` = Iter,

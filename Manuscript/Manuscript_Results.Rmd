@@ -23,8 +23,6 @@ knitr::opts_chunk$set(
 	cache = TRUE,
 	cache.rebuild = FALSE
 )
-# message(wd)
-# sys.source(file.path(wd, 'R', 'Setup.R'), envir = knitr::knit_global())
 
 ```
 
