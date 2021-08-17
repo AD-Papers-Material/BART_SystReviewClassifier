@@ -1,0 +1,114 @@
+---
+title: "S2. Additional figures and table"
+date: "`r lubridate::today()`"
+output:
+  github_document:
+    html_preview: false
+    toc: yes
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE, error = FALSE}
+
+wd <- ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd())
+
+knitr::opts_knit$set(root.dir = wd)
+
+options(knitr.kable.NA = '')
+
+knitr::opts_chunk$set(
+	echo = FALSE,
+	error = FALSE,
+	message = FALSE,
+	warning = FALSE,
+	dpi = 400,
+	cache = TRUE,
+	cache.rebuild = FALSE
+)
+# message(wd)
+# sys.source(file.path(wd, 'R', 'Setup.R'), envir = knitr::knit_global())
+
+```
+
+```{r load framework, cache.rebuild=TRUE}
+source(file.path('R', 'Setup.R'))
+
+# The following are already the default, but better be explicit
+options(baysren.probs = c(.05, .5, .95))
+options(baysren.sessions_folder = 'Sessions')
+```
+
+
+# Posterior predictive distributions
+
+Figure 1 show the mixture of the predictive distribution of the probability of a positive match, grouped by labelling status. The posterior samples for each record were extracted and joined in a global distribution; on this distribution, density was computed on the logit scale and then logistic transformed for display on a `[0-1]` scale. The light violet ridges show the distribution of the still unlabelled records.\
+For each iteration, the thresholds which define the lower and the upper range of 98% predictive interval (PrI) respectively for the positive and negative records. The zone comprised between these two boundaries defines the uncertainty zone; records whose 98% PrI intersects this zone requires manual review.\
+Notice how the positive and negative densities start overlapping starting with the second iteration of Session 2. Meanwhile the distribution of the records to be reviewed shrink and shift towards the negative side, as positive records get found and labeled.
+
+```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="Figure 1. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
+
+s1_plot <- plot_predictive_densities('Session1')
+
+s2_plot <- plot_predictive_densities('Session2')
+
+s1_plot +
+    guides(color = 'none', fill = 'none') +
+    ggtitle('Session 1') +
+    s2_plot +
+    ggtitle('Session 2') +
+    theme(
+        axis.title.y = element_blank()
+        ) &
+    theme(
+        legend.position = 'bottom'
+    ) &
+    plot_layout(guides = 'collect')
+```
+
+# List of terms relevant for prediction
+
+In table 1 and 2 are listed the 50 more relevant terms used by the BART algorithm to discriminate between positive and negative records, for Session 1 and 2. Term importance ("Value" in the tables) is defined as the proportion over 10 000 posterior trees in which a term was used divided by the standard deviation of this value among each model repetition. The symbol "|" indicate synonyms while terms joined by "&" represent terms that are co-present in a document component The component in which the term was used is reported in the leftmost column.\
+Next to it, we added the relative risk of a positive match (RR) and statistical relevancy (measured as standard errors, s.e.) of the terms estimated through a Poisson regression, to evaluate its linear correlation with the probability of a positive match. A strong BART score with a low regression score identify terms whose effect is highly non linear (e.g., they are relevant only in the presence of other terms).
+
+```{r var imp}
+
+var_importance_s1 <- extract_var_imp('Session1', num_vars = 50, score_filter = 0) %>%
+	format_var_imp(as_data_frame = TRUE)
+
+var_importance_s2 <- extract_var_imp('Session1', num_vars = 50, score_filter = 0) %>%
+	format_var_imp(as_data_frame = TRUE)
+```
+
+`r knitr::kable(var_importance_s1, caption = 'Table 1. Term importance at the end of Session 1')`
+
+
+`r knitr::kable(var_importance_s2, caption = 'Table 2. Term importance at the end of Session 2')`
+
+# Hyperparameters grid search
+
+To select the engine hyperparameter set which would maximize sensitivity and efficiency, we set up a comprehensive grid search by running the algorithm on a fully labeled dataset of 1200 records. Using a partition tree algorithm we grouped the searches in a number of clusters with similar performance and selected the best parameter set in the best cluster.\
+Table 3 shows the best parameter set and their performance for each cluster while figure 2 displays the conditional impact on performance of each parameter.
+
+```{r hyperparameters, fig.width=14, fig.height=9, fig.cap="Performance clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: num. of models in the ensemble; Quant: uncertainty zone interval to trigger manual review; Resamp: bootstrap resampling; Init: num. of initial training records; Multi: oversampling multiplier of positive matches."}
+
+grid_out <- analyse_grid_search() 
+
+grid_out_params <- grid_out$best_by_rule %>% 
+	rename(
+		`Cluster (mean score)` = Cluster,
+		`Num. iterations` = Iter,
+		`Positive matches` = Pos_labels,
+		`Reviewed records` = Tot_labeled,
+		`Score (Sens. x Eff.)` = Score,
+		`Num. ensemble models` = Mods,
+		`Uncertainty interval` = Quant,
+		`Resampling` = Resamp,
+		`Num. initial training records` = Init,
+		`Positives oversampling multiplier` = Mult
+	)
+
+print(grid_out$plot & labs(y = 'Sens. x. Eff.'))
+
+```
+
+
+`r knitr::kable(grid_out_params, caption = 'Table 3. Hyperparameter clusters and best cluster subsets. For each cluster, the defining rules and mean Sens. x Eff. is shown, followed by the per-cluster best set results.')`
