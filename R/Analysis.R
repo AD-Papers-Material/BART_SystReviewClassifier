@@ -422,7 +422,7 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 			theme_minimal() +
 			scale_color_manual(values = colors) +
 			scale_fill_manual(values = colors) +
-			labs(color = glue('Par. group (mean {score})'))
+			labs(color = glue('Perf. cluster (mean {score})'))
 
 		tmp <- ggplot_gtable(ggplot_build(p_one))
 		leg <- which(tmp$layout$name == 'guide-box')
