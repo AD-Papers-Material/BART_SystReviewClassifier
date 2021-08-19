@@ -1205,13 +1205,15 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 		session_path <- file.path(sessions_folder, Grid[i,]$session)
 
 		# if no record files are present, recreate the session folder
-		if (length(list.files(session_path, pattern = 'Records', recursive = TRUE)) == 0) {
+		if (is.null(get_session_files(Grid[i,]$session, sessions_folder)$Records)) {
 			Records <- Records %>%
 				# remove labels in excess of "n_init"
-				mutate(across(
-					any_of(c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new')),
-					~ replace(.x, Order > Grid[i,]$n_init, NA)
-				))
+				mutate(
+					Rev_manual = coalesce_labels(Records, c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new', 'Rev_previous')) %>%
+						replace(Order > Grid[i,]$n_init, NA),
+					Rev_prediction = NA,
+					Rev_prediction_new = NA
+					)
 
 			create_session(Records, session_name = Grid[i,]$session,
 										 sessions_folder = sessions_folder,
