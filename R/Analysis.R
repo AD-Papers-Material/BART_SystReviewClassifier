@@ -77,14 +77,7 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 				prior(student_t(3, 0, 2.5), class = "Intercept"),
 				prior(student_t(3, 0, 1.5), class = "b")
 			))
-
 }
-
-# predict_num_positives <- function(model, tot_records, start_index = 1,
-# 																	nsamples = min(2000, sum(model$fit@sim$n_save))) {
-# 	posterior_predict(mod, newdata = data.frame(Order = start_index:tot_records), nsamples = nsamples) %>%
-# 		rowSums()
-# }
 
 estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE,
 																 quants = options('baysren.probs')[[1]],
@@ -94,8 +87,10 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 
 	if (is.null(model)) {
 		message('- build model...')
+
 		model <- estimate_positivity_rate_model(records, seed)
 	}
+
 
 	quants <- sort(quants)
 
