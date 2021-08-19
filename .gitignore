@@ -7,7 +7,6 @@ Models
 Records
 Model_backup.rds
 _cache*
-_files*
 ~*
 Previous run
 .Rproj.user
