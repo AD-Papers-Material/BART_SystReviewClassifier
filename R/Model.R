@@ -504,7 +504,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 	stop_after = 4, pos_target = NULL,
 																	 	labeling_limit = NULL
 																	 ),
-																	 compute_performance = TRUE,
+																	 compute_performance = FALSE,
 																	 test_data = NULL,
 																	 use_prev_labels = TRUE,
 																	 prev_classification = NULL,
