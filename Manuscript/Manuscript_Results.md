@@ -1,6 +1,6 @@
 Manuscript
 ================
-2021-08-17
+2021-08-19
 
 ## Results
 
@@ -117,7 +117,7 @@ interest (“Orange County”) of another research group active on the
 topic. It is interesting to see that some terms were considered highly
 relevant (e.g., “Worker” in 6th position out of more than 3800 terms
 considered) although in a simpler linear model, their effect would be
-hardly significant (statistic: -1.21 se), and this highlight the extra
+hardly significant (statistic: -1.21 s.e.), and this highlight the extra
 predictive power brought by a highly non-linear model.  
 A more extensive set of terms is presented in Table 1 of Supplemental
 Material S2.
@@ -202,7 +202,7 @@ evaluated). A summary of the results of the grid search is reported in
 Table 3 in Suppl. Mat. S2.
 
 To evaluate the theoretical performance of the engine on the full
-datasets (i.e., session1 and session2 data), a Bayesian logistic model
+datasets (i.e., session 1 and session 2 data), a Bayesian logistic model
 was trained on each session dataset to predict the label of the records
 from the probability estimated by the engine (see methods for details).
 The performance of such simple models is quite high (Bayesian R2: 98.1%
@@ -217,11 +217,11 @@ cumulative number of positive matches, ordered by the initial simple
 ordering query. As confirmed by the high efficiency values reported in
 Table 3, it is striking how many more records would need to be evaluated
 manually to find all positive matches without using a smart search tool.
-Our engine was able to find matches even close to the end of the
+The engine was able to find matches even close to the end of the
 heuristically ordered list of records. Specifically, in session 1 we
 observe an expected total number of positives of 101 \[101, 108\] for an
-estimated sensitivity of 100% \[93.5%, 100%\] and efficiency of 100%
-\[93.5%, 100%\].  
+estimated sensitivity of 100% \[93.5%, 100%\] and efficiency of 95.7%
+\[95.3%, 95.7%\].  
 In session 2 we observed a drop in the expected sensitivity, especially
 in the lower margin (97.3% \[73.8%, 100%\]), due to the fact that as the
 number of records grows very large, even a small probability can
