@@ -58,7 +58,7 @@ clean_date_filter_arg <- function(year_query, cases,
 }
 
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
-											 default_field = 'TS', api_key = options('wos_api_key'),
+											 default_field = 'TS', api_key = options('baysren.wos_api_key')[[1]],
 											 parallel = T, parse_query = T, ...) {
 
 	message('Searching WOS...')
@@ -168,7 +168,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
-													api_key = options('ncbi_api_key'),
+													api_key = options('baysren.ncbi_api_key')[[1]],
 													record_limit = numeric(),
 													...) {
 
@@ -239,7 +239,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 }
 
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
-												api_key = options('ieee_api_key')[[1]], allow_web_scraping = T,
+												api_key = options('baysren.ieee_api_key')[[1]], allow_web_scraping = T,
 												file_name = glue('IEEE_{safe_now()}'), save = T,
 												wait_for = 20, record_limit = NULL) {
 	message('Searching IEEE...')
