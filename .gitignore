@@ -13,6 +13,7 @@ Previous run
 **/[Uu]ntitled.R
 secrets.R
 *.csv
+*.html
 Sessions*
 Test_Sessions*
 Grid_Search*
