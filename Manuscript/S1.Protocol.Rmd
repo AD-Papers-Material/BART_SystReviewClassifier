@@ -366,6 +366,3 @@ The function produces a dataframe with the score and the cluster of reference of
 
 Once chosen, the hyperparameters can be pass to `enrich_annotation_file()`.\
 Mind that the grid search process may take many days, even on powerful computers, so we suggest sticking to the default set of `enrich_annotation_file()`. \
-
-
-
