@@ -6,6 +6,8 @@ output:
     toc: yes
 ---
 
+\newpage
+
 ```{r setup, echo = FALSE, eval = TRUE}
 
 knitr::opts_chunk$set(
