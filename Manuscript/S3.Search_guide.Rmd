@@ -1,0 +1,48 @@
+---
+title: "Databases' search guide"
+date: "`r lubridate::today()`"
+output:
+  github_document:
+    toc: yes
+---
+
+## WOS
+- activate your institution proxy or log in in some way (it is only needed to get the API key, then you can log off the proxy)
+- go to https://apps.webofknowledge.com/
+- extract the API key from the URL, is denominated by SID
+- put the key in the secrets.R file and source it or source Setup.R
+- perform the search using the API
+
+## IEEE
+- get your API key and put it into the secrets.R
+- source the file source Setup.R
+- perform the search using the API
+
+## Scopus
+- change the NOT in the query to AND NOT
+- go to https://www.scopus.com/search/form.uri?display=basic#basic
+- log in with your institution credential
+- set up the year range
+- search within: title, abstract, keywords, authors
+- select years in order to have just less than 2000 records
+- download csv (Excel). Choose "Citation information" and "Abstract & keywords"
+- call the files Scopus#.csv with # being a sequential number
+- perform_search_session() will find and parse the files
+
+## Pubmed
+- put your API key in the secrets.R file and source it or source Setup.R
+- perform the search using the API
+- put the same query into pubmed and download records in the Pubmed format.
+- only 10k records can be downloaded at once, so use the year filter to partition the records
+- call the file Pubmed#.nbib with # being a sequential number
+- perform_search_session() will find and parse the files
+
+## Embase
+- Login from within the institution or activate remote access
+- go to https://www.embase.com/#advancedSearch/default
+- set your date range
+- in the mapping field select all apart from "Limit to terms indexed in article as 'major focus'"
+- in "Sources" select Embase
+- select records in blocks of 10K
+- chose format: Csv - fields by column, output: Full record (may take a while to prepare the download and you can download only one batch at time)
+- call the files Embase#.csv with # being a sequential number
