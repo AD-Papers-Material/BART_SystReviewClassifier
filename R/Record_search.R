@@ -214,7 +214,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 			rescords <- try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
 																						retstart = step * 200, retmax = min(200, total_count - step * 200),
 																						rettype = 'medline', parsed = F,
-																						api_key = options('ncbi_api_key')), silent = T)
+																						api_key = api_key), silent = T)
 
 			have.results <- class(rescords) == 'character'
 			trials <- trials + 1
