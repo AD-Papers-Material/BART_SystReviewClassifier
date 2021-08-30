@@ -6,3 +6,14 @@ output:
     html_preview: false
 ---
 
+## Methods
+
+### General description
+
+We built an R [@rstat] based framework with the aim of simplifying two aspects of systematic reviews: record acquisition and relevance classification. The framework is composed by several components which act together while being independent enough to be in principle be substituted by alternative implementations, given that the structure of the intermediate data outputs is respected. Check Supplemental Material S1 for an in-depth description of the framework and how to use it.\
+The tasks carried out by the framework are grouped into "sessions", that is a set of actions that starts from a search query with which collect a set of unlabelled records and ends with the having a fully labelelled set (Fig. 1). From this labelled set, the framework allows to generate a new query and perform a new session.\
+Follows a description of the method components.
+
+![Metods' visual depiction](methods_diagram.png)
+### Records' acquisition
+We built a set of tools to let user automatically search and download records data from three major scientific databases: MEDLINE, Web Of Science (WOS) and the Institute of Electrical and Electronics Engineers (IEEE). The user needs to input a boolean query and a date range. For WOS an API key is nece
