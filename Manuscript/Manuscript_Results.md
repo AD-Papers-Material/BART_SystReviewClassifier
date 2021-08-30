@@ -1,10 +1,24 @@
 Results
 ================
-2021-08-20
+2021-08-30
 
 ## Results
 
 ### First session
+
+The input search query was:  
+
+*((model OR models OR modeling OR network OR networks) AND
+(dissemination OR transmission OR spread OR diffusion) AND (nosocomial
+OR hospital OR “long-term-care” OR “long term care” OR “longterm care”
+OR “long-term care” OR “healthcare associated”) AND (infection OR
+resistance OR resistant))*
+
+including results between 2010 and 2020 (included). The automatic search
+tools were used for MEDLINE, WOS and IEEE, while a manual search and
+importation was necessary for EMBASE and SCOPUS. The search was repeated
+manually also for MEDLINE, since, as reported in the methods, the web
+interface may return different results from the API.
 
 The first search session returned a total of 27600 unique records,
 specifically 12719 (71.6% of the total) records from the *EMBASE*
@@ -148,7 +162,10 @@ the algorithm was trained on documents that were all more or less
 related to these topics.  
 The generated query also provides a more nuanced understanding of the
 engine’s internal classification logic, and this is helpful to spot
-possible biases in the model.
+possible biases in the model.  
+
+The search was done with the same year filter and procedures of the
+first session.  
 
 The new search produced 107294 records (Table 1), of which 48396 (58.6%)
 from the *EMBASE*, followed by 28811 (34.9%) from *Pubmed/Medline*,

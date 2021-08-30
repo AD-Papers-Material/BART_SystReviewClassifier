@@ -54,6 +54,11 @@ annotation_results <- summarise_annotations_by_session(remove_raw_data = TRUE)
 ### First session
 
 ```{r session 1}
+
+first_query <- import_data('Session_journal.csv') %>% 
+    filter(Session_ID == 'Session1') %>% 
+    with(Query[1])
+
 records_s1 <- import_data(session1_files$Records)
 
 source_summary <- source_list$Session1
@@ -82,6 +87,11 @@ var_importance <- extract_var_imp('Session1') %>%
 	
 ```
 
+The input search query was:\
+
+*`r first_query`*
+
+including results between 2010 and 2020 (included). The automatic search tools were used for MEDLINE, WOS and IEEE, while a manual search and importation was necessary for EMBASE and SCOPUS. The search was repeated manually also for MEDLINE, since, as reported in the methods, the web interface may return different results from the API.
 
 The first search session returned a total of `r all_records` unique records, specifically `r source_summary$Embase$Records` (`r source_summary$Embase$Perc_over_total` of the total) records from the *EMBASE* database, followed by `r source_summary$Pubmed$Records` (`r source_summary$Pubmed$Perc_over_total`) from *Pubmed/Medline*, `r source_summary$Scopus$Records` (`r source_summary$Scopus$Perc_over_total`) from *Scopus*, `r source_summary$WOS$Records` (`r source_summary$WOS$Perc_over_total`) from *Web of Science*, and `r source_summary$IEEE$Records` (`r source_summary$IEEE$Perc_over_total`) from *IEEE* (Table 1). There were various degrees of overlapping with the `r percent(1 - source_distr[1])` of records being present in more than one database and *EMBASE* and *IEEE* being the databases with the higher uniqueness ratios. The final dataset was composed by `r source_summary$Total$Records` unique records.\
 The first `r num_first_labeling` records were manually labeled. Of these `r sprintf('%d (%s)', num_first_positives, percent(num_first_positives/num_first_labeling))` were labeled as positive, and `r sprintf('%d (%s)', num_first_negatives, percent(num_first_negatives/num_first_labeling))` as negative.
@@ -133,7 +143,9 @@ The results of the first classification session were used to create a second, da
 *`r new_query`*
 
 The final piece *AND ((antimicrobial resistance) OR (healthcare infection)* was added manually to better define the search domain, since the algorithm was trained on documents that were all more or less related to these topics.\
-The generated query also provides a more nuanced understanding of the engine's internal classification logic, and this is helpful to spot possible biases in the model.
+The generated query also provides a more nuanced understanding of the engine's internal classification logic, and this is helpful to spot possible biases in the model.\
+
+The search was done with the same year filter and procedures of the first session.\
 
 The new search produced `r all_records` records (Table 1), of which `r source_summary$Embase$Records` (`r source_summary$Embase$Perc_over_total`) from the *EMBASE*, followed by `r source_summary$Pubmed$Records` (`r source_summary$Pubmed$Perc_over_total`) from *Pubmed/Medline*, `r source_summary$Scopus$Records` (`r source_summary$Scopus$Perc_over_total`) from *Scopus*, `r source_summary$WOS$Records` (`r source_summary$WOS$Perc_over_total`) from *Web of Science*, and `r source_summary$IEEE$Records` (`r source_summary$IEEE$Perc_over_total`) from *IEEE*; compared to the first session, the relative weight of *EMBASE* and *Pubmed* over the total was decreased, while the amount of content specificity was greatly increased, as it was for *Scopus*. After removal of duplicates, `r source_summary$Total$Records` unique records were obtained. Once joined with the session 1 records and duplicates removed, we obtained `r nrow(records_s2)` unique records, with just `r session_diff` shared records between searches, that is the `r percent(session_diff / source_list[['All Sessions']]$Total$Records)`. The percentage of records shared by two or more source dropped to `r percent(1 - source_distr[1])`.
 
