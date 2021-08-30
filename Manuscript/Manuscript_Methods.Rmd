@@ -1,0 +1,8 @@
+---
+title: "Methods"
+date: "`r lubridate::today()`"
+output:
+  github_document:
+    html_preview: false
+---
+
