@@ -27,6 +27,8 @@ knitr::opts_chunk$set(
 
 This document will guide the reader along the steps to utilize the framework and reproduce our results.
 
+Add intallation and setup info here
+
 ## Acquisition of the records
 
 Once the framework is loaded, the user defines an initial search query which needs to be as specific as possible while still generating a sufficient number of positive matches:
