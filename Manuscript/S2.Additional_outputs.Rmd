@@ -41,7 +41,7 @@ options(baysren.sessions_folder = 'Sessions')
 # Posterior predictive distributions
 
 Figure 1 show the mixture of the predictive distribution of the probability of a positive match, grouped by labelling status. The posterior samples for each record were extracted and joined in a global distribution; on this distribution, density was computed on the logit scale and then logistic transformed for display on a \[[0 - 1]\] scale. The light violet ridges show the distribution of the still unlabelled records.\
-For each iteration, the thresholds which define the lower and the upper range of 98% predictive interval (PrI) respectively for the positive and negative records. The zone comprised between these two boundaries defines the uncertainty zone; records whose 98% PrI intersects this zone requires manual review.\
+For each iteration, the thresholds which define the lower and the upper range of 98% predictive interval (PrI) respectively for the positive and negative records are shown. The zone included between these two boundaries defines the uncertainty zone; records whose 98% PrI intersects this zone requires manual review.\
 Notice how the positive and negative densities start overlapping starting with the second iteration of Session 2. Meanwhile the distribution of the records to be reviewed shrink and shift towards the negative side, as positive records get found and labeled.
 
 ```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="Figure 1. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
