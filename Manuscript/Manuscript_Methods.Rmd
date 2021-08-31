@@ -1,6 +1,8 @@
 ---
 title: "Methods"
 date: "`r lubridate::today()`"
+bibliography: references.bib
+csl: apa.csl
 output:
   github_document:
     html_preview: false
@@ -16,11 +18,13 @@ It is advisable that the research starts using the framework with a specific que
 Follows a description of the framework's components.\
 
 ![Figure 1. Framework visual depiction.](methods_diagram.png)
+
 ### Records' acquisition
-We built a set of tools to let user automatically search and download records data from three major scientific databases: MEDLINE (https://pubmed.ncbi.nlm.nih.gov/), Web Of Science (WOS, https://apps.webofknowledge.com/) and the Institute of Electrical and Electronics Engineers (IEEE, https://ieeexplore.ieee.org/Xplore/home.jsp). The user needs to input a search query and a date range. The query may contain boolean operators AND, OR, NOT and nested parentheses. The dabatase will be also called "sources" in the rest of the text.\
+We built a set of tools to let user automatically search and download records data from three major scientific databases: MEDLINE (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>). The user needs to input a search query and a date range. The query may contain boolean operators AND, OR, NOT and nested parentheses. The dabatase will be also called "sources" in the rest of the text.\
 For WOS an Application Programming Interface (API) key is necessary to use the automatic search tools; for IEEE, if an API key is not available, a slower, webscraping-based solution will be employed; for MEDLINE the API key is required for high frequency requests to the NCBI server [@pubmed], which may happen if the chosen query produces a large number of records, since our tool splits a big API requests in multiple smaller ones.\
-It is also possible to download and import records in the framework manually. This is particularly useful to acquire records from the SCOPUS (https://www.scopus.com/search/form.uri?display=basic#basic) and EMBASE databases (https://www.embase.com/#advancedSearch/default), for which a comprehensive API interface was not easy to build; the framework will be able to import the manually downloaded results seamlessly.A short guide on how to setup the search for each supported database is available in Supplemental Material S3.\
-Once the records are dowloaded and acquired, the framework merges them into a single database, resolving duplicates and different formatting between sources, and ordering the records by simple query term frequency, putting the most likely relevant on top. The output is an "Annotation file".
+It is also possible to download and import records in the framework manually. This is particularly useful to acquire records from the SCOPUS (<https://www.scopus.com/search/form.uri?display=basic#basic>) and EMBASE databases (<https://www.embase.com/#advancedSearch/default>), for which a comprehensive API interface was not easy to build; the framework will be able to import the manually downloaded results seamlessly.A short guide on how to setup the search for each supported database is available in Supplemental Material S3.\
+Once the records are downloaded and acquired, the framework merges them into a single database, resolving duplicates and different formatting between sources, and ordering the records by simple query term frequency, putting the most likely relevant on top. The output is an "Annotation file".
 
 ### Document-Term matrix generation
+The annotation file produced in the previous step has a number of fields describing a publication. Of these we use the following to model its relevance: title, abstract, authors, keywords, MESH terms [@lipscomb2000medical]. We use a series of Natural Language Processing (NLP) techniques (*should I put a general reference?*) to transform the textual information in these fields into machine learning features. The first steps are tokenizing the text (i.e., separate the terms), remove common stopwords (i.e. grammar term bringing no meaning) and lemmatizing the remaining terms (i.e. reduce them to their base grammar form). Tokenization for authors, keywords and MESH terms works differently than for title and abstract text, since it keep a whole unit without breaking it in its single terms.\
 

@@ -14,8 +14,10 @@ create_training_set <- function(Records, min_freq = 0.05) {
 			ID, Title, Abstract, Authors, Keywords, Mesh
 		)
 
+	# Compute minimum term frequency among documents
 	min_freq <- max(floor(sum(Records$Target %in% c('y', 'n')) * min_freq), 1)
 
+	# Ensure that all positive document terms are kept
 	Records <- Records[c(
 		rep(which(Records$Target %in% 'y'), min_freq),
 		which(Records$Target %nin% 'y')),]
