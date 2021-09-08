@@ -42,7 +42,8 @@ pkg.require(
 											 "pbmcapply", "rpart", "bartMachine", "tm", "patchwork", "ggplot2", "ggrepel", "RLesur/crrri",
 											 "bakaburg1/tidytrees"),
 	only_install = c('purrr', 'openxlsx', 'tictoc', 'tidyr', 'arm', 'english',
-									 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms', 'ggridges')
+									 'parallel', 'jsonlite', 'rentrez', 'wosr', 'brms', 'ggridges',
+									 'knitr', 'kableExtra')
 )
 
 
