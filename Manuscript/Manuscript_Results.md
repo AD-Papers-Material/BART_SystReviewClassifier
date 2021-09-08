@@ -1,6 +1,6 @@
 Results
 ================
-2021-08-30
+2021-09-08
 
 ## Results
 
@@ -14,11 +14,11 @@ OR hospital OR “long-term-care” OR “long term care” OR “longterm care�
 OR “long-term care” OR “healthcare associated”) AND (infection OR
 resistance OR resistant))*
 
-including results between 2010 and 2020 (included). The automatic search
-tools were used for MEDLINE, WOS and IEEE, while a manual search and
-importation was necessary for EMBASE and SCOPUS. The search was repeated
-manually also for MEDLINE, since, as reported in the methods, the web
-interface may return different results from the API.
+subsetting results between 2010 and 2020 (included). The automatic
+search tools were used for MEDLINE, WOS and IEEE, while a manual search
+and importation was necessary for EMBASE and SCOPUS. The search was
+repeated manually also for MEDLINE, since, as reported in the methods,
+the web interface may return different results from the API.
 
 The first search session returned a total of 27600 unique records,
 specifically 12719 (71.6% of the total) records from the *EMBASE*
@@ -202,7 +202,7 @@ that the engine was quite capable of internalizing the concepts behind
 the research topic. A subsample of these terms is reported in Table 2 of
 Suppl. Mat. S2.
 
-### Hyperparameter selection and performance evaluation
+### Hyperparameter selection
 
 <!-- develop more in the methods, the data is not a random sample and it's ordered so performance evaluation needs to take this into account. also note that hyperparameter selection is necessary since even if bayesian methods are robust, the other parameters outside it are not-->
 
@@ -217,6 +217,8 @@ combination of parameters reached a sensitivity of 98.8% (81 / 82
 positive matches found) and efficiency of 61.5% (462 / 1200 records
 evaluated). A summary of the results of the grid search is reported in
 Table 3 in Suppl. Mat. S2.
+
+### Performance evaluation
 
 To evaluate the theoretical performance of the engine on the full
 datasets (i.e., session 1 and session 2 data), a Bayesian logistic model
@@ -248,30 +250,30 @@ positives were missed, we evaluated 100 more records between the
 unreviewed ones with the highest median predicted probability produced
 by the engine and found no actual positive matches.
 
-| Indicator                          | Session 1              | Session 2              |
-|:-----------------------------------|:-----------------------|:-----------------------|
-| Tot. records                       | 17755                  | 98371                  |
-| N. reviewed records (% over total) | 761 (4.29%)            | 1316 (1.34%)           |
-| Expected efficiency \[PrI\]        | 95.7% \[95.3%, 95.7%\] | 98.6% \[98.2%, 98.7%\] |
-| N. positive matches (% over total) | 101 (0.57%)            | 107 (0.11%)            |
-| Predicted positive matches \[PrI\] | 101 \[101, 108\]       | 110 \[107, 145\]       |
-| Expected sensitivity \[PrI\]       | 100% \[93.5%, 100%\]   | 97.3% \[73.8%, 100%\]  |
-| Simple Model R^2 \[PrI\]           | 98.1% \[97.4%, 98.3%\] | 98.2% \[97.6%, 98.3%\] |
+| Indicator                                            | Session 1              | Session 2              |
+|:-----------------------------------------------------|:-----------------------|:-----------------------|
+| Total records                                        | 17755                  | 98371                  |
+| Reviewed records (% over total records)              | 761 (4.29%)            | 1316 (1.34%)           |
+| Expected efficiency (over random) \[trunc. 90% CrI\] | 95.7% \[95.3%, 95.7%\] | 98.6% \[98.2%, 98.7%\] |
+| Observed positive matches (% over total records)     | 101 (0.57%)            | 107 (0.11%)            |
+| Predicted positive matches \[trunc. 90% PrI\]        | 101 \[101, 108\]       | 110 \[107, 145\]       |
+| Expected sensitivity \[trunc. 90% PrI\]              | 100% \[93.5%, 100%\]   | 97.3% \[73.8%, 100%\]  |
+| Simple Model *R*<sup>2</sup> \[90% PrI\]             | 98.1% \[97.4%, 98.3%\] | 98.2% \[97.6%, 98.3%\] |
 
-Table 3. Estimated performance summary. For each session, the number of
-reviewed records and the percentage over the total provide an idea of
-the work saved against manually labelling all retrieved records. Using a
-simple logistic model to predict a positive match from the probabilities
-outputted by the engine, the predictive distribution of the cumulative
-number of positive matches was computed and used to estimate the
-sensitivity and the efficiency of the engine for each session. Finally
-the Bayesian R^2 of the logistic models is reported. \[PrI\] represents
-the 90% Predictive Interval.
+Table 3. Estimated performance summary. The table reports for each
+session, the number of reviewed records and the percentage over the
+total. Also, the posterior expected number of positive records,
+*Sensitivity* and *Work saved over random* (WSoR) are reported, with
+their 90% PrI truncated to a number of positive matches equal to the
+observed one. Finally the median Bayesian R^2 \[90% CrI\] of the
+logistic models is reported. \[PrI\] represents the 90% Predictive
+Interval while \[trunc. PrI\] indicate the residual PrI truncated at the
+observed realization (see. methods).
 
-![Figure 1. 90% Predictive distribution of the cumulative number of
-positive matches estimated by the logistic Bayesian models applied to
-the engine output. The distribution is depicted by the shaded area. The
-distribution is cut at the level of the observed cumulative distribution
-of positive matches (red dots), since there cannot be false positive in
-the dataset and predicted value below this line are not
-possible.](Manuscript_Results_files/figure-gfm/performance%20plot-1.png)
+![Figure 2. Observed cumulative number of positive matches (red dots)
+sorted by simple query ordering. The \[trunc. 90% PrI\] of the
+cumulative positive matches estimated by the logistic Bayesian model is
+shown as shaded area delimited by the 95% quantile of the PrI and by the
+observed number of positive matches (light blue lines). The median of
+the PrI is represented by a darker blue
+line.](Manuscript_Results_files/figure-gfm/performance%20plot-1.png)
