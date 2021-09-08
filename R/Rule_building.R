@@ -220,7 +220,7 @@ add_negative_terms <- function(rules, target_vec, target_data) {
 
 		terms$selected_term[1] <- TRUE
 
-		rep <- T
+		rep <- TRUE
 
 		while (rep) {
 
