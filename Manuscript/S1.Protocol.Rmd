@@ -2,6 +2,8 @@
 title: "Study protocol"
 date: "`r lubridate::today()`"
 output:
+  pdf_document:
+    toc: yes
   github_document:
     toc: yes
 ---
@@ -206,7 +208,7 @@ The function adds a number of diagnostic pages to the annotation file:
 
 Finally, the posterior samples produced by the Bayesian engine are stored on the disk. This feature can be turned off to save disk space, but at least the samples of the last annotation are necessary to build a new search query building (see next section) and for classification performance estimation.
 
-The process of predicting labels and manually reviewing them is what defines a "classification and review (CR) iteration".
+The process of predicting labels and manually reviewing them is what defines a "classification-review (CR) iteration".
 
 Once the manual review of the generated annotation file is completed, the user can **rerun exactly the same function**. The reviewed annotation file will be automatically picked up and used for a new CR iteration. If the number of records requiring manual review is excessively high (e.g. > 250), the function needs to be called with the `stop_on_unreviewed` argument set to `FALSE` to allow the classification to proceed even in the presence of unreviewed records in the `Rev_prediction_new` column.
 

@@ -2,8 +2,8 @@
 title: "Databases' search guide"
 date: "`r lubridate::today()`"
 output:
-  github_document:
-    toc: yes
+  pdf_document: default
+  github_document: default
 ---
 
 ## WOS
