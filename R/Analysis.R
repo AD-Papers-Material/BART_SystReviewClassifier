@@ -448,7 +448,7 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 		best_by_rule = out %>% group_by(Cluster = Rule) %>%
 			slice_max(Score, n = 1, with_ties = T) %>%
 			slice_max(Sensitivity, n = 1, with_ties = T) %>%
-			slice_max(Score, n = 1, with_ties = F) %>%
+			slice_max(Efficiency, n = 1, with_ties = F) %>%
 			# ungroup() %>%
 			# arrange(desc(Score), desc(Sensitivity), desc(Efficiency)) %>%
 			select(Cluster, Iter, Pos_labels, Tot_labeled, Sensitivity, Efficiency,
