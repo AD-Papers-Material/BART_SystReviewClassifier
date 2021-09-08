@@ -138,7 +138,7 @@ tokenize_MESH <- function(mesh) {
 
 text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 												freq.subset.ids = ids,
-												included.pos = c('Noun', 'Verb', 'Adjective'),
+												included.pos = c('Noun', 'Verb', 'Adjective'), #TODO: add Plural and Noun Phrase
 												tokenize.fun = tokenize_text, add.ngrams = T,
 												aggr.synonyms = T, n.gram.thresh = .5,
 												syn.thresh = .9, label = 'TERM__', na.as.missing = T) {
