@@ -564,13 +564,13 @@ format_performance <- function(..., session_names = NULL) {
 		elements[[i]] %>% with({
 			tibble(
 				#Session = session_names[i],
-				'Tot. records' = total_records,
-				'N. reviewed records (% over total)' = glue("{n_reviewed} ({percent(n_reviewed/total_records)})"),
-				'Expected efficiency [PrI]' = efficiency %>% format_interval(percent = TRUE),
-				'N. positive matches (% over total)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
-				'Predicted positive matches [PrI]' = pred_positives %>% format_interval(),
-				'Expected sensitivity [PrI]' = sensitivity %>% format_interval(percent = TRUE),
-				'Simple Model R^2 [PrI]' = mod_r2 %>% format_interval(percent = TRUE)
+				'Total records' = total_records,
+				'Reviewed records (% over total records)' = glue("{n_reviewed} ({percent(n_reviewed/total_records)})"),
+				'Expected efficiency (over random) [trunc. 90% CrI]' = efficiency %>% format_interval(percent = TRUE),
+				'Observed positive matches (% over total records)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
+				'Predicted positive matches [trunc. 90% PrI]' = pred_positives %>% format_interval(),
+				'Expected sensitivity [trunc. 90% PrI]' = sensitivity %>% format_interval(percent = TRUE),
+				'Simple Model $R^2$ [90% PrI]' = mod_r2 %>% format_interval(percent = TRUE)
 		) %>%
 				mutate_all(as.character) %>%
 				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%
@@ -682,4 +682,23 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 	}
 
 	var_imp
+}
+
+print_table <- function(data, caption = '') {
+	if (knitr::is_latex_output()) {
+		knitr::kable(data, "latex", booktabs = T,
+								 caption = caption %>% str_squish()
+								 #format.args = list(floating = FALSE)
+		) %>%
+			kableExtra::kable_styling(
+				latex_options = c(
+					"striped",
+					if (ncol(data) > 5) "scale_down" else NULL,
+					"hold_position"
+				)
+			)
+	} else {
+		knitr::kable(data, caption = caption)
+	}
+
 }
