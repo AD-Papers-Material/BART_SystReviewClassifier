@@ -1,0 +1,23 @@
+- human error correction (Bannach)
+
+- Manning CD, Raghavan P, Schütze H. Introduction to information retrieval.
+USA: Cambridge University Press; 2008. NLP basics
+
+Software:
+	- Thomas J, Brunton J, Graziosi S. EPPI-Reviewer 4.0: software for research
+	synthesis. EPPI-Centre Software. London: Social Science Research Unit,
+	Institute of Education; 2010. uses SVM
+
+- Cormack GV, Grossman MR. Engineering quality and reliability in
+technology-assisted review. Dovrebbe citare il problema del threshold
+
+-  Wallace BC, Small K, Brodley CE, Trikalinos TA. Class imbalance, redux. In:
+Data Mining. Class imbalance
+
+- Our tool does not suffer strongly of threshold and false positive (compare with bannach-brown)
+
+- barriers to implement automatic syst review Thomas J: Diffusion of innovation in systematic review methodology: why is study selection not yet assisted by automation?
+
+- difficulty in understanding and technical implementation among general users @o2015using
+
+- the framework corrected one wrong classification acting also a second screener @o2015using

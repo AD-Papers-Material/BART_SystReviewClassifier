@@ -1,0 +1,22 @@
+---
+title: "Introduction"
+date: "`r lubridate::today()`"
+bibliography: references.bib
+csl: apa.csl
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+  github_document: default
+---
+
+## Introduction
+
+Scientific production has experienced a continuous exponential growth in last decades [@larsen2010rate; @bornmann2015growth]. This is especially true for biomedical research, a trend further increased by the COVID19 pandemic, thanks also to a decrease in journals' processing time and to the diffusion of preprint databases' usage [@aviv2021publication; @horbach2020pandemic; @hoy2020rise]. Consequently, it gets harder for researchers and practitioners to stay up-to-date on the latest findings in their field. Secondary research is of paramount relevance in this scenario, providing useful summaries of the state of the art, but is getting ever more demanding in terms of time and human resources [@allen1999estimating; @borah2017analysis; cohen2010evidence; bastian2010seventy].\
+The article collection and screening phases of a systematic review are particularly problematic tasks [systematic review tutorial]. The first is the collection of published research possibly relevant to a scientific question through the an appropriately built search queries used with scientific database search engines. The construction of search queries is a particularly delicate tasks [@lefebvre2011searching; @hammerstrom2010searching], requiring both domain and some knowledge of the databases' query languages; the goal is to produce a set of results containing all relevant articles (high sensitivity) and as few non-relevant ones as possible (high specificity), focusing on the first aspect at the cost of the second [@hammerstrom2010searching]. Furthermore, often manual work is required to download, store and organize the publication data. This aspect may be complicated by limits in the number of records that can be downloaded at once [], and by the necessity to harmonize different formats and resolve duplication. The screening phase consists of classifying the collected publications as relevant or not for the topic of interest [@bannach2019machine]. It is usually the more resource demanding task of a systematic review; even with appropriately built search queries, the returned results easily range in the tens of thousands of which just a small fraction is actually relevant [@lefebvre2011searching]. It was estimated that labelling 10 000 publications may take as much as 40 weeks of work, while the average clinical systematic review takes 63 weeks to be completed [@bannach2019machine; @borah2017analysis; @allen1999estimating].\
+The field of Data Science applied to evidence synthesis and acquisition has since years reached maturation [@marshall2015systematic; @beller2018making]. Through the application of natural language processing (NLP) it is possible to transform free text into quantitative features, with various level of abstraction and generalization [@ananiadou2006text; @cohen2008getting]; with machine learning, such text-derived data can be used to map and reproduce human judgment to automatize the screening given an initial human labeled set [@ikonomakis2005text].\
+The field of automatization of systematic reviews has been ripe of improvements in the last years [@ananiadou2009supporting; @o2015using; @tsafnat2013automation], and it is possible to foresee that such techniques will become a standard approach [@beller2018making]. Some example...
+Despite the great advances, each method has a various shortcoming, both in usability and efficiency [@o2015using].
+We tried to addresses some of these limitations creating an integrated framework which tries to simplify systematic reviews in innovative ways: our framework provides solutions for automatic publication collection from multiple online sources and management, and a Bayesian, active machine learning based tool to support humans in the screening task, exponentially reducing the number of records to review. Finally, we propose an experimental method to semi-automatically generate efficient search queries given an already labelled set of publications.\
+We apply this solution in the production of a systematic review evaluating the mathematical modeling of patient referral networks among hospitals and its impact on the diffusion of healthcare-associated pathogenic microrganisms with a focus on antimicrobial resistant strains. The systematic review protocol is published in [].
+

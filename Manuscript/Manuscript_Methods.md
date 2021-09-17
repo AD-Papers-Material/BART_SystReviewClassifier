@@ -1,6 +1,6 @@
 Methods
 ================
-2021-09-08
+2021-09-09
 
 ## Methods
 
@@ -179,9 +179,9 @@ different researchers.
 
 The automatic classification task and the manual review step form an
 iterative loop (CR iterations). The whole algorithm falls in the pattern
-defined as active machine learning (Settles, 2009), with the machine
-querying the user to address and progressively resolve uncertainty in
-the classification.  
+defined as active machine learning (Settles, 2009, p. miwa2014reducing),
+with the machine querying the user to address and progressively resolve
+uncertainty in the classification.  
 The CR iterations continue until no new positive matches are found in
 four consecutive iterations. The framework supports alternative stopping
 conditions like limits on the fraction or number of total records
@@ -264,13 +264,13 @@ already collected labels. The framework ran until four CR iterations
 with no positive records were returned, or the whole dataset was
 labelled.  
 For each combination, a performance score was computed as the product of
-*Efficiency* (number of records that required review over the total) and
-*Sensitivity* (number of positive records found over the total of
-positives). We then identified homogeneous “performance clusters” of
-parameter values using a decision tree on the score. For the final
-analysis, we chose the best cluster of parameter value combinations and,
-inside the cluster, the best combination in order of Sensitivity and
-Efficiency.
+*Efficiency* (1 minus the number of records that required review over
+the total) and *Sensitivity* (number of positive records found over the
+total of positives). We then identified homogeneous “performance
+clusters” of parameter values using a decision tree on the score. For
+the final analysis, we chose the best cluster of parameter value
+combinations and, inside the cluster, the best combination in order of
+Sensitivity and Efficiency.
 
 ### Performance evaluation
 
