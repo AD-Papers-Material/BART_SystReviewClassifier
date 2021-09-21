@@ -1,6 +1,6 @@
 Methods
 ================
-2021-09-09
+2021-09-21
 
 ## Methods
 
@@ -60,9 +60,12 @@ on how to set up the framework for each supported database is available
 in Supplemental Material S3.  
 Once the records are downloaded and acquired, the framework merges them
 into a single database, resolving duplicates and different formatting
-between sources, ordering the records by simple query term frequency
-(“simple ordering”), putting the most likely relevant records on top.
-The output is an “Annotation file.”  
+between sources. The records are ordered according to the frequency of
+the positive terms (e.g., not preceded by a *N**O**T* modifier) of the
+query appear in the title and abstract (“simple ordering”); this
+approach is a modification of Wallace et al. (2010). The final output is
+an “Annotation file” with all the record’s info and its label when
+present´.  
 
 A first initial set of manually labelled records is needed to start the
 automatic classification. We suggest manually label the first 250
@@ -74,9 +77,10 @@ The annotation file produced in the previous step has a number of fields
 characterizing a scientific publication. The framework models the
 relevance of a record based on the following fields: title, abstract,
 authors, keywords, MESH terms (Lipscomb, 2000). A series of Natural
-Language Processing (NLP) techniques <mark>(*should I put a general
-reference?*)</mark>) are employed to transform the textual information
-in these fields into features for machine learning. The processing of
+Language Processing (NLP) techniques (Ananiadou & McNaught, 2006;
+Marshall & Brereton, 2015) are employed to transform the textual
+information in these fields into features for machine learning, through
+a bag-of-words approach (Marshall & Brereton, 2015). The processing of
 free text fields includes tokenization (i.e., extracting the terms),
 common stopwords (i.e. sentence components bringing no meaning) removal,
 part-of-speech filtering (only nouns, adjectives, verbs and untagged
@@ -135,7 +139,9 @@ improve prediction stability by averaging the predictions between
 models.  
 To choose how to label a record, we exploit the uncertainty typical of
 Bayesian estimates to decide a record label and whether it requires
-manual evaluation. To describe the process formally, we define
+manual evaluation, an approach joining the “uncertainty” and “certainty”
+selection criteria of previous work in the field (Miwa et al., 2014). To
+describe the process formally, we define
 
 $$\\pi\_i = \\frac{1}{M}\\sum\_mPr(L\_i = \\text{pos}\|DTM,model\_m)$$
 
@@ -179,9 +185,9 @@ different researchers.
 
 The automatic classification task and the manual review step form an
 iterative loop (CR iterations). The whole algorithm falls in the pattern
-defined as active machine learning (Settles, 2009, p. miwa2014reducing),
-with the machine querying the user to address and progressively resolve
-uncertainty in the classification.  
+defined as active machine learning Miwa et al. (2014), with the machine
+querying the user to address and progressively resolve uncertainty in
+the classification.  
 The CR iterations continue until no new positive matches are found in
 four consecutive iterations. The framework supports alternative stopping
 conditions like limits on the fraction or number of total records
@@ -313,6 +319,13 @@ total positive records lower than observed is zero.
 <div id="refs" class="references csl-bib-body hanging-indent"
 line-spacing="2">
 
+<div id="ref-ananiadou2006text" class="csl-entry">
+
+Ananiadou, S., & McNaught, J. (2006). *Text mining for biology and
+biomedicine*. Citeseer.
+
+</div>
+
 <div id="ref-chae1993presenting" class="csl-entry">
 
 Chae, K.-C. (1993). Presenting the negative hypergeometric distribution
@@ -381,6 +394,23 @@ the Medical Library Association*, *88*(3), 265.
 
 </div>
 
+<div id="ref-marshall2015systematic" class="csl-entry">
+
+Marshall, C., & Brereton, P. (2015). Systematic review toolbox: A
+catalogue of tools to support systematic reviews. *Proceedings of the
+19th International Conference on Evaluation and Assessment in Software
+Engineering*, 1–6.
+
+</div>
+
+<div id="ref-miwa2014reducing" class="csl-entry">
+
+Miwa, M., Thomas, J., O’Mara-Eves, A., & Ananiadou, S. (2014). Reducing
+systematic review workload through certainty-based screening. *Journal
+of Biomedical Informatics*, *51*, 242–253.
+
+</div>
+
 <div id="ref-rstat" class="csl-entry">
 
 R Core Team. (2020). *R: A language and environment for statistical
@@ -415,6 +445,15 @@ analysis and review. *International Journal of Forecasting*, *16*(4),
 
 Therneau, T., & Atkinson, B. (2019). *Rpart: Recursive partitioning and
 regression trees*. <https://CRAN.R-project.org/package=rpart>
+
+</div>
+
+<div id="ref-wallace2010active" class="csl-entry">
+
+Wallace, B. C., Small, K., Brodley, C. E., & Trikalinos, T. A. (2010).
+Active learning for biomedical citation screening. *Proceedings of the
+16th ACM SIGKDD International Conference on Knowledge Discovery and Data
+Mining*, 173–182.
 
 </div>
 

@@ -21,3 +21,15 @@ Data Mining. Class imbalance
 - difficulty in understanding and technical implementation among general users @o2015using
 
 - the framework corrected one wrong classification acting also a second screener @o2015using
+
+-  Wallace et al. state that ‘class imbalance presents a problem for classification algorithms, because they have typically been optimised for accuracy, rather than the recall of a particular class’. Wallace B, Trikalinos T, Lau J, Brodley C, Schmid C: Semi-automated screening of biomedical citations for systematic reviews
+
+- importance of high sensitivity. Jonnalagadda S, Petitti D: A new iterative method to reduce workload in systematic review process.Int J Comput Biol Drug Des 2013,6(1–2):5–17.
+
+- benefit of overweighting positives especially in conjunction with conjunction with a ‘positive-first’ approach. Miwa M, Thomas J, O’Mara-Eves A, Ananiadou S: Reducing systematic review workload through certainty-based screening.J Biomed Inform 2014, 51:242–53. doi:10.1016/j.jbi.2014.06.005
+
+- prospective design @o2015using
+
+- scalability, most of the studies used corpora of less then 5000 records while we perform well with 100k @o2015using
+
+- point5. encapsulate different tasks so that the outputs are easy to use with other software. point 7: make code available @beller2018making
