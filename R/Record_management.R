@@ -404,7 +404,7 @@ get_session_files <- function(session_name,
 
 	session_path <- file.path(sessions_folder, session_name)
 
-	sapply(which, function(type) {
+	lapply(which, function(type) {
 		files <- list.files(session_path, recursive = T) %>% str_subset(type)
 
 		files <- files[str_detect(basename(files), '^\\w')]
@@ -424,7 +424,7 @@ get_session_files <- function(session_name,
 		) %>% arrange(iter) %>% pull(files)
 
 		file.path(session_path, files)
-	})
+	}) %>% setNames(which)
 }
 
 
