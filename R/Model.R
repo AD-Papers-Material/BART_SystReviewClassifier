@@ -1039,14 +1039,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	common_tag <- glue('{if (repl > 1) paste0("rep", repl, "_") else ""}{safe_now()}')
 	iter <- with(Results, Value[Indicator == 'Iter'])
 
-	# message('- DTM...')
-	# tictoc::tic()
-	# DTM_file <- file.path(session_path, 'DTM.rds')
-	#
-	# readr::write_rds(DTM, file = DTM_file, compress = 'gz')
-	#
-	# tictoc::toc()
-
 	message('- annotated records...')
 	tictoc::tic()
 	output_file_ann <- file.path(session_path, 'Annotations',
@@ -1092,7 +1084,8 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			rm(Predicted_data, Annotated_data, Var_imp, Samples)
 			gc()
 
-			enrich_annotation_file(output_file_ann, DTM = DTM_file,
+			enrich_annotation_file(output_file_ann,
+														 DTM = get_session_files(session_name, sessions_folder)$DTM,
 														 ## Model parameters
 														 pos_mult = pos_mult,
 														 n_models = n_models,
@@ -1160,7 +1153,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 																		## Model parameters
 																		resample = c(FALSE, TRUE),
 																		n_init = c(50, 100, 250, 500),
-																		n_models = c(5, 10, 20, 40, 60),
+																		n_models = c(1, 5, 10, 20, 40, 60),
 																		pos_mult = c(1, 10, 20),
 																		pred_quants = list(c(.1, .5, .9),
 																											 c(.05, .5, .95),
@@ -1172,7 +1165,7 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 																			pos_target = NULL, labeling_limit = NULL
 																		)) {
 
-	# file: 'Sessions/Session1/Records_2021-03-18T13.09.24.xlsx'
+	# file: 'Grid_Search/Classification_data.xlsx'
 
 	# prepare the parameter grid
 	Grid <- tidyr::expand_grid(
@@ -1223,7 +1216,12 @@ perform_grid_evaluation <- function(records, sessions_folder = 'Grid_Search',
 		}
 
 		# pick the last annotated record file or the source one if any
-		last_record_file <- get_session_files(Grid[i,]$session, sessions_folder)$Annotations %>% last()
+		last_record_file <- get_session_files(Grid[i,]$session, sessions_folder)$Annotations %>%
+			last()
+
+		if (is.null(last_record_file)) {
+			last_record_file <- get_session_files(Grid[i,]$session, sessions_folder)$Records
+		}
 
 		with(Grid[i,],
 				 enrich_annotation_file(last_record_file, session_name = session,
