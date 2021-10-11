@@ -1,6 +1,6 @@
 Results
 ================
-2021-09-08
+2021-10-11
 
 ## Results
 
@@ -210,7 +210,7 @@ As described in the methods, the selection of hyperparameters was
 achieved via evaluation of sensibility and efficiency through a grid
 search on a subset of 1200 completely manually labelled records
 (validation set). The best set of parameters suggested an initial input
-of 250 labelled records with 20x positive matches oversampling, an
+of 250 labelled records with 10x positive matches oversampling, an
 averaged ensemble of 10 models, no bootstrapping and an uncertainty zone
 defined by the 98% predictive interval. On the validation set, this
 combination of parameters reached a sensitivity of 98.8% (81 / 82
@@ -231,7 +231,7 @@ well the actual number of cumulative positive records found. The
 predicted cumulative number of positive matches was used to evaluate the
 performance in the non-reviewed records (Table 3).  
 
-Figure 1 shows the actual and predicted (from the logistic model)
+Figure 2 shows the actual and predicted (from the logistic model)
 cumulative number of positive matches, ordered by the initial simple
 ordering query. As confirmed by the high efficiency values reported in
 Table 3, it is striking how many more records would need to be evaluated

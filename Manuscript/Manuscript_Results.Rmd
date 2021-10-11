@@ -2,9 +2,9 @@
 title: "Results"
 date: "`r lubridate::today()`"
 output:
-  pdf_document:
-    includes:
-      in_header: header.tex
+  # pdf_document:
+  #   includes:
+  #     in_header: header.tex
   github_document: default
 ---
 
@@ -187,7 +187,7 @@ perf_table <- format_performance(Performance$s1, Performance$s2)
 
 <!-- develop more in the methods, the data is not a random sample and it's ordered so performance evaluation needs to take this into account. also note that hyperparameter selection is necessary since even if bayesian methods are robust, the other parameters outside it are not-->
 
-As described in the methods, the selection of hyperparameters was achieved via evaluation of sensibility and efficiency through a grid search on a subset of 1200 completely manually labelled records (validation set). The best set of parameters suggested an initial input of 250 labelled records with 20x positive matches oversampling, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval. On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated). A summary of the results of the grid search is reported in Table 3 in Suppl. Mat. S2.
+As described in the methods, the selection of hyperparameters was achieved via evaluation of sensibility and efficiency through a grid search on a subset of 1200 completely manually labelled records (validation set). The best set of parameters suggested an initial input of 250 labelled records with 10x positive matches oversampling, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval. On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated). A summary of the results of the grid search is reported in Table 3 in Suppl. Mat. S2.
 
 ### Performance evaluation
 
