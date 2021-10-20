@@ -14,9 +14,13 @@ output:
 
 ### General description
 
-We built an R [@rstat] based framework with the goal of simplifying two aspects of systematic reviews: record acquisition and classification. The framework is composed of several modules which communicate through intermediate outputs stored in common formats (Comma Separated Values/or Microsoft Excel™), which make it possible for users to extend the framework or easily integrate it with other tools in their pipeline. See Supplemental Material S1 for an in-depth description of the framework and how to use it.\
-The tasks carried out by the framework are grouped into "sessions", that is, a set of actions that starts from a search query to obtain a set of scientific publication data (records), which will be eventually labelled as relevant ("positive" in the rest of the text) or not ("negative") for the topic of interest (Fig. 1). From this labelled set, the framework can generate a new query and perform a new session to find records possible missed by the first query.\
-The researcher should use the framework with a starting query from which she expects a high relevant/non-relevant record ratio.\
+We built an R [@rstat] based framework to simplify two aspects of systematic reviews:
+record acquisition and classification.
+The framework comprises several modules that communicate through intermediate outputs stored in standard formats, which make it possible for users to extend the framework or easily integrate it with other tools in their pipeline.
+See Supplemental Material S1 for an in-depth description of the framework and how to use it.\
+The tasks carried out by the framework are grouped into "sessions", i.e., a set of actions that starts from a search query to obtain a set of scientific citation data (records), which are then labelled as relevant ("positive" in the rest of the text) or not ("negative") for the topic of interest (Fig. 1).
+The framework can generate a new query from this labelled set and perform a new session to find records possibly missed by the first query.\
+The researcher initiates the process with a starting query derived by domain knowledge from which she expects a high relevant/non-relevant record ratio.\
 Follows a description of the framework's components.\
 
 ```{r method_diagram, fig.cap = "Figure 1.Framework's visual depiction.", echo = FALSE, out.width = "100%"}
@@ -26,71 +30,129 @@ knitr::include_graphics("methods_diagram.png", auto_pdf = T)
 <!-- ![Figure 1. Framework visual depiction.](methods_diagram.png) -->
 
 ### Record's acquisition and initial labelling
-We built a set of tools to let users automatically search and download records data from three major scientific databases ("sources"): MEDLINE (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>). The user needs to input a search query and a date range. The query may contain boolean operators AND, OR, NOT and nested parentheses.\
-For WOS, an Application Programming Interface (API) key is necessary to use the automatic search tools; for IEEE, if an API key is not available, a slower, web scraping-based solution will be employed; for MEDLINE, an API key is required only for high-frequency requests to the NCBI server [@pubmed], or if a large number of records is expected since our tool splits big API requests in multiple smaller ones.\
-It is also possible to download and import records in the framework manually. This is particularly useful to acquire records from the SCOPUS (<https://www.scopus.com/search/form.uri?display=basic#basic>) and EMBASE databases (<https://www.embase.com/#advancedSearch/default>), for which a comprehensive API interface was not easy to build. A short guide on how to set up the framework for each supported database is available in Supplemental Material S3.\
-Once the records are downloaded and acquired, the framework merges them into a single database, resolving duplicates and different formatting between sources. The records are ordered according to the frequency of the positive terms (e.g., not preceded by a $NOT$ modifier) of the query appear in the title and abstract ("simple ordering"); this approach is a modification of @wallace2010active. The final output is an "Annotation file" with all the record's info and its label when present´.\
+We built a set of tools to let users automatically search and download citation data from three major scientific databases ("sources"):
+MEDLINE (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>).
+The framework takes care of authorization management for non-open databases like WOS and IEEE.
+It is also possible to download and import records in the framework manually;
+this is particularly useful to acquire records from the SCOPUS (<https://www.scopus.com/search/form.uri?display=basic#basic>) and EMBASE databases (<https://www.embase.com/#advancedSearch/default>), for which a comprehensive API interface was not easy to build.
+A short guide on how to set up the framework for each supported database is available in Supplemental Material S3.\
+The acquired records are merged into a single database, resolving duplicates and different formatting between sources. The records are ordered according to the frequency of the positive query terms (e.g., not preceded by a $NOT$ modifier) in the title and abstract ("simple query ordering").\
+The researcher is then asked to label a number of records to create the "initial training set" needed to start the automatic classification.
+We suggest manually labelling the first 250 records (see "hyperparameter optimization" later).
+The simple query ordering increases the positivity rate in the initial training set [@wallace2010active], which provide higher sensitivity during automatic classification [@chawla2004special].
 
-An initial training set of manually labelled records is needed to start the automatic classification. We suggest manually label the first 250 records (see "hyperparameter optimization" later).\
-
-### Document-Term matrix generation
-The annotation file produced in the previous step has a number of fields characterizing a scientific publication. The framework models the relevance of a record based on the following fields: title, abstract, authors, keywords, MESH terms [@lipscomb2000medical]. A series of Natural Language Processing (NLP) techniques [@baeza1999modern; @marshall2015systematic; @ananiadou2006text] are employed to transform the textual information in these fields into features for machine learning, through a bag-of-words approach [@marshall2015systematic]. The processing of free text fields includes tokenization (i.e., extracting the terms), common stopwords (i.e. sentence components bringing no meaning) removal, part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatization of the terms (i.e. reduction to their base grammar form). Processing for authors, keywords and MESH terms identify logical units (e.g., author's full names, composite keywords) without breaking them into single terms, and no stopwords removal or lemmatization are applied.\
-To reduce noise and save computation time, terms that appeared in less than 5% of the labelled documents (positive and negatives) are removed from negative records. All terms in the positive set are kept to increase sensitivity at the cost of specificity.\
-Some terms tend to co-appear in records (non-consecutive ngrams, nc-ngrams), often carrying a particular meaning when copresent. To detect nc-ngrams, we generated a network representation posing edges between terms with a cosine similarity in terms of records copresence > 0.5. We extracted the maximal cliques in the network [@eppstein2010listing] representing highly correlated groups of terms; These generated terms are added to the data set. To avoid overfitting, we kept nc-ngrams of a maximum of ten terms.\
-A similarity network is built again using a similarity threshold of 0.9 and finding the cliques again. In this case, the cliques represent terms that always appear together and therefore can be considered synonyms. These terms are merged in the data set to increase computation efficiency and reduce overfitting.\
-The final output is a matrix, also called a Document-Term Matrix (DTM), with $N_d$ rows representing the records $D$, $N_t$ terms column for the $t_{field}$ terms (divided by record field) and ${0,1}$ values whether $t_{field} \in D$. We also enriched the DTM with features storing the number of terms in each field to help the model scale term importance based on the document length.
+### Text feature extraction
+The collected citation data have a number of fields characterizing a scientific publication.
+The framework models the relevance of a record based on the following fields:
+title, abstract, authors, keywords, MESH terms [@lipscomb2000medical].
+A series of Natural Language Processing (NLP) techniques [@baeza1999modern; @marshall2015systematic; @ananiadou2006text] are employed to transform the textual information in these fields into features for machine learning through a bag-of-words approach [@marshall2015systematic].
+The processing of free text fields (title, abstract) includes: tokenization (i.e., extracting the terms), common stopwords (i.e. sentence components bringing no meaning) removal, part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatization of the terms (i.e. reduction to their base grammar form).
+Text processing for authors, keywords and MESH terms identifies logical units (e.g., author's full names, composite keywords) and extracts them.\
+Terms appearing in less than 5% of the labelled documents are removed from negative records.
+All terms in the positive set are kept to increase sensitivity at the cost of specificity.\
+Some terms tend to co-appear in records (non-consecutive ngrams, nc-ngrams), often carrying a particular meaning when copresent.
+To detect nc-ngrams, we generated a word network representation [@rousseau2015graph] posing edges between terms with a cosine similarity in terms of record co-occurrence > 0.5.
+We extracted the maximal cliques in the network [@eppstein2010listing] representing highly correlated groups of terms;
+These groups of terms are added to the data set as individual features.
+Only nc-ngrams comprising a maximum of ten terms are kept.\
+A second network is built using a co-occurrence threshold of 0.9.
+In this case, the cliques represent terms that always appear together and therefore can be considered redundant (i.e. they do not need to be considered separately).
+These terms are merged to increase computation efficiency and reduce overfitting.\
+The output is a Document-Term Matrix (DTM), with $N_d$ rows representing the records ($D_i$), $N_t$ terms column for the $t_{field}$ terms (divided by record field) and ${0,1}$ values whether $t_{field} \in D_i$.
+We also enriched the DTM with features referencing the number of terms in each field to help the model scale term importance based on the field length.
 
 ### Label prediction
-We used a Bayesian Additive Regression Trees (BART) machine learning model [@chipman2010bart] [in the implementation of @kapelner2013bartmachine] to predict the probability of a record of being relevant, given the information coded into the enriched DTM.
-We set up the BART model to use 2000 MCMC iterations (after 250 burn-in iterations) and 50 trees; we used a $k$ value of 2 to regularized extreme prediction and let the model use missing fields in the DTM as features [@kapelner2015prediction]. Since the goal is to find all positive matches (i.e., focus on sensitivity), positive records are oversampled ten times.\
-The output is a posterior predictive distribution (PPD) of each record's probability of a positive match. An ensemble of ten models was fitted to improve prediction stability by averaging the predictions between models.\
-To choose how to label a record, we exploit the uncertainty typical of Bayesian estimates to decide a record label and whether it requires manual evaluation, an approach joining the "uncertainty" and "certainty" selection criteria of previous work in the field [@miwa2014reducing]. To describe the process formally, we define
+We used a Bayesian Additive Regression Trees (BART) machine learning "classification model" [@chipman2010bart] [in the implementation of @kapelner2013bartmachine] to predict the probability of a record of being relevant, given the information coded into the enriched DTM and the initial training set.
+We set up the BART model to use 2000 MCMC iterations (after 250 burn-in iterations) and 50 trees;
+we used a $k$ value of 2 to regularize extreme prediction and let the model use missing fields in the DTM as features [@kapelner2015prediction].
+Positive records are oversampled ten times to increase sensitivity [@batista2004study].\
+The output is a posterior predictive distribution (PPD) for each record describing its probability of being relevant (i.e., a positive match).
+An ensemble of ten models was fitted to improve prediction stability by averaging the PPD between models [@zhou2021ensemble; @dietterich2000ensemble].\
 
-$$\pi_i = \frac{1}{M}\sum_{j=1}^MPr(L_i = \text{pos}|DTM,m_j)$$
+To assign the labels, we employed an "active learning" [@settles2009active, @miwa2014reducing] approach, where a human reviews a specific subset of predictions made from the machine, which is then retrained on the manually reviewed dataset.
+This process proceeds iteratively, decreasing prediction uncertainty.\
+Label assignment is done through the identification of an "uncertainty zone" whose construction is possible thanks to the Bayesian nature of BART, which provides full PPDs instead of point-wise predictions for each record.\
+To describe the process formally, we define
 
-as the PPD of a record $D_i$ being assigned a positive label ($L_i$), averaging the PPDs of the ensemble of $M=10$ models $m$, and
+$$\pi_i = \frac{1}{M}\sum_{j=1}^MPr(L_i = \text{1}|DTM,m_j)$$
 
-$$\pi_{i,l} = \{\pi_i : Pr(\pi_i) = 1\%\}\\
-\pi_{i,u} = \{\pi_i : Pr(\pi_i) = 99\%\}$$
+as the PPD of a record $D_i$ being relevant (i.e, having a positive label, $L_i = 1$), averaging the PPDs of the ensemble of $M=10$ models $m$, and
 
-as respectively the lower and upper boundaries of the 98% quantile interval of $\pi_i$ (98% predictive interval, 98% PrI).\
-Then we identify the "uncertainty zone"
+$$
+\begin{aligned}
+\pi_{i,l} = \{\pi_i : Pr(\pi_i) = 1\%\}\\
+\pi_{i,u} = \{\pi_i : Pr(\pi_i) = 99\%\}
+\end{aligned}
+$$
 
-$$U_\pi=[\max_{D_i \in L_n}\pi_{i,u}, \min_{D_i \in L_p}\pi_{i,l}]$$
+as respectively the lower and upper boundaries of the 98% quantile interval of $\pi_i$ (98% Predictive Interval, 98% PrI).\
+Then we identify the "uncertainty zone" as
 
-that is, a range of $\pi$ values between the smallest $\pi_{i,l}$ in the set of already labelled positive records $L_p$ and the largest $pi_{i,u}$ related to the negative ones $L_n$, noting that the two limits can appear in any order.\
+$$U_\pi=[\max\vec{\pi}_{u}^-, \min\vec{\pi}_{l}^+]$$
+with $\vec{\pi}_{u}^-$ being the vector of $\pi_{i,u}$ with a negative label and $\vec{\pi}_{l}^+$ the vector of $\pi_{i,l}$ with a positive label.
+That is, $U_\pi$ defines a range of values between the smallest $\pi_{i,l}$ in the set of already labelled positive records $L_p$ and the largest $pi_{i,u}$ related to the negative ones $L_n$, noting that the two limits can appear in any order.\
 Consequently, a record $D_i$ will be labelled as positive if
 
 $$\pi_{i,l} > \max_{\pi \in U_\pi} \pi$$
 
-that is, its lower 98% PrI boundary should be higher than every value in the uncertainty zone. In other words, for a record to be labelled positive, its PPD should be within the range of the mixture of PPD of the previously labelled positive records and not cross the distributions of the negative records.\
+that is, the record lower 98% PrI boundary should be higher than every value in the uncertainty zone.
+In other words, for a record to be labelled positive, its PPD should be within the range of the mixture of PPD of the previously labelled positive records and not cross the distributions of the negative records.\
 Conversely, a record is labelled as negative if
 
-$$\pi_{i,u} > \min_{\pi \in U_\pi} \pi$$
+$$\pi_{i,u} < \min_{\pi \in U_\pi} \pi$$
 
-All other records are labelled as uncertain and will require manual labelling. Also, positive labelled records are to be reviewed to avoid false positives. Furthermore, if a predicted label differs from the existing one, a manual check will be required; this could identify uncertainty in the labelling criteria of the same researcher or between different researchers.
+All other records are labelled as "uncertain".
 
-The automatic classification task and the manual review step form an iterative loop (CR iterations). The whole algorithm falls in the pattern defined as active machine learning [@settles2009active, @miwa2014reducing], with the machine querying the user to address and progressively resolve uncertainty in the classification.\
-The CR iterations continue until no new positive matches are found in four consecutive iterations. The framework supports alternative stopping conditions like limits on the fraction or number of total records reviewed and on the total number of positive matches found.
+Manual review is then necessary for: 1) uncertain records, 2) positive records (to avoid false positives), 3) records whose predicted label differs from the existing manual one.
+The last case helps identify human errors or inconsistent labelling criteria.
+
+The automatic classification and the manual review steps alternate in a loop (CR iterations) until no new positive matches are found in four consecutive iterations.
 
 ### New search query generation
-We created an algorithm that helps create a new search query that could detect further relevant publications missed during the first search, possibly at a reasonable cost in specificity (i.e., a higher number of negative results).\
+We created an algorithm that generates a new search query to acquire further relevant publications missed during the first search, possibly at a reasonable cost in specificity (i.e., a higher number of negative results).\
 The algorithm encompasses a number of steps:
 
-* We fit a partition tree [@rpart] between the DTM and 800 samples from the PPD; if a term is present multiple times in the DTM (e.g. both title and abstract), they are counted just one, and field term count features are removed. This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MESH, which together identify a group of records.
-* For each rule, we add a set of negative conditions ($NOT$ statements in the rule), removing non-relevant records in a group: a condition removing the largest number of non-relevant records is found, and then iteratively, more are added with the same logic, until no conditions are found that would not also remove positive records.
-* The extended set of rules is sorted by the difference between the number of positive and negative records they identify in descending order. Given this ordered list, the cumulative number of unique positive records is computed and used to group the rules: each rule in the same group of rules adds the same number of positive records to the preceding group but are ordered according to the number of negative records they identify.
-* These groups of rules are outputted, and the researcher is asked to review them, selecting one or more (useful if they convey radically different meaning) rules from each group, or edit them (in case too specific positive or negative conditions were included). By default, the framework suggests keeping the first rule of each group since it would identify the lower number of non-relevant records for the same number of positive one (.e., higher specificity). It is possible to exclude a group of rules altogether, especially the last ones with very low positive/negative records ratios.
+* We fit a partition tree [@rpart] between the DTM and 800 samples from the PPD;
+if a term is present multiple times in the DTM (e.g. both title and abstract), they are counted just one, and field term count features are removed.
+This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
+* For each rule, negative conditions (i.e., $NOT$ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
+* The extended set of rules is sorted by positive-negative record difference in descending order.
+The cumulative number of unique positive records is computed and used to group the rules.
+Rules inside each group are ordered by specificity.
+* The researcher is then asked to review the rule groups, selecting one or more rules (useful if they convey different meaning) from each, or edit them (in case too specific positive or negative conditions were included).
+It is possible to exclude a group of rules altogether, especially those with the worse sensitivity/specificity ratio.
 * The selected rules are joined together by $OR$ statements, defining a subset of records with a sensibly higher proportion of positive records than the original one.
-* Given this data set, the next step removes redundant rules (i.e., rules whose positive records are already included in more specific ones) and conditions (i.e., conditions that once removed do not decrease the total number of positive or do not increase the negative records).
-* Finally, the rules are re-elaborated in a format usable on the major scientific databases.
-Since the algorithm is data-driven and creates rules that are specific for the dataset but may be not once applied to comprehensive research databases, we added a new subquery in $AND$ specifying the general topics of our search.
+* Redundant rules (i.e., rules whose positive records are already included in more specific ones) and conditions (i.e., conditions that once removed do not decrease the total number of positive or do not increase the negative records) are removed.
+* Finally, the rules are re-elaborated in a query usable on the major scientific databases.
 
-### Hyperparameter search
-The machine learning model behind the algorithm has a number of hyperparameters in addition to the BART specific ones: the number of ensemble models, the source of randomness between models (just derived from MCMC sampling, the default, or whether to bootstrap the data first), the oversampling of positive records, the PrI quantiles, the number of initial manually labelled records. These parameters have a relevant effect on the algorithm performance.\
-We set up a grid search to evaluate the parameters on a subset made of the first 1200 records from the first session; these records were fully labelled as relevant or not. We run the framework for each combination of parameter values, automatizing the manual review part using the already collected labels. The framework ran until four CR iterations with no positive records were returned, or the whole dataset was labelled.\
-For each combination, a performance score was computed as the product of *Efficiency* (1 minus the ratio of records that required review over the total) and *Sensitivity* (number of positive records found over the total of positives). We then identified homogeneous "performance clusters" of parameter values using a decision tree on the score. For the final analysis, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination in order of Sensitivity and Efficiency.
+Since the algorithm is data-driven, it creates queries that effectively select positive records from the input dataset but may be not specific enough once applied to actual research databases.
+Therefore we appended an extra subquery in $AND$, which specifies the general topics of our search and delimitates the search domain.\
+The new query was used to initiate a second search session.
 
 ### Performance evaluation
-Each literature corpus is unique per database/search query, so we did noWe focused on estimating the expected total sensitivity in the dataset, using a surrogate [] Bayesian logistic regression to model the record labels on the lower bound of the [98% PrI] produced by our algorithm and then using this last model to produce a predictive cumulative distribution of the number of missed positive records. For this model, we used weakly regularizing, robust priors for the intercept (Student T with $\nu=3,\mu=0,\sigma=2.5$) and the linear coefficient (Student T with $\nu=3,\mu=0,\sigma=1.5$). Given that this model is conditional only on the BART predictions and not on the DTM, it is characterized by more uncertainty, providing a plausible worst-case scenario. The quality of the model was evaluated through Bayesian $R^2$ [@gelman2019r] of which we reported the posterior median and 90% Credible Interval [90% CrI].\
-The predictive distribution of the number of missed positive records allows to estimate the expected long-run *Sensitivity* and the *Work saved over random* (WSoR) of the algorithm. The WSoR is based on a negative hypergeometric model to estimate the number of records to manually label to find the same number of positives if records were evaluated in random order [@chae1993presenting]; the WSoR is then one minus the ratio of the reviewed records over this number. For the number of predicted positive records, the sensitivity and WSoR, we reported the truncated 90% PrI [trunc. 90% PrI], which is the uncertainty interval bounded at the number of observed total positive records: since each positive match is manually verified, the probability of a number of total positive records lower than observed is zero.
+We trained a simple Bayesian logistic regression (surrogate model) on the reviewed records to evaluate the classification model consistency (see Discussion for the theoretical justification).
+The surrogate model uses as predictor the lower bound of the 98% PrI of the records' PPD with weakly regularizing, robust priors for the intercept (Student T with $\nu=3,\mu=0,\sigma=2.5$) and the linear coefficient (Student T with $\nu=3,\mu=0,\sigma=1.5$).\
+The quality of the model was evaluated through Bayesian $R^2$ [@gelman2019r], of which we reported the posterior median and 90% Credible Interval [90% CrI].
+The $R^2$ also provides an evaluation of the consistency of the original classification model.
+Given that this model is conditional only on the BART predictions and not on the DTM, it is characterized by more uncertainty, providing plausible worst-case scenarios.\
+The surrogate model is then used to generate the predictive cumulative distribution of the number of missed positive records in the whole dataset.
+This distribution allows estimating the expected total posterior "Sensitivity" and the "Work saved over random" (WSoR) of the classification model in the full (unreviewed) dataset.
+The WSoR is one minus the number of records to manually label at random to find the same number of positives; this last quantity is estimated through a negative hypergeometric distribution [@chae1993presenting].\
+For the number of predicted positive records, the sensitivity and the WSoR, we reported the "truncated 90% PrI" [trunc. 90% PrI], which is the uncertainty interval bounded at the number of observed total positive records (i.e., there cannot be less predicted positive records than observed).
+
+### Hyperparameter evaluation
+Our classification algorithm has a number of hyperparameters:
+
+* The number of ensemble models;
+* The source of randomness between models in the ensemble, that is, either MCMC sampling only [@robert2004monte], or MCMC plus data bootstrapping [@breiman1996bagging] before training;
+* The oversampling rate of positive records;
+* The PrI quantiles to define the uncertainty zone;
+* The size of the initial training set.
+
+To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled subset made of the first 1200 records from the first session dataset. See Supplemental Material S1 for the combinations of hyperparameter used and other details on the method.\
+The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole dataset got labelled.\
+For each combination, a performance score was computed as the product of *Efficiency* (1 minus the ratio of records that required review over the total) and *Sensitivity* (number of positive records found over the total of positives).
+We then identified homogeneous "performance clusters" of hyperparameter values and scores using a partition tree.
+For the rest of our study, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination according to Sensitivity and Efficiency in this order.
+
+
