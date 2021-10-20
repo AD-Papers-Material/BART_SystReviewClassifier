@@ -1,5 +1,5 @@
 extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
-													n.trees = 800, sessions_folder = options("baysren.sessions_folder")[[1]], ...) {
+													n.trees = 800, sessions_folder = getOption("baysren.sessions_folder"), ...) {
 
 	message('Preparing the data')
 

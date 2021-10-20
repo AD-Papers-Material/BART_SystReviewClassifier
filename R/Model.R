@@ -148,7 +148,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 }
 
 # compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F,
-# 																		 quants = options('baysren.probs')[[1]], AUC.thr = .9) {
+# 																		 quants = getOption('baysren.probs'), AUC.thr = .9) {
 #
 # 	library(scales)
 # 	library(pROC)
@@ -496,7 +496,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 resample = F,
 																	 pred_quants = c(.01, .5, .99),
 																	 #
-																	 sessions_folder = options("baysren.sessions_folder")[[1]],
+																	 sessions_folder = getOption("baysren.sessions_folder"),
 																	 pred_batch_size = 5000,
 																	 autorun = TRUE, replication = NULL,
 																	 stop_on_unreviewed = TRUE,
@@ -1110,7 +1110,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	invisible(out)
 }
 
-consolidate_results <- function(session_name, sessions_folder = options("baysren.sessions_folder")[[1]]) {
+consolidate_results <- function(session_name, sessions_folder = getOption("baysren.sessions_folder")) {
 	annotations_files <- get_session_files(session_name, sessions_folder)$Annotations
 
 	message('Loading annotations...')

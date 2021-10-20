@@ -4,7 +4,7 @@
 
 Sys.setenv(LANG = "en")
 
-if (is.null(options('BartMem')[[1]]) & interactive()) {
+if (is.null(getOption('BartMem')) & interactive()) {
 	local({
 		mem <- readline("How much GB of memory should be used (better no more than 90% of available one)?")
 
@@ -16,7 +16,7 @@ if (is.null(options('BartMem')[[1]]) & interactive()) {
 	})
 }
 
-options(java.parameters = options('BartMem')$BartMem)
+options(java.parameters = getOption('BartMem'))
 
 pkg.require <- function(install_and_load = c(), only_install = c()) {
 

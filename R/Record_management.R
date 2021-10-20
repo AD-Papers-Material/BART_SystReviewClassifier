@@ -313,7 +313,7 @@ create_annotation_file <- function(records, reorder_query = NULL,
 }
 
 create_session <- function(Records, session_name,
-													 sessions_folder = options("baysren.sessions_folder")[[1]],
+													 sessions_folder = getOption("baysren.sessions_folder"),
 													 DTM = NULL,
 													 dup_session_action = c('skip', 'stop', 'add', 'replace', 'silent'),
 													 use_time_stamp = TRUE) {
@@ -398,7 +398,7 @@ create_session <- function(Records, session_name,
 }
 
 get_session_files <- function(session_name,
-															sessions_folder = options("baysren.sessions_folder")[[1]],
+															sessions_folder = getOption("baysren.sessions_folder"),
 															which = c('Records', 'Annotations',
 																				'DTM', 'Samples', 'Results')) {
 
