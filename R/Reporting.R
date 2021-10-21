@@ -679,7 +679,7 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 		)
 
 	if (!as_data_frame) {
-		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Value (on 10K trees)`} ({IS}) [{RR}, {`Statistic (s.e.)`}]'))
+		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Inclusion rate`} ({IS}) [{RR}, {`Statistic`}]'))
 	}
 
 	var_imp
