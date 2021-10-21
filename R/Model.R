@@ -971,7 +971,11 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 		)
 	}) %>% bind_rows() %>%
 		group_by(Term) %>%
-		summarise(Value = mean(Val), Score = if (n_models > 1) Value / sd(Val) else Value, n_models = n())
+		summarise(
+			Value = mean(Val),
+			Score = if (n_models > 1) Value / sd(Val) else Value,
+			n_models = n()
+		)
 
 	message('Adding annotation summary')
 
