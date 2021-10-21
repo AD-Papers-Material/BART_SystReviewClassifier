@@ -198,7 +198,8 @@ grid_search <- analyse_grid_search()$best_parms %>%
 As described in the methods, the selection of hyperparameters was achieved via evaluation of sensibility and efficiency through a grid search on a validation set of 1200 completely manually labelled records.
 The best set of parameters suggested an initial input of 250 labelled records with 10x positive matches oversampling, an averaged ensemble of 10 models, no bootstrapping and an uncertainty zone defined by the 98% predictive interval.
 On the validation set, this combination of parameters reached a sensitivity of `r grid_search$Sensitivity` (`r grid_search$Pos_labels` positive matches found) and efficiency of `r grid_search$Efficiency` (`r grid_search$Tot_labeled` records evaluated).
-A summary of the results of the grid search is reported in Table 3 of Supplemental Material S2.
+The results of the hyperparameter tuning are reported in Table 3 of Supplemental Material S2.
+Figure 2 in Supplemental Material S2 demonstrates that the positive record oversampling rate, the number of ensemble models and the size of the initial training set were the parameters that most impact performance.
 
 ### Performance evaluation
 
