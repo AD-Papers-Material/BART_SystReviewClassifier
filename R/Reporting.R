@@ -672,13 +672,14 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 				factor(c('ABSTR', 'TITLE', 'AUTH', 'KEYS', 'MESH'),
 							 c('Abstract', 'Title', 'Author', 'Keyword', 'Mesh term')),
 			Term = str_replace_all(Term, c('^\\w+__' = '', '\\._\\.' = ' & ', '\\.' = ' | ', '_' = ' ')) %>% str_to_title(),
-			'Value (on 10K trees)' = signif(Value * 10000, 3),
+			'Inclusion rate' = signif(Value * 10000, 3),
+			IS = signif(Score, 3),
 			RR = signif(exp(estimate), 3) %>% str_remove('\\.?0+$'),
-			`Statistic (s.e.)` = signif(statistic, 3) %>% str_remove('\\.?0+$'),
+			`Statistic` = signif(statistic, 3) %>% str_remove('\\.?0+$'),
 		)
 
 	if (!as_data_frame) {
-		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Value (on 10K trees)`} [{`Statistic (s.e.)`}]'))
+		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Value (on 10K trees)`} ({IS}) [{RR}, {`Statistic (s.e.)`}]'))
 	}
 
 	var_imp
