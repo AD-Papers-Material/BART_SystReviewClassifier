@@ -31,10 +31,11 @@ knitr::include_graphics("methods_diagram.png", auto_pdf = T)
 
 ### Record's acquisition and initial labelling
 We built a set of tools to let users automatically search and download citation data from three major scientific databases ("sources"):
-MEDLINE (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>).
+Pubmed (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>).
 The framework takes care of authorization management for non-open databases like WOS and IEEE.
 It is also possible to download and import records in the framework manually;
 this is particularly useful to acquire records from the SCOPUS (<https://www.scopus.com/search/form.uri?display=basic#basic>) and EMBASE databases (<https://www.embase.com/#advancedSearch/default>), for which a comprehensive API interface was not easy to build.
+An extra manual search was necessary also for Pubmed, since the API and the web interface have different rule expansion algorithms and return slightly different results [@pubmedUpdate].
 A short guide on how to set up the framework for each supported database is available in Supplemental Material S3.\
 The acquired records are merged into a single database, resolving duplicates and different formatting between sources. The records are ordered according to the frequency of the positive query terms (e.g., not preceded by a $NOT$ modifier) in the title and abstract ("simple query ordering").\
 The researcher is then asked to label a number of records to create the "initial training set" needed to start the automatic classification.
@@ -154,5 +155,3 @@ The framework tested each hyperparameter combination until four CR iterations wi
 For each combination, a performance score was computed as the product of *Efficiency* (1 minus the ratio of records that required review over the total) and *Sensitivity* (number of positive records found over the total of positives).
 We then identified homogeneous "performance clusters" of hyperparameter values and scores using a partition tree.
 For the rest of our study, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination according to Sensitivity and Efficiency in this order.
-
-
