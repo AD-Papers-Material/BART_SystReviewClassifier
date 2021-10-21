@@ -37,7 +37,8 @@ It is also possible to download and import records in the framework manually;
 this is particularly useful to acquire records from the SCOPUS (<https://www.scopus.com/search/form.uri?display=basic#basic>) and EMBASE databases (<https://www.embase.com/#advancedSearch/default>), for which a comprehensive API interface was not easy to build.
 An extra manual search was necessary also for Pubmed, since the API and the web interface have different rule expansion algorithms and return slightly different results [@pubmedUpdate].
 A short guide on how to set up the framework for each supported database is available in Supplemental Material S3.\
-The acquired records are merged into a single database, resolving duplicates and different formatting between sources. The records are ordered according to the frequency of the positive query terms (e.g., not preceded by a $NOT$ modifier) in the title and abstract ("simple query ordering").\
+The acquired records are merged into a single database, resolving duplicates and different formatting between sources.
+The records are ordered according to the frequency of the positive query terms (e.g., not preceded by a $NOT$ modifier) in the title and abstract ("simple query ordering").\
 The researcher is then asked to label a number of records to create the "initial training set" needed to start the automatic classification.
 We suggest manually labelling the first 250 records (see "hyperparameter optimization" later).
 The simple query ordering increases the positivity rate in the initial training set [@wallace2010active], which provide higher sensitivity during automatic classification [@chawla2004special].
@@ -47,7 +48,7 @@ The collected citation data have a number of fields characterizing a scientific 
 The framework models the relevance of a record based on the following fields:
 title, abstract, authors, keywords, MESH terms [@lipscomb2000medical].
 A series of Natural Language Processing (NLP) techniques [@baeza1999modern; @marshall2015systematic; @ananiadou2006text] are employed to transform the textual information in these fields into features for machine learning through a bag-of-words approach [@marshall2015systematic].
-The processing of free text fields (title, abstract) includes: tokenization (i.e., extracting the terms), common stopwords (i.e. sentence components bringing no meaning) removal, part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatization of the terms (i.e. reduction to their base grammar form).
+The processing of free text fields (title, abstract) includes: tokenization (i.e., extracting the terms), common stopwords (i.e., sentence components bringing no meaning) removal, part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatization of the terms (i.e., reduction to their base grammar form).
 Text processing for authors, keywords and MESH terms identifies logical units (e.g., author's full names, composite keywords) and extracts them.\
 Terms appearing in less than 5% of the labelled documents are removed from negative records.
 All terms in the positive set are kept to increase sensitivity at the cost of specificity.\
@@ -57,7 +58,7 @@ We extracted the maximal cliques in the network [@eppstein2010listing] represent
 These groups of terms are added to the data set as individual features.
 Only nc-ngrams comprising a maximum of ten terms are kept.\
 A second network is built using a co-occurrence threshold of 0.9.
-In this case, the cliques represent terms that always appear together and therefore can be considered redundant (i.e. they do not need to be considered separately).
+In this case, the cliques represent terms that always appear together and therefore can be considered redundant (i.e., they do not need to be considered separately).
 These terms are merged to increase computation efficiency and reduce overfitting.\
 The output is a Document-Term Matrix (DTM), with $N_d$ rows representing the records ($D_i$), $N_t$ terms column for the $t_{field}$ terms (divided by record field) and ${0,1}$ values whether $t_{field} \in D_i$.
 We also enriched the DTM with features referencing the number of terms in each field to help the model scale term importance based on the field length.
@@ -109,12 +110,19 @@ The last case helps identify human errors or inconsistent labelling criteria.
 
 The automatic classification and the manual review steps alternate in a loop (CR iterations) until no new positive matches are found in four consecutive iterations.
 
+### Relevant terms' extraction
+BART model it is possible to extract the proportion of times a term was used in a posterior tree over the sum of total inclusions of all variables [@kapelner2013bartmachine], as a measure of feature importance for the model.
+We extracted the terms, the part of the citation data they were used in, the average "inclusion rate" among the ensemble models (over 10,000 inclusions) and its ratio over the standard deviation of this inclusion (inclusion stability, IS).
+For each term we ran a Poisson regression to get its linear association with a positive label and reported it as Relative Risk (RR) with the number of standard errors as significance index (Statistic);
+the comparison between the inclusion rate in the BART models and the linear association allows to spot relevant non-linear effects (i.e, the feature is relevant only in association with others).
+We reported in the Results only the first (in order of inclusion rate) 15 terms with IS > 1.5 while the first fifty terms regardless of inclusion stability are reported in Supplemental Material S2.
+
 ### New search query generation
 We created an algorithm that generates a new search query to acquire further relevant publications missed during the first search, possibly at a reasonable cost in specificity (i.e., a higher number of negative results).\
 The algorithm encompasses a number of steps:
 
 * We fit a partition tree [@rpart] between the DTM and 800 samples from the PPD;
-if a term is present multiple times in the DTM (e.g. both title and abstract), they are counted just one, and field term count features are removed.
+if a term is present multiple times in the DTM (e.g., both title and abstract), they are counted just one, and field term count features are removed.
 This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
 * For each rule, negative conditions (i.e., $NOT$ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
 * The extended set of rules is sorted by positive-negative record difference in descending order.
@@ -150,8 +158,9 @@ Our classification algorithm has a number of hyperparameters:
 * The PrI quantiles to define the uncertainty zone;
 * The size of the initial training set.
 
-To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled subset made of the first 1200 records from the first session dataset. See Supplemental Material S1 for the combinations of hyperparameter used and other details on the method.\
+To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled "validation set" made of the first 1200 records from the first session dataset.
+See Supplemental Material S1 for the combinations of hyperparameter used and other details on the method.\
 The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole dataset got labelled.\
-For each combination, a performance score was computed as the product of *Efficiency* (1 minus the ratio of records that required review over the total) and *Sensitivity* (number of positive records found over the total of positives).
+For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required review over the total) and "Sensitivity" (number of positive records found over the total of positives).
 We then identified homogeneous "performance clusters" of hyperparameter values and scores using a partition tree.
 For the rest of our study, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination according to Sensitivity and Efficiency in this order.
