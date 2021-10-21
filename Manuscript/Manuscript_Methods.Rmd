@@ -30,6 +30,7 @@ knitr::include_graphics("methods_diagram.png", auto_pdf = T)
 <!-- ![Figure 1. Framework visual depiction.](methods_diagram.png) -->
 
 ### Record's acquisition and initial labelling
+
 We built a set of tools to let users automatically search and download citation data from three major scientific databases ("sources"):
 Pubmed (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>).
 The framework takes care of authorization management for non-open databases like WOS and IEEE.
@@ -44,6 +45,7 @@ We suggest manually labelling the first 250 records (see "hyperparameter optimiz
 The simple query ordering increases the positivity rate in the initial training set [@wallace2010active], which provide higher sensitivity during automatic classification [@chawla2004special].
 
 ### Text feature extraction
+
 The collected citation data have a number of fields characterizing a scientific publication.
 The framework models the relevance of a record based on the following fields:
 title, abstract, authors, keywords, MESH terms [@lipscomb2000medical].
@@ -64,6 +66,7 @@ The output is a Document-Term Matrix (DTM), with $N_d$ rows representing the rec
 We also enriched the DTM with features referencing the number of terms in each field to help the model scale term importance based on the field length.
 
 ### Label prediction
+
 We used a Bayesian Additive Regression Trees (BART) machine learning "classification model" [@chipman2010bart] [in the implementation of @kapelner2013bartmachine] to predict the probability of a record of being relevant, given the information coded into the enriched DTM and the initial training set.
 We set up the BART model to use 2000 MCMC iterations (after 250 burn-in iterations) and 50 trees;
 we used a $k$ value of 2 to regularize extreme prediction and let the model use missing fields in the DTM as features [@kapelner2015prediction].
@@ -111,6 +114,7 @@ The last case helps identify human errors or inconsistent labelling criteria.
 The automatic classification and the manual review steps alternate in a loop (CR iterations) until no new positive matches are found in four consecutive iterations.
 
 ### Relevant terms' extraction
+
 BART model it is possible to extract the proportion of times a term was used in a posterior tree over the sum of total inclusions of all variables [@kapelner2013bartmachine], as a measure of feature importance for the model.
 We extracted the terms, the part of the citation data they were used in, the average "inclusion rate" among the ensemble models (over 10,000 inclusions) and its ratio over the standard deviation of this inclusion (inclusion stability, IS).
 For each term we ran a Poisson regression to get its linear association with a positive label and reported it as Relative Risk (RR) with the number of standard errors as significance index (Statistic);
@@ -118,6 +122,7 @@ the comparison between the inclusion rate in the BART models and the linear asso
 We reported in the Results only the first (in order of inclusion rate) 15 terms with IS > 1.5 while the first fifty terms regardless of inclusion stability are reported in Supplemental Material S2.
 
 ### New search query generation
+
 We created an algorithm that generates a new search query to acquire further relevant publications missed during the first search, possibly at a reasonable cost in specificity (i.e., a higher number of negative results).\
 The algorithm encompasses a number of steps:
 
@@ -139,6 +144,7 @@ Therefore we appended an extra subquery in $AND$, which specifies the general to
 The new query was used to initiate a second search session.
 
 ### Performance evaluation
+
 We trained a simple Bayesian logistic regression (surrogate model) on the reviewed records to evaluate the classification model consistency (see Discussion for the theoretical justification).
 The surrogate model uses as predictor the lower bound of the 98% PrI of the records' PPD with weakly regularizing, robust priors for the intercept (Student T with $\nu=3,\mu=0,\sigma=2.5$) and the linear coefficient (Student T with $\nu=3,\mu=0,\sigma=1.5$).\
 The quality of the model was evaluated through Bayesian $R^2$ [@gelman2019r], of which we reported the posterior median and 90% Credible Interval [90% CrI].
@@ -150,6 +156,7 @@ The WSoR is one minus the number of records to manually label at random to find 
 For the number of predicted positive records, the sensitivity and the WSoR, we reported the "truncated 90% PrI" [trunc. 90% PrI], which is the uncertainty interval bounded at the number of observed total positive records (i.e., there cannot be less predicted positive records than observed).
 
 ### Hyperparameter evaluation
+
 Our classification algorithm has a number of hyperparameters:
 
 * The number of ensemble models;
@@ -162,5 +169,5 @@ To evaluate the hyperparameter effect of performance, we set up a "grid search" 
 See Supplemental Material S1 for the combinations of hyperparameter used and other details on the method.\
 The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole dataset got labelled.\
 For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required review over the total) and "Sensitivity" (number of positive records found over the total of positives).
-We then identified homogeneous "performance clusters" of hyperparameter values and scores using a partition tree.
-For the rest of our study, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination according to Sensitivity and Efficiency in this order.
+We then identified homogeneous "performance clusters" of scores given hyperparameter values using a partition tree.
+For the rest of our study, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination according to Sensitivity and Efficiency, in this order.
