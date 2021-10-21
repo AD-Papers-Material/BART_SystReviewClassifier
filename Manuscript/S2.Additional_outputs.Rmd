@@ -69,17 +69,23 @@ s1_plot +
 
 # List of terms relevant for prediction
 
-In table 1 and 2 are listed the 50 more relevant terms used by the BART algorithm to discriminate between positive and negative records, for Session 1 and 2. Term importance ("Value" in the tables) is defined as the proportion over 10 000 posterior trees in which a term was used divided by the standard deviation of this value among each model repetition. The symbol "|" indicate synonyms while terms joined by "&" represent terms that are co-present in a document component The component in which the term was used is reported in the leftmost column.\
-Next to it, we added the relative risk of a positive match (RR) and statistical relevancy (measured as standard errors, s.e.) of the terms estimated through a Poisson regression, to evaluate its linear correlation with the probability of a positive match. A strong BART score with a low regression score identify terms whose effect is highly non linear (e.g., they are relevant only in the presence of other terms).
-
 ```{r var imp}
 
-var_importance_s1 <- extract_var_imp('Session1', num_vars = 50, score_filter = 0) %>%
+n_terms <- 50
+
+var_importance_s1 <- extract_var_imp('Session1', num_vars = n_terms, score_filter = 0) %>%
 	format_var_imp(as_data_frame = TRUE)
 
-var_importance_s2 <- extract_var_imp('Session1', num_vars = 50, score_filter = 0) %>%
+var_importance_s2 <- extract_var_imp('Session1', num_vars = n_terms, score_filter = 0) %>%
 	format_var_imp(as_data_frame = TRUE)
 ```
+
+In table 1 and 2 are listed the `r n_terms` more relevant terms used by the BART algorithm to discriminate between positive and negative records, for Session 1 and 2 (see Methods).
+Term importance ("Inclusion rate" in the tables) is defined as the ensemble average inclusion rate in posterior trees over 10,000 total term inclusions, while the Inclusion Stability (IS) is the ratio of the average inclusion rate over its standard deviation among the ensemble models.
+The symbol "|" in the terms indicate redundant terms while "&" indicate nc-grams.
+The component in which the term was used is reported in the leftmost column.\
+For each term, we added its linear association with a positive label estimated through a Poisson regression, reporting it as Relative Risk (RR) and its statistical significance (Statistic) measured as number of standard errors, s.e., of the terms.
+A strong BART score with a Statistic close to zero identify terms whose effect is highly non-linear (e.g., they are relevant only in the presence of other terms).
 
 `r print_table(var_importance_s1, caption = 'Table 1. Term importance at the end of Session 1.')`
 
