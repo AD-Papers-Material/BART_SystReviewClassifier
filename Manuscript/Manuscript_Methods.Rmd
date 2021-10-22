@@ -159,15 +159,14 @@ For the number of predicted positive records, the sensitivity and the WSoR, we r
 
 Our classification algorithm has a number of hyperparameters:
 
-* The number of ensemble models;
-* The source of randomness between models in the ensemble, that is, either MCMC sampling only [@robert2004monte], or MCMC plus data bootstrapping [@breiman1996bagging] before training;
-* The oversampling rate of positive records;
-* The PrI quantiles to define the uncertainty zone;
-* The size of the initial training set.
+* Size of the initial training set: 50, 100, 250, 500 records;
+* Number of models in the ensemble: 1, 5, 10, 20, 40, 60 repetitions;
+* Oversampling rate of positive records: (1x (i.e., no oversampling), 10x, 20x;
+* PrI quantiles for building the uncertainty zone: 80%, 90%, 98%;
+* Source of randomness between models in the ensemble: MCMC sampling only [@robert2004monte], MCMC plus data bootstrapping [@breiman1996bagging] of the training set.
 
 To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled "validation set" made of the first 1200 records from the first session dataset.
-See Supplemental Material S1 for the combinations of hyperparameter used and other details on the method.\
 The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole dataset got labelled.\
 For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required review over the total) and "Sensitivity" (number of positive records found over the total of positives).
-We then identified homogeneous "performance clusters" of scores given hyperparameter values using a partition tree.
-For the rest of our study, we chose the best cluster of parameter value combinations and, inside the cluster, the best combination according to Sensitivity and Efficiency, in this order.
+We then identified homogeneous "performance clusters" of scores given hyperparameter values using a partition tree [@rpart].
+For the rest of the study, we used the best hyperparameter set in terms of Sensitivity followed by Efficiency from the cluster with the highest average score.
