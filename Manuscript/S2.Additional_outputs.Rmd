@@ -2,10 +2,10 @@
 title: "S2. Additional figures and table"
 date: "`r lubridate::today()`"
 output:
-  # pdf_document:
-  #   toc: yes
-  #   includes:
-  #     in_header: header.tex
+  pdf_document:
+    toc: yes
+    includes:
+      in_header: header.tex
   github_document:
     toc: yes
 ---
@@ -43,9 +43,16 @@ options(baysren.sessions_folder = 'Sessions')
 
 # Posterior predictive distributions
 
-Figure 1 show the mixture of the predictive distribution of the probability of a positive match, grouped by labelling status. The posterior samples for each record were extracted and joined in a global distribution; on this distribution, density was computed on the logit scale and then logistic transformed for display on a $[0 - 1]$ scale. The light violet ridges show the distribution of the still unlabelled records.\
-For each iteration, the thresholds which define the lower and the upper range of 98% predictive interval (PrI) respectively for the positive and negative records are shown. The zone included between these two boundaries defines the uncertainty zone; records whose 98% PrI intersects this zone requires manual review.\
-Notice how the positive and negative densities start overlapping starting with the second iteration of Session 2. Meanwhile the distribution of the records to be reviewed shrink and shift towards the negative side, as positive records get found and labeled.
+Figure 1 show the mixture of the PPD of the probability of a positive match, grouped by label (only records manually labelled or reviewed are considered).
+The posterior samples for each record were extracted and joined into a global distribution;
+on this distribution, density was computed on the logit scale and then logistic transformed for displaying on a $[0 - 1]$ scale.
+The purple ridges show the distribution of the still unlabelled records.\
+For each iteration, the thresholds which define the "uncertainty zone", i.e, the lower and the upper range of 98% PrI for the positive and negative records respectively, are shown.
+Records whose 98% PrI intersects the uncertainty zone requires manual review.\
+Notice how the positive and negative record densities tend to increasingly overlap at each iteration;
+meanwhile the distribution of the records to be reviewed shrinks and shifts towards the negative side, as positive records get found and labeled.\
+In Session 2, as the number of negative records reviewed increased, also already positively labelled records re-entered the uncertainty zone;
+this is due to the baseline positivity rate decreasing as the number of negatives in the training data increased, forcing to review dubious records that may have been mislabelled.
 
 ```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="Figure 1. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
 
@@ -94,10 +101,11 @@ A strong BART score with a Statistic close to zero identify terms whose effect i
 
 # Hyperparameters grid search
 
-To select the engine hyperparameter set which would maximize sensitivity and efficiency, we set up a comprehensive grid search by running the algorithm on a fully labeled dataset of 1200 records. Using a partition tree algorithm we grouped the searches in a number of clusters with similar performance and selected the best parameter set in the best cluster.\
-Table 3 shows the best parameter set and their performance for each cluster while figure 2 displays the conditional impact on performance of each parameter.
+Table 3 shows the best hyperparameter set and their performance for each cluster while figure 2 displays the conditional impact on performance of each hyperparameter.
 
-```{r hyperparameters, fig.width=17, fig.height=10, fig.cap="Figure 2. Performance clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: num. of models in the ensemble; Quant: uncertainty zone interval to trigger manual review; Resamp: bootstrap resampling; Init: num. of initial training records; Multi: oversampling multiplier of positive matches."}
+The most influential parameters were the number of models in the ensemble, the oversampling rate and the initial training set size. The use of bootstrap resampling seemed detrimental.
+
+```{r hyperparameters, fig.width=17, fig.height=10, fig.cap="Figure 2. Score clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: number of models in the ensemble; Quant: PrI quantiles for the uncertainty zone; Resamp: bootstrap resampling between models; Init: size of initial training set; Multi: oversampling rate of positive records"}
 
 grid_out <- analyse_grid_search() 
 
