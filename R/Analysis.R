@@ -433,8 +433,6 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 		iterations = out,
 		best_parms = out %>% filter(str_detect(Rule, '^1\\.')) %>%
 			arrange(desc(Sensitivity), desc(Efficiency)) %>% head(1) %>%
-			# slice_max(Sensitivity, n = 1, with_ties = T) %>%
-			# slice_max(Score, n = 1, with_ties = F) %>%
 			select(Iter, Rep, Pos_labels, Sensitivity, Tot_labeled, Efficiency,
 						 Score, any_of(params)) %>%
 			mutate(
@@ -446,11 +444,7 @@ analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 				across(.fns = as.character)) %>%
 			tidyr::pivot_longer(everything(), names_to = 'Parameter', 'Value'),
 		best_by_rule = out %>% group_by(Cluster = Rule) %>%
-			slice_max(Score, n = 1, with_ties = T) %>%
-			slice_max(Sensitivity, n = 1, with_ties = T) %>%
-			slice_max(Efficiency, n = 1, with_ties = F) %>%
-			# ungroup() %>%
-			# arrange(desc(Score), desc(Sensitivity), desc(Efficiency)) %>%
+			arrange(desc(Sensitivity), desc(Efficiency)) %>% slice_head(n = 1) %>%
 			select(Cluster, Iter, Pos_labels, Tot_labeled, Sensitivity, Efficiency,
 						 Score, any_of(params)) %>%
 			mutate(
