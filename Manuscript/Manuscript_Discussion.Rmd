@@ -10,7 +10,7 @@ output:
   github_document: default
 ---
 
-## Discussion
+# Discussion
 
 We propose a new integrated framework to help researchers collect and screen scientific publications characterised by high performance and versatility, joining the growing field of systematic review automation (SRA) and helpers (SRH) tools [@cohen2006reducing; @cohen2010evidence; @ananiadou2009supporting; @o2015using].
 This framework joins standard approaches and uses ad-hoc solutions to deal with common SRA issues.\

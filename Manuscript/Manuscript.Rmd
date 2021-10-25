@@ -1,0 +1,48 @@
+---
+title: Main manuscript
+authors:
+  - name: David S. Hippocampus
+    thanks: Use footnote for providing further information about author (webpage, alternative address)---*not* for acknowledging funding agencies. Optional.
+    department: Department of Computer Science
+    affiliation: Cranberry-Lemon University
+    location: Pittsburgh, PA 15213
+    email: hippo@cs.cranberry-lemon.edu
+  - name: Elias D. Striatum
+    department: Department of Electrical Engineering
+    affiliation: Mount-Sheikh University
+    location: Santa Narimana, Levand
+    email: stariate@ee.mount-sheikh.edu
+abstract: |
+  Enter the text of your abstract here.
+keywords:
+  - blah
+  - blee
+  - bloo
+  - these are optional and can be removed
+bibliography: references.bib
+output: 
+  rticles::arxiv_article:
+    number_sections: no
+    keep_tex: true
+    includes:
+      in_header: header.tex
+---
+
+```{r, echo=FALSE, results='asis', message = FALSE, warning = FALSE, error = FALSE, dpi = 400, fig.width=12, fig.height=5}
+
+getOption("mc.cores", parallel::detectCores())
+
+out <- unlist(lapply(c(
+	'Manuscript_Introduction.Rmd',
+	'Manuscript_Methods.Rmd',
+	'Manuscript_Results.Rmd',
+	'Manuscript_Discussion.Rmd'
+), knitr::knit_child, quiet = TRUE))
+
+cat(out, sep = '\n')
+
+```
+
+\newpage
+
+# References

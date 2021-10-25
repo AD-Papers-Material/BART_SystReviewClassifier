@@ -28,15 +28,15 @@ knitr::opts_chunk$set(
 
 ```
 
-```{r load framework, cache.rebuild=TRUE}
-source(file.path('R', 'Setup.R'))
+```{r load framework, cache.rebuild=TRUE, include=FALSE}
+source(file.path('R', 'Setup.R'), local = knitr::knit_global())
 
 # The following are already the default, but better be explicit
 options(baysren.probs = c(.05, .5, .95))
 options(baysren.sessions_folder = 'Sessions')
 ```
 
-## Results
+# Results
 
 ```{r results}
 
@@ -53,7 +53,7 @@ annotation_results <- summarise_annotations_by_session(remove_raw_data = TRUE)
 
 ```
 
-### First session
+## First session
 
 ```{r session 1}
 
@@ -129,7 +129,7 @@ It is interesting to see that some terms were considered highly relevant for the
 these are terms which are relevant only together with other terms but not by themselves, highlighting the extra predictive power brought by a non-linear model like BART.\
 A more extensive set of terms is presented in Table 1 of Supplemental Material S2.
 
-### Second session
+## Second session
 
 ```{r session 2}
 new_query <- import_data('Session_journal.csv') %>% 
@@ -185,7 +185,7 @@ Again, the evaluation of the inclusion rate of the terms showed that the engine 
 A subsample of the terms is reported in Table 2 of Supplemental Material S2.
 
 
-### Hyperparameter selection
+## Hyperparameter selection
 
 ```{r hyperparameters}
 
@@ -201,7 +201,7 @@ On the validation set, this combination of parameters reached a sensitivity of `
 The results of the hyperparameter tuning are reported in Table 3 of Supplemental Material S2.
 Figure 2 in Supplemental Material S2 demonstrates that the positive record oversampling rate, the number of ensemble models and the size of the initial training set were the parameters that most impact performance.
 
-### Performance evaluation
+## Performance evaluation
 
 ```{r performance}
 
@@ -239,9 +239,9 @@ In session 1 we observe an expected total number of positives of `r Performance$
 In session 2 we observed a drop in the expected sensitivity, especially in the lower margin (`r Performance$s2$sensitivity %>% format_interval(percent = TRUE)`), due to the fact that as the number of records grows, even a small probability can translate, in the worst case scenario, into a relevant number of missed positive matches (`r Performance$s2$pred_positives %>% max()` in this case).
 To ascertain that no evident positives were missed, we evaluated 100 more records between the unreviewed ones with the highest median predicted probability produced by the engine and found no additional positive matches.
 
-`r print_table(perf_table, caption = "**Table 3**. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, *Sensitivity* and *Work saved over random* (WSoR) are reported, with their 90% PrI truncated to a number of positive matches equal to the observed one. Finally the median Bayesian R^2 [90% CrI] of the logistic models is reported. [PrI] represents the 90% Predictive Interval while [trunc. PrI] indicate the residual PrI truncated at the observed realization (see. methods).")`
+`r print_table(perf_table, caption = '**Table 3**. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, "Sensitivity" and "Work saved over random" (WSoR) are reported, with their 90% PrI truncated to a number of positive matches equal to the observed one. Finally the median Bayesian $R^2$ [90% CrI] of the logistic models is reported. [PrI] represents the 90% Predictive Interval while [trunc. PrI] indicate the residual PrI truncated at the observed realization (see. methods).')`
 
-```{r performance plot, cache = FALSE, fig.width=12, fig.height=5, fig.cap="Figure 2. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the logistic Bayesian model is shown as shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). The median of the PrI is represented by a darker blue line."}
+```{r performance plot, cache = FALSE, fig.width=12, fig.height=5, fig.cap="**Figure 2**. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the logistic Bayesian model is shown as shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). The median of the PrI is represented by a darker blue line."}
 
 Performance$s1$plot +
 	guides(color = 'none', fill = 'none') +
