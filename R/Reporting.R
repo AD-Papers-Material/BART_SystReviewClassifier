@@ -566,7 +566,7 @@ format_performance <- function(..., session_names = NULL) {
 				#Session = session_names[i],
 				'Total records' = total_records,
 				'Reviewed records (% over total records)' = glue("{n_reviewed} ({percent(n_reviewed/total_records)})"),
-				'Expected efficiency (over random) [trunc. 90% CrI]' = efficiency %>% format_interval(percent = TRUE),
+				'Expected efficiency (over random) [trunc. 90% PrI]' = efficiency %>% format_interval(percent = TRUE),
 				'Observed positive matches (% over total records)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
 				'Predicted positive matches [trunc. 90% PrI]' = pred_positives %>% format_interval(),
 				'Expected sensitivity [trunc. 90% PrI]' = sensitivity %>% format_interval(percent = TRUE),
@@ -687,8 +687,13 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 
 print_table <- function(data, caption = '') {
 	if (knitr::is_latex_output()) {
-		knitr::kable(data, "latex", booktabs = T,
-								 caption = caption %>% str_squish()
+	data %>%
+			mutate(across(where(is.character), ~ str_replace_all(.x, '%', '\\\\%'))) %>%
+			dplyr::rename_with(~ str_replace_all(.x, '%', '\\\\%')) %>%
+		knitr::kable(format = "latex", booktabs = T,
+								 caption = caption %>% str_squish() %>%
+								 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
+								 escape = FALSE
 								 #format.args = list(floating = FALSE)
 		) %>%
 			kableExtra::kable_styling(
