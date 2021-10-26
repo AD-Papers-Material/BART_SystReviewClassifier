@@ -95,12 +95,6 @@ safe_now <- function() {
 	str_replace_all(now(), c(' ' = 'T', ':' = '.'))
 }
 
-summarise_vector <- function(vec) {
-	if (length(vec) == 0) return(0)
-	table(vec) %>%
-		{paste0(names(.), ': ', ., ' (', percent(./sum(.)), ')', collapse = ', ')}
-}
-
 # Tool to grab XHR messages from dynamic websites
 get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 																	wait_for = 20,

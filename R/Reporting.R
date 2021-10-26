@@ -1,3 +1,9 @@
+summarise_vector <- function(vec) {
+	if (length(vec) == 0) return(0)
+	table(vec) %>%
+		{paste0(names(.), ': ', ., ' (', percent(./sum(.)), ')', collapse = ', ')}
+}
+
 summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 																add_session_totals = TRUE) {
 	data <- import_data(annotation_file)
