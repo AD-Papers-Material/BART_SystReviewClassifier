@@ -20,6 +20,7 @@ keywords:
   - bloo
   - these are optional and can be removed
 bibliography: references.bib
+lang: en-GB
 output: 
   rticles::arxiv_article:
     number_sections: no
@@ -29,8 +30,6 @@ output:
 ---
 
 ```{r, echo=FALSE, results='asis', message = FALSE, warning = FALSE, error = FALSE, dpi = 400, fig.width=12, fig.height=5}
-
-getOption("mc.cores", parallel::detectCores())
 
 out <- unlist(lapply(c(
 	'Manuscript_Introduction.Rmd',
