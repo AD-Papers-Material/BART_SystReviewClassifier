@@ -234,16 +234,16 @@ summarise_annotations_by_session <- function(sessions_folder = getOption("baysre
 	}
 }
 
-	# summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
-	# 	# list.files('Models') %>% pbmclapply(function(file) {
-	# 	# 	Model <- read_rds(file.path('Models', file))
-	#
-	# 	Res <- list.files(annotation.folder, recursive = T, pattern = 'Records_P') %>%
-	# 		str_subset('~\\$', negate = T) %>%
-	# 		pbmclapply(function(file) {
-	#
-	# 			file_path <- file.path(annotation.folder, file)
-	#
+# summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
+# 	# list.files('Models') %>% pbmclapply(function(file) {
+# 	# 	Model <- read_rds(file.path('Models', file))
+#
+# 	Res <- list.files(annotation.folder, recursive = T, pattern = 'Records_P') %>%
+# 		str_subset('~\\$', negate = T) %>%
+# 		pbmclapply(function(file) {
+#
+# 			file_path <- file.path(annotation.folder, file)
+#
 # 			Annotated_data <- read_excel(file_path)
 #
 # 			Performance <- read_excel(file_path, sheet = 'Out_of_sample_perf')
@@ -571,7 +571,7 @@ format_performance <- function(..., session_names = NULL) {
 				'Predicted positive matches [trunc. 90% PrI]' = pred_positives %>% format_interval(),
 				'Expected sensitivity [trunc. 90% PrI]' = sensitivity %>% format_interval(percent = TRUE),
 				'Simple Model $R^2$ [90% PrI]' = mod_r2 %>% format_interval(percent = TRUE)
-		) %>%
+			) %>%
 				mutate_all(as.character) %>%
 				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%
 				{
@@ -599,8 +599,8 @@ plot_predictive_densities <- function(session_name,
 			import_data()
 
 		if (i <= length(records_files)) {
-		records <- records %>%
-			mutate(Rev_prediction_new = replace(Rev_prediction_new, !is.na(Rev_prediction_new), '*'))
+			records <- records %>%
+				mutate(Rev_prediction_new = replace(Rev_prediction_new, !is.na(Rev_prediction_new), '*'))
 		}
 
 		records <- records %>%
@@ -636,7 +636,7 @@ plot_predictive_densities <- function(session_name,
 	}) %>% bind_rows() %>%
 		mutate(
 			Label = factor(Label, c('n', 'y', '*'), c('Negative', 'Positive', 'To review'))
-			) %>% {
+		) %>% {
 			df <- mutate(., Iteration = factor(Iteration, sort(unique(Iteration), TRUE)))
 
 			unc_range_df <- select(df, -Samples) %>% distinct()
@@ -685,17 +685,21 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 	var_imp
 }
 
-print_table <- function(data, caption = '') {
+print_table <- function(data, caption = '', allow_math = F) {
 	if (knitr::is_latex_output()) {
-	data %>%
-			mutate(across(where(is.character), ~ str_replace_all(.x, '%', '\\\\%'))) %>%
-			dplyr::rename_with(~ str_replace_all(.x, '%', '\\\\%')) %>%
-		knitr::kable(format = "latex", booktabs = T,
-								 caption = caption %>% str_squish() %>%
-								 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
-								 escape = FALSE
-								 #format.args = list(floating = FALSE)
-		) %>%
+		if (isTRUE(allow_math)) {
+			data <- data %>%
+				mutate(across(where(is.character), ~ str_replace_all(.x, '%', '\\\\%'))) %>%
+				dplyr::rename_with(~ str_replace_all(.x, '%', '\\\\%'))
+		}
+
+		data %>%
+			knitr::kable(format = "latex", booktabs = T,
+									 caption = caption %>% str_squish() %>%
+									 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
+									 escape = !allow_math
+									 #format.args = list(floating = FALSE)
+			) %>%
 			kableExtra::kable_styling(
 				latex_options = c(
 					"striped",
