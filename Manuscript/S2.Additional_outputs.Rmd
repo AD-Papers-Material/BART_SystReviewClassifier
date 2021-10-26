@@ -54,7 +54,7 @@ meanwhile the distribution of the records to be reviewed shrinks and shifts towa
 In Session 2, as the number of negative records reviewed increased, also already positively labelled records re-entered the uncertainty zone;
 this is due to the baseline positivity rate decreasing as the number of negatives in the training data increased, forcing to review dubious records that may have been mislabelled.
 
-```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="Figure 1. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
+```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="**Figure 1**. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
 
 s1_plot <- plot_predictive_densities('Session1')
 
@@ -94,10 +94,10 @@ The component in which the term was used is reported in the leftmost column.\
 For each term, we added its linear association with a positive label estimated through a Poisson regression, reporting it as Relative Risk (RR) and its statistical significance (Statistic) measured as number of standard errors, s.e., of the terms.
 A strong BART score with a Statistic close to zero identify terms whose effect is highly non-linear (e.g., they are relevant only in the presence of other terms).
 
-`r print_table(var_importance_s1, caption = 'Table 1. Term importance at the end of Session 1.')`
+`r print_table(var_importance_s1, caption = '**Table 1**. Term importance at the end of Session 1.')`
 
 
-`r print_table(var_importance_s2, caption = 'Table 2. Term importance at the end of Session 2.')`
+`r print_table(var_importance_s2, caption = '**Table 2**. Term importance at the end of Session 2.')`
 
 # Hyperparameters grid search
 
@@ -105,7 +105,7 @@ Table 3 shows the best hyperparameter set and their performance for each cluster
 
 The most influential parameters were the number of models in the ensemble, the oversampling rate and the initial training set size. The use of bootstrap resampling seemed detrimental.
 
-```{r hyperparameters, fig.width=17, fig.height=10, fig.cap="Figure 2. Score clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: number of models in the ensemble; Quant: PrI quantiles for the uncertainty zone; Resamp: bootstrap resampling between models; Init: size of initial training set; Multi: oversampling rate of positive records"}
+```{r hyperparameters, fig.width=17, fig.height=10, fig.cap="**Figure 2**. Score clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: number of models in the ensemble; Quant: PrI quantiles for the uncertainty zone; Resamp: bootstrap resampling between models; Init: size of initial training set; Multi: oversampling rate of positive records"}
 
 grid_out <- analyse_grid_search() 
 
@@ -129,4 +129,4 @@ print(grid_out$plot & labs(y = 'Sens. x. Eff.'))
 ```
 
 
-`r print_table(grid_out_params, caption = 'Table 3. Hyperparameter clusters and best cluster subsets. For each cluster, the defining rules and mean Sens. x Eff. is shown, followed by the per-cluster best set results.')`
+`r print_table(grid_out_params, caption = '**Table 3**. Hyperparameter clusters and best cluster subsets. For each cluster, the defining rules and mean Sens. x Eff. is shown, followed by the per-cluster best set results.')`
