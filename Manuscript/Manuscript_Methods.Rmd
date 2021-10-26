@@ -2,7 +2,6 @@
 title: "Methods"
 date: "`r lubridate::today()`"
 bibliography: references.bib
-csl: apa.csl
 output:
   pdf_document:
     includes:
@@ -126,18 +125,18 @@ We reported in the Results only the first (in order of inclusion rate) 15 terms 
 We created an algorithm that generates a new search query to acquire further relevant publications missed during the first search, possibly at a reasonable cost in specificity (i.e., a higher number of negative results).\
 The algorithm encompasses a number of steps:
 
-* We fit a partition tree [@rpart] between the DTM and 800 samples from the PPD;
+- We fit a partition tree [@rpart] between the DTM and 800 samples from the PPD;
 if a term is present multiple times in the DTM (e.g., both title and abstract), they are counted just one, and field term count features are removed.
 This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
-* For each rule, negative conditions (i.e., $NOT$ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
-* The extended set of rules is sorted by positive-negative record difference in descending order.
+- For each rule, negative conditions (i.e., $NOT$ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
+- The extended set of rules is sorted by positive-negative record difference in descending order.
 The cumulative number of unique positive records is computed and used to group the rules.
 Rules inside each group are ordered by specificity.
-* The researcher is then asked to review the rule groups, selecting one or more rules (useful if they convey different meaning) from each, or edit them (in case too specific positive or negative conditions were included).
+- The researcher is then asked to review the rule groups, selecting one or more rules (useful if they convey different meaning) from each, or edit them (in case too specific positive or negative conditions were included).
 It is possible to exclude a group of rules altogether, especially those with the worse sensitivity/specificity ratio.
-* The selected rules are joined together by $OR$ statements, defining a subset of records with a sensibly higher proportion of positive records than the original one.
-* Redundant rules (i.e., rules whose positive records are already included in more specific ones) and conditions (i.e., conditions that once removed do not decrease the total number of positive or do not increase the negative records) are removed.
-* Finally, the rules are re-elaborated in a query usable on the major scientific databases.
+- The selected rules are joined together by $OR$ statements, defining a subset of records with a sensibly higher proportion of positive records than the original one.
+- Redundant rules (i.e., rules whose positive records are already included in more specific ones) and conditions (i.e., conditions that once removed do not decrease the total number of positive or do not increase the negative records) are removed.
+- Finally, the rules are re-elaborated in a query usable on the major scientific databases.
 
 Since the algorithm is data-driven, it creates queries that effectively select positive records from the input dataset but may be not specific enough once applied to actual research databases.
 Therefore we appended an extra subquery in $AND$, which specifies the general topics of our search and delimitates the search domain.\
@@ -159,11 +158,11 @@ For the number of predicted positive records, the sensitivity and the WSoR, we r
 
 Our classification algorithm has a number of hyperparameters:
 
-* Size of the initial training set: 50, 100, 250, 500 records;
-* Number of models in the ensemble: 1, 5, 10, 20, 40, 60 repetitions;
-* Oversampling rate of positive records: (1x (i.e., no oversampling), 10x, 20x;
-* PrI quantiles for building the uncertainty zone: 80%, 90%, 98%;
-* Source of randomness between models in the ensemble: MCMC sampling only [@robert2004monte], MCMC plus data bootstrapping [@breiman1996bagging] of the training set.
+- Size of the initial training set: 50, 100, 250, 500 records;
+- Number of models in the ensemble: 1, 5, 10, 20, 40, 60 repetitions;
+- Oversampling rate of positive records: (1x (i.e., no oversampling), 10x, 20x;
+- PrI quantiles for building the uncertainty zone: 80%, 90%, 98%;
+- Source of randomness between models in the ensemble: MCMC sampling only [@robert2004monte], MCMC plus data bootstrapping [@breiman1996bagging] of the training set.
 
 To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled "validation set" made of the first 1200 records from the first session dataset.
 The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole dataset got labelled.\
