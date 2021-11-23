@@ -229,7 +229,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 	message('- parsing results')
 
-	records <- parse_medline(records %>% unlist() %>% paste(collapse = '\\n\\n')) %>%
+	records <- parse_pubmed(records %>% unlist() %>% paste(collapse = '\\n\\n')) %>%
 		mutate(Source_type = 'API')
 
 	message('...found ', nrow(records), ' records.')
@@ -501,7 +501,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 		if (file.exists(out_file)) {
 			if (!overwrite) {
-				warning(basename(out_file), ' already present and argument overwrite == FALSE.', call. = F)
+				warning(basename(out_file), ' already present and argument overwrite is FALSE.', call. = F)
 
 				read_csv(out_file, col_types = cols())
 			} else {
