@@ -169,21 +169,6 @@ import_data <- function(input, ...) {
 	stop('Input should be an existing csv/excel file path or a data.frame, found "', class(input),'".')
 }
 
-summarise_args <- function(args) {
-	print(args %>% names())
-	args %>%
-		names %>% lapply(function(name) {
-
-			if (name == '' || !exists(name)) return(NULL)
-			obj <- get(name)
-			data.frame(
-				name,
-				value = if (is.data.frame(obj)) paste(class(obj), collapse = ', ') else capture.output(str(obj)) %>% head() %>% paste(collapse = '\n') %>% str_trim()
-			)
-		}) %>% bind_rows()
-}
-
-
 
 # Load the infrastructure -------------------------------------------------
 

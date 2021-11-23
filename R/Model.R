@@ -147,348 +147,6 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = F,
 	model
 }
 
-# compute_pred_performance <- function(model, data = NULL, Y = NULL, summary = F,
-# 																		 quants = getOption('baysren.probs'), AUC.thr = .9) {
-#
-# 	library(scales)
-# 	library(pROC)
-# 	library(glue)
-# 	library(pbapply)
-# 	library(pbmcapply)
-#
-# 	if (!is.null(data)) {
-# 		if (is.null(Y)) stop('Define the Y variable name.')
-#
-# 		X <- data %>% select(all_of(model$X %>% colnames()))
-# 		y <- data[[Y]]
-# 	} else {
-# 		X <- model$X
-# 		y <- model$y
-# 	}
-#
-# 	if (is.factor(y)) {
-# 		y <- relevel(y, ref = levels(y)[2])
-# 		y_levels <- levels(y)
-# 	} else {
-# 		y_levels <- sort(unique(y), T)
-# 	}
-#
-# 	samples <- bart_machine_get_posterior(model, new_data = X)$y_hat_posterior_samples
-#
-# 	out <- mclapply(1:ncol(samples), function(i) {
-# 		roc <- pROC::roc(response = y, predictor = samples[,i])
-# 		data.frame(
-# 			AUC = pROC::auc(roc) %>% as.vector(),
-# 			pROC::coords(roc, "best",
-# 									 ret = c('threshold', 'sensitivity',
-# 									 				'specificity', 'accuracy', 'ppv', 'npv'),
-# 									 transpose = F) %>%
-# 				as.list() %>% as.data.frame.list() %>% head(1) %>%
-# 				setNames(c('Threshold', 'Sens', 'Spec', 'Acc', 'PPV', 'NPV')),
-# 			Sens.thr = quantile(samples[y == y_levels[1], i], min(quants)),
-# 			Spec.thr = quantile(samples[y == y_levels[2], i], max(quants))
-# 		)
-# 	}) %>% bind_rows()
-#
-# 	if (summary) {
-# 		summarise_pred_perf(out, quants)
-# 	} else out
-#
-# }
-
-# compute_pred_performance2 <- function(DTM, models, pred_quants = c(.01, .5, .99),
-# 																			negLim = NULL, posLim = NULL) {
-# 	message('Build indexes')
-# 	index_data <- pblapply(1:length(models), function(i) {
-# 		rbind(
-# 			data.frame(
-# 				IDs = models[[i]]$indexes$test$IDs,
-# 				Sets = 'test',
-# 				model_i = i
-# 			),
-# 			data.frame(
-# 				IDs = models[[i]]$indexes$train$IDs,
-# 				Sets = 'train',
-# 				model_i = i
-# 			)
-# 		)
-# 	}) %>% bind_rows()
-#
-# 	message('Aggregate predictions')
-# 	aggr_preds <- lapply(c('test', 'train'), function(set) {
-# 		IDs <- index_data %>% filter(Sets == set) %>% pull(IDs) %>% unique()
-# 		pbmclapply(IDs, function(ID) {
-#
-# 			ID_preds <- index_data %>% filter(IDs == ID, Sets == set) %>% pull(model_i) %>%
-# 				sapply(function(i) {
-#
-# 					models[[i]]$preds[DTM$ID %in% ID,]
-# 				}) %>% t() %>% colMeans()
-#
-# 			data.frame(
-# 				ID,
-# 				Target = DTM$Target[DTM$ID == ID],
-# 				ID_preds %>% quantile(pred_quants) %>% t %>%
-# 					as.data.frame() %>%
-# 					setNames(c('Pred_Med', 'Pred_Low', 'Pred_Up')),
-# 				set = set,
-# 				matrix(ID_preds, nrow = 1)
-# 			)
-# 		}) %>% bind_rows()
-# 	}) %>% bind_rows()
-#
-# 	message('Compute performance')
-# 	aggr_preds %>%
-# 		mutate(
-# 			Predicted_label = {
-# 				if (is.null(negLim)) negLim <- max(Pred_Up[Target %in% 'n' & set == 'train'])
-# 				if (is.null(posLim)) posLim <- min(Pred_Low[Target %in% 'y' & set == 'train'])
-# 				case_when( # assign y or n if posterior lower/upper is outside the common range in the manually labeled articles, otherwise label as unknown
-# 				Pred_Low > negLim & Pred_Low > posLim ~ 'y',
-# 				Pred_Up < posLim & Pred_Up < negLim ~ 'n',
-# 				T ~ 'unk'
-# 			)
-# 				},
-# 			# Predicted_label = replace(
-# 			# 	Predicted_label,
-# 			# 	Predicted_label != Target & Predicted_label != 'unk',
-# 			# 	'check'),
-# 			.before = X1
-# 		) %>%
-# 		filter(!is.na(Target)) %>%
-# 		group_by(set) %>%
-# 		summarise(
-# 			'AUC [CrI]' =  cur_data() %>% select(starts_with('X')) %>% pbmclapply(function(p) {
-# 				suppressMessages(pROC::roc(response = Target, predictor = p) %>% pROC::auc() %>% as.vector())
-# 			}) %>% unlist() %>% quantile(pred_quants) %>% percent() %>% {glue("{.[2]} [{.[1]}, {.[3]}]")},
-# 			'SetLimits, neg/pos' = sprintf('%s/%s',
-# 																		 min(Pred_Low[Target %in% 'y']) %>% percent,
-# 																		 max(Pred_Up[Target %in% 'n']) %>% percent
-# 			),
-# 			'Predicted, n (%) [y/n]' = sapply(c('y', 'unk', 'n'), function(outc) {
-# 				abs <- sum(Predicted_label == outc)
-# 				perc <- percent(abs / n())
-# 				pos <- sum(Target[Predicted_label == outc] == 'y')
-# 				neg <- sum(Target[Predicted_label == outc] == 'n')
-#
-# 				glue('{outc}: {abs} ({perc}) [{pos}/{neg}]')
-# 			}) %>% paste(collapse = ', '),
-# 			'Observed, n (%)' = sapply(c('y', 'n'), function(outc) {
-# 				abs <- sum(Target == outc)
-# 				perc <- percent(abs / n())
-# 				glue('{outc}: {abs} ({perc})')
-# 			}) %>% paste(collapse = ', '),
-# 			'Sens., pot. (act.)' = {
-# 				x <- c(mean(Predicted_label[Target == 'y'] != 'n'), # potential
-# 							 mean(Predicted_label[Target == 'y'] == 'y') # actual
-# 				) %>% percent()
-# 				glue('{x[1]} ({x[2]})')
-# 			},
-# 			'Spec., pot. (act.)' = {
-# 				x <- c(mean(Predicted_label[Target == 'n'] != 'y'), # potential
-# 							 mean(Predicted_label[Target == 'n'] == 'n') # actual
-# 				) %>% percent()
-# 				glue('{x[1]} ({x[2]})')
-# 				},
-# 			'PPV' = percent(mean(Target[Predicted_label == 'y'] == 'y')),
-# 			'NPV' = percent(mean(Target[Predicted_label == 'n'] == 'n'))
-# 		) %>%
-# 		mutate(across(.fns = as.character)) %>%
-# 		group_split(set) %>%
-# 		lapply(function(df) tidyr::pivot_longer(df, everything(), names_to = 'Stat')) %>%
-# 		{left_join(.[[2]], .[[1]], by = 'Stat')[-1, ]} %>%
-# 		setNames(c('Statistic', 'Train', 'Test'))
-# }
-
-# compute_pred_performance <- function(data, samples = NULL, test_data = NULL,
-# 																		 negLim = NULL, posLim = NULL,
-# 																		 truePos = NULL, trueNeg = NULL,
-# 																		 pred_quants = c(.01, .5, .99),
-# 																		 show_progress = T) {
-#
-# 	if (show_progress) {
-# 		iter_fun <- pblapply
-# 	} else {
-# 		iter_fun <- lapply
-# 	}
-#
-# 	if ('Target' %nin% colnames(data)) {
-# 		data$Target <- coalesce_labels(data)
-# 	}
-#
-# 	if (!is.null(test_data)) {
-# 		data <- import_classification(data, prev_records = test_data)
-# 	}
-#
-# 	data <- data %>%
-# 		select(any_of(c('ID', 'Target', 'Rev_previous', 'Pred_Med', 'Pred_Low',
-# 										'Pred_Up', 'Predicted_label'))) %>%
-# 		mutate(Set = ifelse(!is.na(Target), 'Train', 'Test'))
-#
-# 	obs <- coalesce_labels(data, c('Rev_previous', 'Target'))
-# 	if (is.null(truePos)) truePos <- sum(obs %in% 'y', na.rm = T)
-# 	if (is.null(trueNeg)) trueNeg <- sum(obs %in% 'n', na.rm = T)
-# 	preds <- coalesce_labels(data, c('Rev_previous', 'Target',
-# 																	 'Predicted_label'))
-# 	predPos <- sum(preds %in% 'y', na.rm = T)
-# 	predNeg <- sum(preds %in% 'n', na.rm = T)
-# 	rm(obs, preds)
-#
-# 	if (!is.null(samples)) {
-# 		if (nrow(data) != nrow(samples)) {
-# 			stop('Data and posterior samples have a different number of rows')
-# 		}
-# 		data$Samples <- left_join(data[,'ID'], samples, by = "ID")
-# 		#data$Samples <- samples[match(data$ID, samples$ID),]
-# 	} else data$Samples <- data$Pred_Med
-#
-# 	iter_fun(list('Train', 'Test', c('Train', 'Test')), function(set) {
-# 		data <- data %>%
-# 			mutate(
-# 				Target_test = coalesce_labels(cur_data(), c('Rev_previous', 'Target'))
-# 			) %>%
-# 			filter(Set %in% set)
-#
-# 		set <- paste(if (length(set) == 1) set else 'Total')
-#
-# 		if (nrow(data) == 0) return(data.frame(
-# 			Value = c(glue('{set} (n = {nrow(data)})'), rep(NA, 9)) # Very ugly to put this number manually
-# 		))
-#
-# 		data %>%
-# 			filter(!is.na(Target_test)) %>%
-# 			summarise(
-# 				Set = glue('{set} (n = {n()})'),
-#
-# 				'AUC [CrI]' =  if (n_distinct(Target_test) == 1) {
-# 					'One class only'
-# 				} else {
-# 					as.data.frame(cur_data()$Samples) %>%
-# 						select(-any_of('ID')) %>%
-# 						mclapply(function(p) {
-#
-# 							pROC::roc(response = Target_test, predictor = p) %>% #suppressMessages() %>%
-# 								pROC::auc() %>% as.vector()
-# 						}) %>% unlist() %>% {
-# 							if (length(.) > 1) {
-# 								quantile(., pred_quants) %>% percent() %>%
-# 									{glue("{.[2]} [{.[1]}, {.[3]}]")}
-# 							} else percent(.)
-# 						}
-# 				},
-#
-# 				'SetLimits, pos/neg' = if ('Train' %in% set) {
-# 					if (is.null(negLim)) {
-# 						negLim <- max(Pred_Up[Target %in% 'n'])
-# 					}
-#
-# 					if (is.null(posLim)) {
-# 						posLim <- min(Pred_Low[Target %in% 'y'])
-# 					}
-#
-# 					c(posLim, negLim) %>%
-# 						percent() %>% paste(collapse = '/')
-# 				} else NA,
-#
-# 				'Predicted, n (%) [y/n]' = sapply(c('y', 'unk', 'check', 'n'), function(outc) {
-# 					abs <- sum(data$Predicted_label == outc) # This include also non
-# 					# labeled records, therefore it needs to be namespaced
-#
-# 					perc <- percent(abs / nrow(data))
-# 					pos <- sum(Target_test[Predicted_label == outc] == 'y')
-# 					neg <- sum(Target_test[Predicted_label == outc] == 'n')
-#
-# 					glue('{outc}: {abs} ({perc}) [{pos}/{neg}]')
-# 				}) %>% paste(collapse = ', '),
-#
-# 				'Observed, n (%)' = summarise_vector(Target_test),
-#
-# 				'Sens., pot. (act.)' = {
-# 					x <- c(mean(Predicted_label[Target_test == 'y'] != 'n'), # potential
-# 								 mean(Predicted_label[Target_test == 'y'] == 'y') # actual
-# 					) %>% percent()
-# 					glue('{x[1]} ({x[2]})')
-# 				},
-#
-# 				'Spec., pot. (act.)' = {
-# 					x <- c(mean(Predicted_label[Target_test == 'n'] != 'y'), # potential
-# 								 mean(Predicted_label[Target_test == 'n'] == 'n') # actual
-# 					) %>% percent()
-# 					glue('{x[1]} ({x[2]})')
-# 				},
-#
-# 				# Samples %>% select(-ID) %>% pblapply(function(x) {
-# 				# 	Predicted_label = case_when( # assign y if a record range is included into global y range and don't overlap the n range. The opposite is true for n labels
-# 				# 		x > negLim & x > posLim ~ 'y',
-# 				# 		x < posLim & x < negLim ~ 'n',
-# 				# 		T ~ 'unk' # Assign unk if the label is not clearly defined
-# 				# 	)
-# 				#
-# 				# 	Predicted_label = replace(
-# 				# 		Predicted_label,
-# 				# 		Predicted_label != Target & Predicted_label != 'unk',
-# 				# 		'check')
-# 				#
-# 				# 	mean(Predicted_label[Target_test == 'n'] == 'n')
-# 				# }) %>% unlist %>% quantile(pred_quants)
-#
-# 				PPV = percent(mean(
-# 					Target_test[Predicted_label == 'y' |
-# 												(Predicted_label == 'unk' & Target_test == 'y')] == 'y')),
-# 				NPV = percent(mean(
-# 					Target_test[Predicted_label == 'n' |
-# 												(Predicted_label == 'unk' & Target_test == 'n')] == 'n')),
-#
-# 				## Similar results to the next indicators, but have finite bounds (no divisions by zero)
-# 				# 'Pos per sample rate [CrI] (prob. > random)' = {
-# 				# 	obsPos <- sum(Target_test %in% 'y')
-# 				# 	obs <- (obsPos/qhyper(pred_quants, truePos, trueNeg, n())) %>%
-# 				# 		signif(3)
-# 				# 	obs_p <- phyper(obsPos, truePos, trueNeg, n()) %>% percent()
-# 				#
-# 				# 	pred <- (obsPos/qhyper(pred_quants, predPos, predNeg, n())) %>%
-# 				# 		signif(3)
-# 				# 	pred_p <- phyper(obsPos, predPos, predNeg, n()) %>% percent()
-# 				#
-# 				# 	glue('test: {obs[2]} [{obs[3]}, {obs[1]}] ({obs_p}), pred: {pred[2]} [{pred[3]}, {pred[1]}] ({pred_p})')
-# 				# },
-#
-# 				'Random samples needed [CrI] (prob. < random)' = {
-# 					qnhyper <- extraDistr::qnhyper
-# 					pnhyper <- extraDistr::pnhyper
-#
-# 					obsPos <- sum(Target_test %in% 'y')
-# 					obs <- (qnhyper(pred_quants, trueNeg, truePos, obsPos) / n()) %>%
-# 						signif(3) %>% sort()
-# 					obs_p <- (1 - pnhyper(n(), trueNeg, truePos, obsPos)) %>% percent()
-#
-# 					pred <- (qnhyper(pred_quants, predNeg, predPos, obsPos) / n()) %>%
-# 						signif(3) %>% sort()
-# 					pred_p <- (1 - pnhyper(n(), predNeg, predPos, obsPos)) %>% percent()
-#
-# 					glue('test: {obs[2]} [{obs[1]}, {obs[3]}] ({obs_p}), pred: {pred[2]} [{pred[1]}, {pred[3]}] ({pred_p})')
-# 				},
-#
-# 				## https://doi.org/10.1186/s13643-016-0263-z
-# 				## Not intuitive to explain
-# 				# WWS = {
-# 				# 	TN = sum(Predicted_label == 'n' & Target_test == 'n')
-# 				# 	FN = sum(Predicted_label == 'n' & Target_test == 'y')
-# 				# 	N = sum(!is.na(Target_test))
-# 				# 	Sens = mean(Predicted_label[Target_test == 'y'] != 'n')
-# 				#
-# 				# 	(TN + FN) / N - (1 - Sens)
-# 				# } %>% percent
-# 			) %>%
-# 			tidyr::pivot_longer(everything(), names_to = 'Statistic', values_to = set) %>% {
-# 				if (!identical(set, 'Train')) .[,-1] else .
-# 			}
-# 	}) %>%
-# 		bind_cols() #%>%
-# 	#setNames(c('Statistic', 'Train', 'Test', 'Total'))
-#
-# }
-
 enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																	 ## Model parameters
 																	 pos_mult = 10,
@@ -547,7 +205,14 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			obj <- get(name)
 			data.frame(
 				name,
-				value = if (is.data.frame(obj)) paste(class(obj), collapse = ', ') else capture.output(str(obj)) %>% head() %>% paste(collapse = '\n') %>% str_trim()
+				value = if (is.data.frame(obj)) {
+					paste(class(obj), collapse = ', ')
+					} else {
+						capture.output(str(obj)) %>%
+							head() %>%
+							paste(collapse = '\n') %>%
+							str_trim()
+					}
 			)
 		}) %>% bind_rows()
 
@@ -754,44 +419,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	}
 	else {
-		# bart.mods <- pblapply(1:n_models, function(i) {
-		# 	all_data <- DTM %>% filter(!is.na(Target))
-		#
-		# 	if (resample) {
-		# 		train_data <- slice_sample(all_data, prop = 1, replace = T) %>% {
-		# 			.[c(rep(which(.$Target %in% 'y'), pos_mult), which(!(.$Target %in% 'y'))),]
-		# 		}
-		# 	} else train_data <- all_data
-		#
-		# 	#test_data <- all_data %>% filter(!(ID %in% train_data$ID))
-		#
-		# 	bart.mod <- compute_BART_model(train_data %>% select(-ID), 'Target',
-		# 																 name = 'BartModel', rebuild = T, save = F,
-		# 																 verbose = F, ...)
-		#
-		# 	list(
-		#
-		# 		preds = bart_machine_get_posterior(
-		# 			bart.mod,
-		# 			new_data = DTM %>% select(all_of(colnames(bart.mod$X)))
-		# 		)$y_hat_posterior_samples,
-		#
-		# 		# indexes = list(
-		# 		# 	train = train_data$ID %>% unique(),
-		# 		# 	test = setdiff(all_data$ID, train_data$ID)
-		# 		# ),
-		# 		# oos.perf = compute_pred_performance(
-		# 		# 	bart.mod, data = test_data, Y = 'Target', AUC.thr = AUC.thr,
-		# 		# 	quants = pred_quants),
-		#
-		# 		var.imp = bartMachine::get_var_props_over_chain(bart.mod, 'trees')
-		# 	)
-		# })
-		#
-		#
-		# message('Writing model to disk')
-		# readr::write_rds(bart.mods, 'Model_backup.rds', compress = 'gz')
-		# gc()
 
 		Var_imp <- list()
 
@@ -803,9 +430,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			train_data <- DTM %>% filter(!is.na(Target))
 
 			if (resample) {
-				train_data <- slice_sample(train_data, prop = 1, replace = T) # %>% {
-				# 	.[c(rep(which(.$Target %in% 'y'), pos_mult), which(!(.$Target %in% 'y'))),]
-				# }
+				train_data <- slice_sample(train_data, prop = 1, replace = T)
 			}
 
 			train_data <- train_data[c(rep(which(train_data$Target %in% 'y'), pos_mult),
@@ -818,8 +443,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 			gc()
 
 			message("predicting...")
-			#pred_batch_size = 2 * 10^4
-			#browser()
+
 			preds <- pblapply(0:floor(nrow(DTM) / pred_batch_size), function (i) {
 				gc()
 				start <- i * pred_batch_size + 1
@@ -832,8 +456,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 				)$y_hat_posterior_samples
 
 			}) %>% do.call(what = 'rbind')
-
-			#print(dim(preds))
 
 			if (!exists('Samples')) {
 				Samples <- preds
@@ -866,19 +488,7 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	tictoc::tic()
 
-	# Average posterior samples along the ensemble of models
-	# Samples <- (Reduce(
-	# 	"+",
-	# 	bart.mods %>% lapply(`[[`, 'preds')
-	# ) / length(bart.mods))
-
 	Samples <- data.frame(ID = DTM$ID, Samples)
-
-	# avg_preds <- bart.mods %>% pblapply(function(model) {
-	# 	n.preds <- ncol(model$preds)
-	# 	i <- sample(1:n.preds, round(n.preds/length(bart.mods)))
-	# 	model$preds[,i]
-	# }) %>% do.call(what = 'cbind')
 
 	Predicted_data <- DTM %>% select(ID, Target) %>%
 		data.frame(
@@ -935,18 +545,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	if (compute_performance) {
 		message('Adding performance summary (may take a while...)')
 
-		# if (!is.null(Test_data)) {
-		#
-		# 	tictoc::tic()
-		#
-		# 	Performance <- compute_pred_performance(Annotated_data, samples = Samples,
-		# 																					test_data = Test_data,
-		# 																					pred_quants = pred_quants)
-		# 	tictoc::toc()
-		# } else {
-		# 	warning('compute_performance is TRUE but no test data')
-		# }
-
 		Performance <- estimate_performance(Annotated_data) %>%
 			format_performance(session_names = session_name)
 
@@ -954,15 +552,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 	}
 
 	message('Adding variables\' importance')
-
-	# var_imp <- lapply(1:n_models, function(i) {
-	# 	data.frame(
-	# 		Term = names(bart.mods[[i]]$var.imp),
-	# 		Val = bart.mods[[i]]$var.imp
-	# 	)
-	# }) %>% bind_rows() %>%
-	# 	group_by(Term) %>%
-	# 	summarise(Value = mean(Val), Score = Value / sd(Val), n_models = n())
 
 	Var_imp <- lapply(1:n_models, function(i) {
 		data.frame(
@@ -979,14 +568,6 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 
 	message('Adding annotation summary')
 
-	# if ('Change: unlab. -> y' %in% names(iter_data)) {
-	# 	last_iter_with_new_pos <- which(!is.na(iter_data[['Change: unlab. -> y']])) %>% max()
-	#
-	# 	if (nrow(iter_data) - last_iter_with_new_pos < stop_after) {
-	#
-	# 	}
-	# }
-
 	Results <- tibble(
 		Iter = (list.files(file.path(session_path, 'Annotations'), pattern = '.xlsx') %>%
 							str_subset('~\\$', negate = T) %>% length()) + 1,
@@ -1001,32 +582,10 @@ enrich_annotation_file <- function(session_name, file = NULL, DTM = NULL,
 																												 'Rev_manual', 'Predicted_label')) %>%
 			summarise_vector()
 	) %>% bind_cols(
-		compute_changes(Annotated_data) #%>% select(matches('Change'))
+		compute_changes(Annotated_data)
 	) %>%
 		mutate(across(.fns = as.character)) %>%
 		tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value')
-
-	# Results <- data.frame(
-	# 	Indicator = c(
-	# 		'Parent file', 'Rerun n.', 'New labels', 'Records to review', 'Final labeling'
-	# 	),
-	# 	Value = c(
-	# 		file,
-	# 		cur_run,
-	# 		Annotated_data$Rev_prediction_new %>%
-	# 			summarise_vector(),
-	# 		with(Annotated_data, Predicted_label[Rev_prediction_new %in% '*']) %>%
-	# 			summarise_vector(),
-	# 		coalesce_labels(Annotated_data, c('Rev_prediction_new','Rev_prediction',
-	# 																			'Rev_manual', 'Predicted_label')) %>%
-	# 			summarise_vector()
-	# 	)
-	# ) %>% bind_rows(
-	# 	compute_changes(Annotated_data) %>%
-	# 		select(matches('Change')) %>%
-	# 		tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = 'Value') %>%
-	# 		mutate(Value = as.character(Value))
-	# )
 
 	print(as.data.frame(Results))
 
