@@ -201,7 +201,7 @@ Records <- perform_search_session(
 Now the annotation file is ready for the manual classification records.
 The annotation file has a column called `Rev_manual`, where records need to be classified as "positive" (y) or "negative" (n) matches by the user.
 We suggest manually labelling an **initial training set** of 250 records, which should be sufficient if a minimum ~20% positivity rate is present (see the section about model hyperparameter optimisation)./
-The function `check_classification_trends()` can help visualise the trend of the positives/negatives as the number of classified records increases./
+The function `plot_classification_trends()` can help visualise the trend of the positives/negatives as the number of classified records increases./
 
 Once the initial training set is prepared, the function `enrich_annotation_file()` will use a Bayesian Additive Regression Trees (BART) machine learning model to learn the labelling pattern given the record data and predict the positive match probability for the unlabelled records.\
 `enrich_annotation_file()` comprises two steps.

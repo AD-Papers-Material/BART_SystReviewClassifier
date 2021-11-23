@@ -589,6 +589,54 @@ format_performance <- function(..., session_names = NULL) {
 
 }
 
+format_var_imp <- function(var_imp, as_data_frame = TRUE) {
+	var_imp <- var_imp %>%
+		transmute(
+			Component = str_extract(Term, '^\\w+(?=__)') %>%
+				factor(c('ABSTR', 'TITLE', 'AUTH', 'KEYS', 'MESH'),
+							 c('Abstract', 'Title', 'Author', 'Keyword', 'Mesh term')),
+			Term = str_replace_all(Term, c('^\\w+__' = '', '\\._\\.' = ' & ', '\\.' = ' | ', '_' = ' ')) %>% str_to_title(),
+			'Inclusion rate' = signif(Value * 10000, 3),
+			IS = signif(Score, 3),
+			RR = signif(exp(estimate), 3) %>% str_remove('\\.?0+$'),
+			`Statistic` = signif(statistic, 3) %>% str_remove('\\.?0+$'),
+		)
+
+	if (!as_data_frame) {
+		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Inclusion rate`} ({IS}) [{RR}, {`Statistic`}]'))
+	}
+
+	var_imp
+}
+
+print_table <- function(data, caption = '', allow_math = F) {
+	if (knitr::is_latex_output()) {
+		if (isTRUE(allow_math)) {
+			data <- data %>%
+				mutate(across(where(is.character), ~ str_replace_all(.x, '%', '\\\\%'))) %>%
+				dplyr::rename_with(~ str_replace_all(.x, '%', '\\\\%'))
+		}
+
+		data %>%
+			knitr::kable(format = "latex", booktabs = T,
+									 caption = caption %>% str_squish() %>%
+									 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
+									 escape = !allow_math
+									 #format.args = list(floating = FALSE)
+			) %>%
+			kableExtra::kable_styling(
+				latex_options = c(
+					"striped",
+					if (ncol(data) > 5) "scale_down" else NULL,
+					"hold_position"
+				)
+			)
+	} else {
+		knitr::kable(data, caption = caption)
+	}
+
+}
+
 plot_predictive_densities <- function(session_name,
 																			sessions_folder = getOption("baysren.sessions_folder")) {
 
@@ -671,50 +719,68 @@ plot_predictive_densities <- function(session_name,
 		}
 }
 
-format_var_imp <- function(var_imp, as_data_frame = TRUE) {
-	var_imp <- var_imp %>%
-		transmute(
-			Component = str_extract(Term, '^\\w+(?=__)') %>%
-				factor(c('ABSTR', 'TITLE', 'AUTH', 'KEYS', 'MESH'),
-							 c('Abstract', 'Title', 'Author', 'Keyword', 'Mesh term')),
-			Term = str_replace_all(Term, c('^\\w+__' = '', '\\._\\.' = ' & ', '\\.' = ' | ', '_' = ' ')) %>% str_to_title(),
-			'Inclusion rate' = signif(Value * 10000, 3),
-			IS = signif(Score, 3),
-			RR = signif(exp(estimate), 3) %>% str_remove('\\.?0+$'),
-			`Statistic` = signif(statistic, 3) %>% str_remove('\\.?0+$'),
-		)
+#' Plot the cumulative trend of positive and negative labelled records.
+#'
+#' @param records An annotated data frame of records.
+#' @param column The column from which the record labels are taken. By default
+#'   the labels are taken by the manual plus the automatic classification,
+#'   excluding labels imported using \code{import_classification()}.
+#' @param step_size The interval with which the cumulative numbers are plotted.
+#' @param limit How many records to display.
+#'
+#' @return A `ggplot2` object.
+#' @export
+#'
+#'\dontrun{
+#'data <- get_session_files('Session1')$Annotations %>% last() %>%
+#'  import_data()
+#'
+#'plot_classification_trend(data)
+#'}
+plot_classification_trend <- function(records, column = NULL,
+																			step_size = 20, limit = NULL) {
 
-	if (!as_data_frame) {
-		var_imp <- 	with(var_imp, glue('{Term} ({Component}): {`Inclusion rate`} ({IS}) [{RR}, {`Statistic`}]'))
-	}
+	# Join manual classifications in one target column
+	if (is.null(column)) {
+		records <- records %>%
+			mutate(Target = coalesce_labels(., c('Rev_prediction', 'Rev_manual')))
+	} else records$Target <- records[[column]]
 
-	var_imp
-}
+	records <- records %>% arrange(Order) %>%
+		filter(!is.na(Target))
 
-print_table <- function(data, caption = '', allow_math = F) {
-	if (knitr::is_latex_output()) {
-		if (isTRUE(allow_math)) {
-			data <- data %>%
-				mutate(across(where(is.character), ~ str_replace_all(.x, '%', '\\\\%'))) %>%
-				dplyr::rename_with(~ str_replace_all(.x, '%', '\\\\%'))
-		}
+	# Define plot breaks according to a limit of reviewed records
+	if (is.null(limit)) limit <- max(which(!is.na(records$Target)))
+	steps <- seq(step_size, limit, by = step_size) %>% c(limit) %>% unique()
 
-		data %>%
-			knitr::kable(format = "latex", booktabs = T,
-									 caption = caption %>% str_squish() %>%
-									 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
-									 escape = !allow_math
-									 #format.args = list(floating = FALSE)
-			) %>%
-			kableExtra::kable_styling(
-				latex_options = c(
-					"striped",
-					if (ncol(data) > 5) "scale_down" else NULL,
-					"hold_position"
-				)
+	# Count positive and negative matches in every break
+	df <- pblapply(steps, function(step) {
+		records %>% head(step) %>%
+			summarise(
+				Yes = sum(Target == 'y', na.rm = T),
+				No = sum(Target == 'n', na.rm = T)
 			)
-	} else {
-		knitr::kable(data, caption = caption)
-	}
+	}) %>% bind_rows()
 
+	# Plot trends
+	p <- df %>%
+		ggplot(aes(x = steps)) +
+		geom_line(aes(y = Yes, color = 'yes'), size = 1) +
+		geom_line(aes(y = No, color = 'no'), size = 1) +
+		labs(y = 'Records', x = 'Records', color = 'Classification') +
+		theme_minimal()
+
+	# Remove consecutive non changing values to avoid label cluttering
+	df <- mutate(
+		df,
+		across(c(Yes, No), function(x) {
+			c(x[1], sapply(2:(n() - 1), function(i) {
+				if (x[i] == x[i-1]) NA else x[i]
+			}), x[n()]) })
+	)
+
+	# Add labels
+	p +
+		geom_label(aes(y = Yes, x = steps, label = Yes), data = df, alpha = .8) +
+		geom_label(aes(y = No, x = steps, label = No), alpha = .8)
 }
