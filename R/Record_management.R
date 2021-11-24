@@ -18,17 +18,17 @@ clean_record_textfields <- function(df) {
 #' Extract the path to citation records files
 #'
 #' The information on the records' location is stored in the session journal
-#' created by `perform_search_session()`. It is possible to select records from
-#' specific session, query, source combinations. Only parsed or API downloaded
-#' record paths will be returned, not the raw data source files.
+#' created by \code{\link{perform_search_session}}. It is possible to select
+#' records from specific session, query, source combinations. Only parsed or API
+#' downloaded record paths will be returned, not the raw data source files.
 #'
-#' @param journal A data frame produced by `perform_search_session()` or a file
-#'   path to it.
+#' @param journal A data frame produced by \code{\link{perform_search_session}}
+#'   or a file path to it.
 #' @param sessions,queries,sources Sessions, queries and sources for which one
 #'   wants to get the record data. By default all record file paths are
 #'   retrieved.
 #' @param records_folder The path to the folder where the records are stored. By
-#'   default is named "Records".
+#'   default is named \code{Records}.
 #'
 #' @return A vector of file paths.
 #'
@@ -600,15 +600,15 @@ order_by_query_match <- function(records, query) {
 
 #' Import classifications from a previously labelled annotation data frame
 #'
-#' The classification is imported in a new column called `Rev_previous`.
+#' The classification is imported in a new column called \code{Rev_previous}.
 #'
 #' @param records An annotation data frame.
 #' @param prev_records An annotation data frame with already existing manual or
 #'   automatic classification.
 #' @param IDs Import the labels only from specific records.
 #'
-#' @return An annotation data frame with an extra column `Rev_previous` which
-#'   store the imported classification.
+#' @return An annotation data frame with an extra column \code{Rev_previous}
+#'   which stores the imported classification.
 #'
 #'
 import_classification <- function(records, prev_records, IDs = records$ID) {
@@ -779,7 +779,7 @@ create_session <- function(Records, session_name,
 #'
 #' @param session_name The name of the session.
 #' @param sessions_folder The folder in which all sessions are stored. It can be
-#'   initialized with the `baysren.sessions_folder` option.
+#'   initialized with the \code{baysren.sessions_folder} option.
 #' @param which Which resource is required. The default is all of them.
 #'
 #' @return A list of vectors of file paths.
