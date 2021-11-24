@@ -15,27 +15,27 @@ clean_record_textfields <- function(df) {
 }
 
 
-#'Extract the path to citation records files
+#' Extract the path to citation records files
 #'
-#'The information on the records' location is stored in the session journal
-#'created by `perform_search_session()`. It is possible to select records from
-#'specific session, query, source combinations. Only parsed or API downloaded
-#'record paths will be returned, not the raw data source files.
+#' The information on the records' location is stored in the session journal
+#' created by `perform_search_session()`. It is possible to select records from
+#' specific session, query, source combinations. Only parsed or API downloaded
+#' record paths will be returned, not the raw data source files.
 #'
-#'@param journal A data frame produced by `perform_search_session()` or a file
-#'  path to it.
-#'@param sessions,queries,sources Sessions, queries and sources for which one
-#'  wants to get the record data. By default all record file paths are
-#'  retrieved.
-#'@param records_folder The path to the folder where the records are stored. By
-#'  default is named "Records".
+#' @param journal A data frame produced by `perform_search_session()` or a file
+#'   path to it.
+#' @param sessions,queries,sources Sessions, queries and sources for which one
+#'   wants to get the record data. By default all record file paths are
+#'   retrieved.
+#' @param records_folder The path to the folder where the records are stored. By
+#'   default is named "Records".
 #'
-#'@return A vector of file paths.
-#'@export
+#' @return A vector of file paths.
 #'
-#'@examples
 #'
-#'\dontrun{
+#' @examples
+#'
+#' \dontrun{
 #' journal <- perform_search_session(
 #'   query = query, year_query = year_filter,
 #'   session_name = 'Session1', query_name = 'Query1',
@@ -47,7 +47,7 @@ clean_record_textfields <- function(df) {
 #'
 #'   # using the journal path
 #'   paths <- extract_source_file_paths('Session_journal.csv')
-#'}
+#' }
 extract_source_file_paths <- function(journal, sessions = journal$Session_ID,
 																			queries = journal$Query_ID,
 																			sources = journal$Source,
@@ -58,24 +58,26 @@ extract_source_file_paths <- function(journal, sessions = journal$Session_ID,
 		unique()
 }
 
-#'Parse Pubmed raw data
+#' Parse Pubmed raw data
 #'
-#'Parse and normalize Pubmed nbib files downloaded through
-#'https://pubmed.ncbi.nlm.nih.gov/.
+#' Parse and normalize Pubmed nbib files downloaded through
+#' \url{https://pubmed.ncbi.nlm.nih.gov/}.
 #'
-#'@param entries A character vector containing the citation data.
-#'@param timestamp A timestamp as provided by `lubridate::now()`.
+#' @param entries A character vector containing the citation data.
+#' @param timestamp A timestamp as provided by
+#'   \code{\link[lubridate:now]{lubridate::now()}}.
 #'
-#'@return A data frame with the parsed data
-#'@export
+#' @return A data frame with the parsed data
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'dataRaw <- readr::read_file(file.path("Records", "Session 1", 'Query', 'Pubmed.nbib'))
+#' \dontrun{
+#' dataRaw <- readr::read_file(file.path("Records", "Session 1", 'Query',
+#'   'Pubmed.nbib'))
 #'
-#'parse_pubmed(dataRaw)
-#'}
+#' parse_pubmed(dataRaw)
+#' }
 parse_pubmed <- function(entries, timestamp = now()) { # Probably
 	entries <- entries %>%
 		str_remove_all('\\r') %>%
@@ -113,24 +115,25 @@ parse_pubmed <- function(entries, timestamp = now()) { # Probably
 	) %>% clean_record_textfields()
 }
 
-#'Parse Web of Science raw data
+#' Parse Web of Science raw data
 #'
-#'Parse and normalize Web of Science data downloaded manually (as csv or excel
-#'files) from https://www.webofknowledge.com.
+#' Parse and normalize Web of Science data downloaded manually (as csv or excel
+#' files) from \url{https://www.webofknowledge.com}.
 #'
-#'@param entries An imported data frame.
-#'@param timestamp A timestamp as provided by `lubridate::now()`.
+#' @param entries An imported data frame.
+#' @param timestamp A timestamp as provided by
+#'   \code{\link[lubridate:now]{lubridate::now()}}.
 #'
-#'@return A data frame with the parsed data.
-#'@export
+#' @return A data frame with the parsed data.
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'WOS.csv'))
+#' \dontrun{
+#' dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'WOS.csv'))
 #'
-#'parse_wos(dataRaw)
-#'}
+#' parse_wos(dataRaw)
+#' }
 parse_wos <- function(entries, timestamp = now()) {
 	entries %>% transmute(
 		Order = 1:n(),
@@ -153,24 +156,25 @@ parse_wos <- function(entries, timestamp = now()) {
 	) %>% clean_record_textfields()
 }
 
-#'Parse IEEE raw data
+#' Parse IEEE raw data
 #'
-#'Parse and normalize IEEE data downloaded manually (as csv or excel
-#'files) from https://ieeexplore.ieee.org/Xplore/home.jsp.
+#' Parse and normalize IEEE data downloaded manually (as csv or excel files)
+#' from \url{https://ieeexplore.ieee.org/Xplore/home.jsp}.
 #'
-#'@param entries An imported data frame.
-#'@param timestamp A timestamp as provided by `lubridate::now()`.
+#' @param entries An imported data frame.
+#' @param timestamp A timestamp as provided by
+#'   \code{\link[lubridate:now]{lubridate::now()}}.
 #'
-#'@return A data frame with the parsed data.
-#'@export
+#' @return A data frame with the parsed data.
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'IEEE.csv'))
+#' \dontrun{
+#' dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'IEEE.csv'))
 #'
-#'parse_ieee(dataRaw)
-#'}
+#' parse_ieee(dataRaw)
+#' }
 parse_ieee <- function(entries, timestamp = now()) {
 	entries %>% transmute(
 		Order = 1:n(),
@@ -191,24 +195,25 @@ parse_ieee <- function(entries, timestamp = now()) {
 	) %>% clean_record_textfields()
 }
 
-#'Parse EMBASE raw data
+#' Parse EMBASE raw data
 #'
-#'Parse and normalize EMBASE data downloaded manually (as csv or excel
-#'files) from https://www.embase.com/#advancedSearch/default.
+#' Parse and normalize EMBASE data downloaded manually (as csv or excel files)
+#' from \url{https://www.embase.com/#advancedSearch/default}.
 #'
-#'@param entries An imported data frame.
-#'@param timestamp A timestamp as provided by `lubridate::now()`.
+#' @param entries An imported data frame.
+#' @param timestamp A timestamp as provided by
+#'   \code{\link[lubridate:now]{lubridate::now()}}.
 #'
-#'@return A data frame with the parsed data.
-#'@export
+#' @return A data frame with the parsed data.
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'EMBASE.csv'))
+#' \dontrun{
+#' dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'EMBASE.csv'))
 #'
-#'parse_embase(dataRaw)
-#'}
+#' parse_embase(dataRaw)
+#' }
 parse_embase <- function(entries, timestamp = now()) {
 	entries %>% transmute(
 		Order = 1:n(),
@@ -233,24 +238,25 @@ parse_embase <- function(entries, timestamp = now()) {
 	) %>% clean_record_textfields()
 }
 
-#'Parse SCOPUS raw data
+#' Parse SCOPUS raw data
 #'
-#'Parse and normalize SCOPUS data downloaded manually (as csv or excel
-#'files) from https://www.scopus.com/search/form.uri?display=basic#basic.
+#' Parse and normalize SCOPUS data downloaded manually (as csv or excel files)
+#' from \url{https://www.scopus.com/search/form.uri?display=basic#basic}.
 #'
-#'@param entries An imported data frame.
-#'@param timestamp A timestamp as provided by `lubridate::now()`.
+#' @param entries An imported data frame.
+#' @param timestamp A timestamp as provided by
+#'   \code{\link[lubridate:now]{lubridate::now()}}.
 #'
-#'@return A data frame with the parsed data.
-#'@export
+#' @return A data frame with the parsed data.
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'EMBASE.csv'))
+#' \dontrun{
+#' dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'EMBASE.csv'))
 #'
-#'parse_embase(dataRaw)
-#'}
+#' parse_embase(dataRaw)
+#' }
 parse_scopus <- function(entries, timestamp = now()) {
 	entries %>% transmute(
 		Order = 1:n(),
@@ -272,23 +278,23 @@ parse_scopus <- function(entries, timestamp = now()) {
 	) %>% clean_record_textfields()
 }
 
-#'Import and parse citation data files
+#' Import and parse citation data files
 #'
-#'Parse and normalize citation data files. If the file was already parsed will
-#'be just read.
+#' Parse and normalize citation data files. If the file was already parsed will
+#' be just read.
 #'
-#'@param files A vector of citation data file paths.
+#' @param files A vector of citation data file paths.
 #'
-#'@return A list of data frames containing the parsed citation data.
-#'@export
+#' @return A list of data frames containing the parsed citation data.
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'data_files <- list.files(file.path("Records", "Session 1", 'Query'))
+#' \dontrun{
+#' data_files <- list.files(file.path("Records", "Session 1", 'Query'))
 #'
-#'read_bib_files(data_files)
-#'}
+#' read_bib_files(data_files)
+#' }
 read_bib_files <- function(files) {
 
 	ts <- now()
@@ -330,27 +336,27 @@ read_bib_files <- function(files) {
 	}) %>% setNames(basename(files))
 }
 
-#'Join citation data frames and resolve record duplication
+#' Join citation data frames and resolve record duplication
 #'
-#'Take a list of data frames containing parsed citation data created using
-#'\code{read_bib_files} and joins them, resolving duplicated records using
-#'\code{fix_duplicated_records}.
+#' Take a list of data frames containing parsed citation data created using
+#' \code{read_bib_files} and joins them, resolving duplicated records using
+#' \code{fix_duplicated_records}.
 #'
-#'@param record_list A list of data frames as created by \code{read_bib_files}.
+#' @param record_list A list of data frames as created by \code{read_bib_files}.
 #'
-#'@return A record data frame containing the citation data from multiple
+#' @return A record data frame containing the citation data from multiple
 #'  sources.
-#'@export
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'data_files <- list.files(file.path("Records", "Session 1", 'Query'))
+#' \dontrun{
+#' data_files <- list.files(file.path("Records", "Session 1", 'Query'))
 #'
-#'record_list <- read_bib_files(data_files)
+#' record_list <- read_bib_files(data_files)
 #'
-#'join_records(record_list)
-#'}
+#' join_records(record_list)
+#' }
 join_records <- function(record_list) {
 
 	lapply(record_list, function(source) {
@@ -387,16 +393,16 @@ join_records <- function(record_list) {
 		arrange(Order)
 }
 
-#'Resolve duplicated records in a record data frame
+#' Resolve duplicated records in a record data frame
 #'
-#'This function uses the DOI or the (cleaned) record title to match duplicated
-#'records and join them. Some fields like the record keywords and source are
-#'joined between copies.
+#' This function uses the DOI or the (cleaned) record title to match duplicated
+#' records and join them. Some fields like the record keywords and source are
+#' joined between copies.
 #'
-#'@param record_list A list of data frames as created by \code{read_bib_files}.
+#' @param record_list A list of data frames as created by \code{read_bib_files}.
 #'
-#'@return A record data frame with no duplicated records.
-#'@export
+#' @return A record data frame with no duplicated records.
+#'
 #'
 fix_duplicated_records <- function(records) {
 
@@ -446,55 +452,55 @@ fix_duplicated_records <- function(records) {
 }
 
 
-#'Create an annotation data set ready for relevance classification.
+#' Create an annotation data set ready for relevance classification.
 #'
-#'This function imports citation data, joins them and possibly reorder them in
-#'order to put on top records with a higher probability of being relevant given
-#'the search query. It also adds the fields needed in the data frame for the
-#'record manual classification. It provides the option to import already
-#'existing annotation data sets or previous classifications (without importing
-#'the data).
+#' This function imports citation data, joins them and possibly reorder them in
+#' order to put on top records with a higher probability of being relevant given
+#' the search query. It also adds the fields needed in the data frame for the
+#' record manual classification. It provides the option to import already
+#' existing annotation data sets or previous classifications (without importing
+#' the data).
 #'
-#'@param records Either a vector of citation file paths and or folder containing
+#' @param records Either a vector of citation file paths and or folder containing
 #'  such files, or a list of record data frames.
-#'@param reorder_query A boolean query (as characters) of keywords which can be
+#' @param reorder_query A boolean query (as characters) of keywords which can be
 #'  used to empirically reorder records putting on top those more probably
 #'  identified by such query. Usually the initial query used to collect records
 #'  is used.
-#'@param prev_records A previously created data frame of records to join with
+#' @param prev_records A previously created data frame of records to join with
 #'  the new ones, removing duplicates.
-#'@param prev_classification A previous set of labeled records from which import
+#' @param prev_classification A previous set of labeled records from which import
 #'  the classification, without importing the records themselves.
 #'
-#'@return A data frame of records ready for manual or automatic relevance
+#' @return A data frame of records ready for manual or automatic relevance
 #'  classification.
-#'@export
 #'
-#'@examples
 #'
-#'\dontrun{
-#'# This function extracts the appropriate file paths from a session journal. By
-#'# default it passes all stored files, otherwise it can be filtered by session,
-#'# query, and source (i.e. Pubmed, WOS, IEEE)
-#'record_files <- extract_source_file_paths(journal)
+#' @examples
 #'
-#'# create_annotation_file() accept a great variety of inputs:
+#' \dontrun{
+#' # This function extracts the appropriate file paths from a session journal. By
+#' # default it passes all stored files, otherwise it can be filtered by session,
+#' # query, and source (i.e. Pubmed, WOS, IEEE)
+#' record_files <- extract_source_file_paths(journal)
 #'
-#'# either record file paths
-#'input <- record_files
+#' # create_annotation_file() accept a great variety of inputs:
 #'
-#'# or specific record file folders
-#'input <- file.path('Records', 'Session1', 'Query1')
+#' # either record file paths
+#' input <- record_files
 #'
-#'# or parent folders, since it searches for files recursively
-#'input <- 'Records'
+#' # or specific record file folders
+#' input <- file.path('Records', 'Session1', 'Query1')
 #'
-#'# or the already parsed files
-#'input <- read_bib_files(record_files)
+#' # or parent folders, since it searches for files recursively
+#' input <- 'Records'
 #'
-#'# We can then call create_annotation_file() with one of the above input
-#'Annotation_data <- create_annotation_file(input, reorder_query = query)
-#'}
+#' # or the already parsed files
+#' input <- read_bib_files(record_files)
+#'
+#' # We can then call create_annotation_file() with one of the above input
+#' Annotation_data <- create_annotation_file(input, reorder_query = query)
+#' }
 create_annotation_file <- function(records, reorder_query = NULL,
 																	 prev_records = NULL,
 																	 prev_classification = NULL) {
@@ -571,7 +577,7 @@ create_annotation_file <- function(records, reorder_query = NULL,
 #' @param query The query to use to arrange the records.
 #'
 #' @return The recordered record data frame.
-#' @export
+#'
 order_by_query_match <- function(records, query) {
 	terms <- str_remove_all(query, "NOT ?(\\w+|\\(.*?\\))") %>%
 		str_remove_all('[^\\w\\s\\*]+|(?<= )(AND|OR)(?= )') %>%
@@ -603,7 +609,7 @@ order_by_query_match <- function(records, query) {
 #'
 #' @return An annotation data frame with an extra column `Rev_previous` which
 #'   store the imported classification.
-#' @export
+#'
 #'
 import_classification <- function(records, prev_records, IDs = records$ID) {
 
@@ -625,7 +631,7 @@ import_classification <- function(records, prev_records, IDs = records$ID) {
 		Rev_previous = coalesce_labels(cur_data(), c('Rev_previous',
 																								 'Rev_prediction_new',
 																								 'Rev_prediction', 'Rev_manual'))
-																								 # 'Rev_abstract', 'Rev_title')) # for legacy, to be removed.
+		# 'Rev_abstract', 'Rev_title')) # for legacy, to be removed.
 	) %>% distinct()
 
 	left_join(records, prev_records, by = 'uID') %>% {
@@ -640,46 +646,46 @@ import_classification <- function(records, prev_records, IDs = records$ID) {
 		select(-uID)
 }
 
-#'Create a Session starting from an annotation data set.
+#' Create a Session starting from an annotation data set.
 #'
-#'A session is identified by the subsequent iteration of automatic labeling and
-#'manual review. It is associated to a folder where the original annotation file
-#'(with the initial manual classification) is stored, plus its updates after
-#'each classification iteration and supplemental files containing the DTM
-#'matrix, a summary of each classification iteration and the posterior samples
-#'of the Bayesian predictions.
+#' A session is identified by the subsequent iteration of automatic labeling and
+#' manual review. It is associated to a folder where the original annotation file
+#' (with the initial manual classification) is stored, plus its updates after
+#' each classification iteration and supplemental files containing the DTM
+#' matrix, a summary of each classification iteration and the posterior samples
+#' of the Bayesian predictions.
 #'
-#'@param Records An annotation data frame.
-#'@param session_name A character string to label the session. Usually is
+#' @param Records An annotation data frame.
+#' @param session_name A character string to label the session. Usually is
 #'  Session followed by a number, without white spaces.
-#'@param sessions_folder The path to the folder where all sessions are stored.
-#'@param DTM An already existing DTM matrix (see \code{create_training_set()}
+#' @param sessions_folder The path to the folder where all sessions are stored.
+#' @param DTM An already existing DTM matrix (see \code{create_training_set()}
 #'  and \code{text_to_DTM()}).
-#'@param dup_session_action What to do if a session with the same name already
+#' @param dup_session_action What to do if a session with the same name already
 #'  exists. the options are: skip (if the session exists do nothing but raise a
 #'  warning), stop (raise an error), silent (like skip but without warnings),
 #'  add (create a new session marking that is a replicate of an existing one),
 #'  replace (overwrite the existing session).
-#'@param use_time_stamp Add a times tamp to the original annotation file name.
+#' @param use_time_stamp Add a times tamp to the original annotation file name.
 #'
-#'@return The path to the created session folder.
-#'@export
+#' @return The path to the created session folder.
+#'
 #'
 #' @examples
 #'
-#'\dontrun{
-#'journal <- perform_search_session(
+#' \dontrun{
+#' journal <- perform_search_session(
 #'	query = query, year_query = year_filter,
 #'	session_name = 'Session1', query_name = 'Query1',
 #'	records_folder = 'Records',
 #'	journal = 'Session_journal.csv')
 #'
-#'record_files <- extract_source_file_paths(journal)
+#' record_files <- extract_source_file_paths(journal)
 #'
-#'Annotation_data <- create_annotation_file(record_files)
+#' Annotation_data <- create_annotation_file(record_files)
 #'
-#'create_session(Annotation_data)
-#'}
+#' create_session(Annotation_data)
+#' }
 create_session <- function(Records, session_name,
 													 sessions_folder = getOption("baysren.sessions_folder"),
 													 DTM = NULL,
@@ -777,7 +783,7 @@ create_session <- function(Records, session_name,
 #' @param which Which resource is required. The default is all of them.
 #'
 #' @return A list of vectors of file paths.
-#' @export
+#'
 #'
 get_session_files <- function(session_name,
 															sessions_folder = getOption("baysren.sessions_folder"),
