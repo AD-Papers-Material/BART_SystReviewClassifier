@@ -1,11 +1,22 @@
-lemmatize <- function(text.vec, dict = lexicon::hash_lemmas,
-											separator = '_tagseparator_') {
+#' Transform words into their base form
+#'
+#' @param text_vec A vector of text documents.
+#' @param dict A dictionary to use to find base forms. See
+#'   \code{\link[lexicon:hash_lemmas]{lexicon::hash_lemmas()}} for the required
+#'   structure.
+#'
+#' @return The vector with terms transformed into their base form, when
+#'   possible.
+#'
+lemmatize <- function(text_vec, dict = lexicon::hash_lemmas) {
 
 	dict <- setNames(lexicon::hash_lemmas$lemma, lexicon::hash_lemmas$token)
 
-	terms <- paste(text.vec, separator, collapse = ' ')
+	separator <- '_tagseparator_'
+
+	terms <- paste(text_vec, separator, collapse = ' ')
 	terms <- gsub(sprintf(' *%s$', separator), '', terms, perl = T) %>%
-		str_split('\\b') %>% unlist
+		str_split('\\b') %>% unlist()
 	terms <- terms[!(terms %in% c('', ' '))]
 
 	terms.lower <- tolower(terms)
@@ -21,45 +32,23 @@ lemmatize <- function(text.vec, dict = lexicon::hash_lemmas,
 	output <- gsub('^\\s+|\\s+$', '', output, perl = T)
 
 	replace(output, output == 'NA', NA)
-
-
-	# terms <- paste(text.vec, separator, collapse = ' ') %>%
-	# 	str_remove(sprintf(' *%s$', separator)) %>%
-	# 	str_split('\\b') %>% unlist %>%
-	# 	str_subset('^ ?$', negate = T)
-	#
-	# terms.lower <- str_to_lower(terms)
-	#
-	# output <- ifelse(
-	# 	terms.lower %in% names(dict),
-	# 	dict[terms.lower], terms
-	# ) %>%
-	# 	paste(collapse = ' ') %>%
-	# 	str_split(sprintf(' *%s *', separator)) %>% unlist %>%
-	# 	str_squish()
-	#
-	# replace(output, output == 'NA', NA)
 }
 
 
+#' Clean up text into tokens
+#'
+#' Removes stop words, punctuation, auxiliary verbs. Lemmatizes text. Changes to
+#' lower-case.
+#'
+#' @param corpus A vector of text documents.
+#'
+#' @return A cleaned-up vector of text documents.
+#'
 tokenize_text <- function(corpus) {
 
 	message('- tokenizing text...')
-	#tictoc::tic()
 
 	stopwords <- stopwords("english")
-
-	#  tictoc::tic()
-	# corpus <- corpus %>% str_to_lower %>% # low case
-	# 	str_replace_all('-', '_') %>%
-	# 	removeWords(stopwords("english")) %>% # remove stopwords
-	# 	str_replace_all(c(
-	# 		"\'(s|re|t|d)?\\b" = '',
-	# 		'_' = ' ',
-	# 		'[^\\w\\d\\s]+' = ' ' # remove non letters/numbers/spaces
-	# 	)) %>%
-	# 	lemmatize() # lemmatize
-	#  tictoc::toc()
 
 	tictoc::tic()
 	corpus <- tolower(corpus)
@@ -75,6 +64,14 @@ tokenize_text <- function(corpus) {
 	corpus
 }
 
+#' Tokenize authors in records
+#'
+#' Use different tokenization approaches based on author field format.
+#'
+#' @param corpus A vector of author fields from an annotation data set.
+#'
+#' @return The tokenized author list.
+#'
 tokenize_authors <- function(corpus) {
 
 	message('- tokenizing authors')
@@ -109,6 +106,14 @@ tokenize_authors <- function(corpus) {
 	output
 }
 
+#' Tokenize keywords in records
+#'
+#' Clean up the keyword fields in the records.
+#'
+#' @param corpus A vector of keywords fields from an annotation data set.
+#'
+#' @return The tokenized keyword list.
+#'
 tokenize_keywords <- function(keywords) {
 	keywords %>%
 		str_to_lower() %>%
@@ -119,6 +124,14 @@ tokenize_keywords <- function(keywords) {
 }
 
 
+#' Tokenize MESH keywords in records
+#'
+#' Clean up the keyword fields in the records.
+#'
+#' @param corpus A vector of MESH keywords fields from an annotation data set.
+#'
+#' @return The tokenized MESH keyword list.
+#'
 tokenize_MESH <- function(mesh) {
 
 	message('- tokenizing Mesh terms')
@@ -136,12 +149,61 @@ tokenize_MESH <- function(mesh) {
 }
 
 
+#' Convert a vector of text documents into a Document Term Matrix
+#'
+#' A Document Term Matrix (DTM) is a structure describing the association of a
+#' term to a document. In this case we used a binary matrix with ones if a term
+#' is present in a document and one otherwise.
+#'
+#' Before computing the DTM, document terms are cleaned, tokenized and
+#' lemmatized, and stop-words are removed.
+#'
+#' To reduce noise, only terms that appear in a fraction of documents higher
+#' than \code{min.freq} are considered. The function uses also cosine similarity
+#' to identify relevant subclusters of related terms or redundant one.
+#'
+#' @param corpus A vector of text documents.
+#' @param min.freq Minimum number of document in which a term need to be present
+#'   to be considered.
+#' @param ids Identification ID of documents.
+#' @param freq.subset.ids IDs to consider when computing term frequency.
+#' @param included.pos Part of speech (POS) to consider when building the DTM.
+#'   See \code{\link[lexicon:hash_grady_pos]{lexicon::hash_grady_pos()}} for a
+#'   list of recognized POS.
+#' @param tokenize.fun Function to use to clean up text.
+#' @param add.ngrams Whether to search and add non-consecutive n-grams. See
+#'   \code{\link{DTM.add_ngrams}}.
+#' @param n.gram.thresh The threshold to use to identify the network of
+#'   non-consecutive n-grams if \code{add.ngrams} is \code{TRUE}.
+#' @param aggr.synonyms Whether to aggregate terms which almost always appear
+#'   together. See \code{\link{DTM.aggr_synonyms}}.
+#' @param syn.thresh The threshold to use to identify the network of terms to
+#'   aggregate if \code{aggr.synonyms} is \code{TRUE}.
+#' @param label A label to prepend to term columns in the DTM.
+#' @param na.as.missing Whether to set as \code{NA} the DTM cells for empty
+#'   document. If \code{FALSE} those cells will be set to zero.
+#'
+#' @return A Document Term Matrix with a row for each document and a column for the terms
+#'   plus a column with the document IDs.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' Records <- import_data(get_session_files('Session1')$Records)
+#'
+#' Title_DTM <- with(
+#'   Records,
+#'   text_to_DTM(Title, min.freq = 20, label = 'TITLE__', ids = ID,
+#'     freq.subset.ids = ID[Target %in% c('y', 'n')])
+#'   )
+#' }
 text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 												freq.subset.ids = ids,
 												included.pos = c('Noun', 'Verb', 'Adjective'), #TODO: add Plural and Noun Phrase
-												tokenize.fun = tokenize_text, add.ngrams = T,
-												aggr.synonyms = T, n.gram.thresh = .5,
-												syn.thresh = .9, label = 'TERM__', na.as.missing = T) {
+												tokenize.fun = tokenize_text, add.ngrams = TRUE,
+												aggr.synonyms = TRUE, n.gram.thresh = .5,
+												syn.thresh = .9, label = 'TERM__', na.as.missing = TRUE) {
 
 	raw.corpus <- corpus
 	order.ids <- 1:length(corpus)
@@ -184,7 +246,7 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 
 	corpus <- corpus %>% filter(term %in% frequent_terms) %>% # filter out unfrequent terms
 		arrange(ID, term, desc(val)) %>%
-		distinct(ID, term, .keep_all = T) # Remove duplicate terms keeping the first of each occurrence (useful for Mesh data)
+		distinct(ID, term, .keep_all = TRUE) # Remove duplicate terms keeping the first of each occurrence (useful for Mesh data)
 
 	message('- to wide format...')
 	tictoc::tic()
@@ -235,15 +297,28 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 	DTM %>% mutate(ID = ids[ID])
 }
 
-DTM.add_ngrams <- function(DTM, min.sim = .5, max.terms = 10, min.freq = 0) {
+#' Find non-consecutive n-grams
+#'
+#' Build a term-term network using a cosine similarity measure build on the term
+#' co-presence in documents. A threshold defined in \code{min.sim} is used to
+#' identify edges. The maximal cliques of the network represent the discovered
+#' n-grams.
+#'
+#' @param DTM A Document Term Matrix.
+#' @param min.sim The mininal cosine similarity that identify an edge.
+#' @param max.terms The maximum size (i.e., the number of terms) in a n-gram.
+#'
+#' @return The same input Document Term Matrix with extra columns for the n-grams.
+#'
+DTM.add_ngrams <- function(DTM, min.sim = .5, max.terms = 10) {
 
 	mat <- as.matrix(DTM[,-1])
 
 	mat.sparse <- as(mat, "dgCMatrix") # Using sparse matrices
 
-	TTM <- (t(mat.sparse) %*% mat.sparse)/sqrt(tcrossprod(colSums(mat^2, na.rm = T))) # Cosine similarity
+	TTM <- (t(mat.sparse) %*% mat.sparse)/sqrt(tcrossprod(colSums(mat^2, na.rm = TRUE))) # Cosine similarity
 
-	ngram.cliques <- graph_from_adjacency_matrix(as.matrix(TTM) >= min.sim, mode = 'undirected', diag = F) %>% # From TTM to undirected network
+	ngram.cliques <- graph_from_adjacency_matrix(as.matrix(TTM) >= min.sim, mode = 'undirected', diag = FALSE) %>% # From TTM to undirected network
 		max_cliques(min = 2) %>% lapply(names) # Extracting cliques
 
 	if (length(ngram.cliques) > 0) {
@@ -263,6 +338,19 @@ DTM.add_ngrams <- function(DTM, min.sim = .5, max.terms = 10, min.freq = 0) {
 	}
 }
 
+#' Aggregate redundant terms
+#'
+#' Build a term-term network using a cosine similarity measure build on the term
+#' co-presence in documents. A high threshold defined in \code{min.sim} is used
+#' to identify edges. The high edge threshold splits the network into multiple
+#' components which identify redundant terms.
+#'
+#' @param DTM A Document Term Matrix.
+#' @param min.sim The mininal cosine similarity that identify an edge.
+#'
+#' @return The same input Document Term Matrix with redundant terms removed and
+#'   joined into new columns.
+#'
 DTM.aggr_synonyms <- function(DTM, min.sim = .9) {
 
 	mat <- as.matrix(DTM[,-1])
