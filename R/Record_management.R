@@ -709,7 +709,7 @@ create_session <- function(Records, session_name,
 
 		# At the moment csv files will be converted to excel, eventually both file
 		# type will be supported
-		if (is.character(Records) && str_detect(Records, '\\.csv$')) Records <- import_data(Records)
+		Records <- import_data(Records)
 
 		message("- copy or write the Record data")
 
