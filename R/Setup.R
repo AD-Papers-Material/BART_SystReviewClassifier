@@ -153,22 +153,6 @@ get_website_resources <- function(url, url_filter = '.*', type_filter = '.*',
 	}, timeouts = max(wait_for + 3, 30), cleaning_timeout = max(wait_for + 3, 30))
 }
 
-# Parse an excel/csv file or return data if already parsed
-import_data <- function(input, ...) {
-
-	if (is.character(input) | is.factor(input)) {
-		if (str_detect(input, '\\.xlsx?$')) {
-			return(read_excel(input, guess_max = 10^6, ...))
-		} else if (str_detect(input, '\\.csv$')) {
-			return(read_csv(input, guess_max = 10^6, col_types = cols(), ...))
-		}
-	} else if (is.data.frame(input)) {
-		return(input)
-	}
-
-	stop('Input should be an existing csv/excel file path or a data.frame, found "', class(input),'".')
-}
-
 
 # Load the infrastructure -------------------------------------------------
 

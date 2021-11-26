@@ -1,3 +1,40 @@
+
+#' Read a data file/object
+#'
+#' @param input A file path to an Excel/CSV file or a data frame object
+#' @param ... Additional arguments to pass to
+#'   \code{link[readxl:read_excel]{readxl::read_excel}} or
+#'   \code{link[readr:read_csv]{readr::read_csv}}, depending on the file type.
+#'
+#' @return A data frame object.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # These all work:
+#'
+#' data <- import_data('data.csv')
+#'
+#' data <- import_data('data.xlsx', sheet = 2)
+#'
+#' data <- import_data(data)
+#' }
+import_data <- function(input, ...) {
+
+	if (is.character(input) | is.factor(input)) {
+		if (str_detect(input, '\\.xlsx?$')) {
+			return(read_excel(input, guess_max = 10^6, ...))
+		} else if (str_detect(input, '\\.csv$')) {
+			return(read_csv(input, guess_max = 10^6, col_types = cols(), ...))
+		}
+	} else if (is.data.frame(input)) {
+		return(input)
+	}
+
+	stop('Input should be an existing csv/excel file path or a data.frame, found "', class(input),'".')
+}
+
+
 #' Clean up problematic text in the citation data.
 #'
 #' @param df The data frame to be cleaned.
