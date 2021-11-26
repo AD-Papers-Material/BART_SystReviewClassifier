@@ -1,3 +1,57 @@
+#' Transform a year range into the format required by a specific search engine
+#'
+#' Take a year range in the form of:
+#'
+#' greater than: > Year; greater then or equal to: >= Year; lower than: < Year;
+#' lower then or equal to: <= Year; equal to: Year; range: Year1 - Year2.
+#'
+#' and transform it into a specific format passed through the \code{cases}
+#' argument. Some checks are performed to evaluate if \code{year_query} is
+#' clearly in an invalid format.
+#'
+#' @param year_query A string identifying a year or a range o years.
+#' @param cases The search engine syntax specification into which convert the
+#'   year query It needs to be a list with the following items: gt (greater
+#'   than), ge (greater then or equal to), lt (lower then), le (lower then or
+#'   equal to), ep (equal to), range (range of years). Inside the specification,
+#'   the year in the query can be retrieved with the \code{year_piece}
+#'   placeholder, which in the case of a closed range is a vector of two
+#'   elements (see examples).
+#' @param arg_in_query_test A search engine syntax tag that identifies a year
+#'   filter. Useful to define an already existing year filter in the query. If
+#'   \code{arg_in_query_test} is set, also the \code{query} argument must be
+#'   set.
+#' @param query The search query. Needed to test if a year filter is already
+#'   present. If \code{query} is set, also the \code{arg_in_query_test} argument
+#'   must be set.
+#'
+#' @return The formatted, search engine specific, year filter.
+#'
+#' @examples
+#'
+#' query <- "Test query"
+#' year_query <- "2010-2020"
+#'
+#' library(lubridate)
+#'
+#' ## Example for Web Of Science
+#' year_query <- clean_date_filter_arg(year_query, cases = list(
+#' gt = '{year_piece + 1}-{year(today())}', ge = '{year_piece}-{year(today())}',
+#' eq = '{year_piece}-{year_piece}', le = '1985-{year_piece}',
+#' range = '{year_piece[1]}-{year_piece[2]}', lt = '1985-{year_piece - 1}'),
+#' arg_in_query_test = 'PY ?=', query = query)
+#'
+#' ## Example for Pubmed
+#' year_query <- clean_date_filter_arg(year_query, cases = list(
+#' gt = '{year_piece + 1}[PDAT]:{year(today())}[PDAT]',
+#' ge = '{year_piece}[PDAT]:{year(today())}[PDAT]',
+#' eq = '{year_piece}[PDAT]:{year_piece}[PDAT]',
+#' le = '1000[PDAT]:{year_piece}[PDAT]',
+#' lt = '1000[PDAT]:{year_piece - 1}[PDAT]',
+#' range = '{year_piece[1]}[PDAT]:{year_piece[2]}[PDAT]'),
+#' arg_in_query_test = '[PDAT]', query = query)
+#'
+#'
 clean_date_filter_arg <- function(year_query, cases,
 																	arg_in_query_test = NULL, query = NULL) {
 
@@ -57,16 +111,64 @@ clean_date_filter_arg <- function(year_query, cases,
 
 }
 
+#' Automatic search on Web Of Science database
+#'
+#' This function performs an API search on Web Of Science (WOS), taking care of
+#' the authorization steps and query normalization. The user is needed to
+#' provide an API key by accessing \url{https://www.webofknowledge.com} with an
+#' authorized account (e.g. access through an academic VPN or proxy). The key
+#' can be found in the URL once the user is authorized. The key has a time
+#' limit, so it will need to be regenerated. The function is a wrapper over
+#' \code{\link[wosr:pull_wos]{wosr::pull_wos}}.
+#'
+#' @param query A boolean query with AND/OR/NOT operators, brackets for term
+#'   grouping and quotation marks for n-grams.
+#' @param year_query A year based filtering query. See
+#'   \code{\link{clean_date_filter_arg}} for more info.
+#' @param additional_fields Additional fields to add to the query. Won't be
+#'   normalized so it must already follow WOS specific syntax.
+#' @param api_key Necessary to access WOS database. See Details.
+#' @param parallel Whether to use parallel execution to speed up result
+#'   collection. Works only on Unix-based systems.
+#' @param parse_query Whether to normalize the query into WOS specific syntax.
+#'   If \code{FALSE}, it is assumed that the query is already in the format
+#'   required by WOS API.
+#' @param ... Additional arguments for
+#'   \code{\link[wosr:pull_wos]{wosr::pull_wos}}, excluding \code{query} and
+#'   \code{sid}.
+#'
+#' @return A data frame of records.
+#'
+#' @examples
+#'
+#' # Initial query to be built on domain knowledge. It accepts OR, AND, NOT
+#' # boolean operators and round brackets to group terms.
+#' query <- '((model OR models OR modeling OR network OR networks) AND
+#' (dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR
+#' hospital OR "long-term-care" OR "long term care" OR "longterm care" OR
+#' "long-term care" OR "healthcare associated") AND (infection OR resistance OR
+#' resistant))'
+#'
+#' # Year filter. The framework converts it to the API-specific format seamlessly.
+#' # common logical comparators can be used, i.e. <, <=, >, >=, while dashes
+#' # denotes inclusive date intervals. A single year restricts results to one year
+#' # period.
+#' year_filter <- '2010-2020'
+#'
+#' records <- search_wos(query, year_filter)
+#'
 search_wos <- function(query, year_query = NULL, additional_fields = NULL,
-											 default_field = 'TS', api_key = getOption('baysren.wos_api_key'),
-											 parallel = T, parse_query = T, ...) {
+											 api_key = getOption('baysren.wos_api_key'),
+											 parallel = TRUE, parse_query = TRUE, ...) {
 
 	message('Searching WOS...')
 
+	default_field <- 'TS' # may change in the future
+
 	if (parallel) { ## Use mclapply which is faster
 		pull_records <- function (query, editions = c("SCI", "SSCI", "AHCI", "ISTP",
-																									"ISSHP", "BSCI", "BHCI", "IC", "CCR", "ESCI"), sid = auth(Sys.getenv("WOS_USERNAME"),
-																																																						Sys.getenv("WOS_PASSWORD")), ...)
+																									"ISSHP", "BSCI", "BHCI", "IC", "CCR", "ESCI"),
+															sid = auth(Sys.getenv("WOS_USERNAME"), Sys.getenv("WOS_PASSWORD")), ...)
 		{
 			parse_wos <- function(all_resps)
 			{
@@ -167,10 +269,48 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 	records
 }
 
+
+#' Automatic search on Pubmed database
+#'
+#' Perform an API search using Pubmed E-utilities
+#' \url{https://www.ncbi.nlm.nih.gov/books/NBK25501/}. An API key is not
+#' mandatory but may avoid quota limitation for searches that return a large
+#' number of results. Large results sets are obtained by iterative querying.
+#'
+#' @param query A boolean query with AND/OR/NOT operators, brackets for term
+#'   grouping and quotation marks for n-grams.
+#' @param year_query A year based filtering query. See
+#'   \code{\link{clean_date_filter_arg}} for more info.
+#' @param additional_fields Additional fields to add to the query. Won't be
+#'   normalized so it must already follow Pubmed specific syntax.
+#' @param api_key Not mandatory but is helpful when performing searches with a
+#'   large number of results to avoid quota limitations.
+#' @param record_limit A limit on the number or records collected.
+#'
+#' @return A data frame of records.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # Initial query to be built on domain knowledge. It accepts OR, AND, NOT
+#' # boolean operators and round brackets to group terms.
+#' query <- '((model OR models OR modeling OR network OR networks) AND
+#' (dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR
+#' hospital OR "long-term-care" OR "long term care" OR "longterm care" OR
+#' "long-term care" OR "healthcare associated") AND (infection OR resistance OR
+#' resistant))'
+#'
+#' # Year filter. The framework converts it to the API-specific format seamlessly.
+#' # common logical comparators can be used, i.e. <, <=, >, >=, while dashes
+#' # denotes inclusive date intervals. A single year restricts results to one year
+#' # period.
+#' year_filter <- '2010-2020'
+#'
+#' records <- search_pubmed(query, year_filter)
+#'}
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = getOption('baysren.ncbi_api_key'),
-													record_limit = numeric(),
-													...) {
+													record_limit = numeric()) {
 
 	message('Searching Pubmed...')
 
@@ -210,17 +350,17 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		have.results <- F
 		trials <- 0
 
-		while (!have.results & trials < 20) { # not efficient but the other solution (below) fails for some reason
-			rescords <- try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
+		while (!have.results & trials < 20) {
+			records <- try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
 																						retstart = step * 200, retmax = min(200, total_count - step * 200),
 																						rettype = 'medline', parsed = F,
 																						api_key = api_key), silent = T)
 
-			have.results <- class(rescords) == 'character'
+			have.results <- class(records) == 'character'
 			trials <- trials + 1
 		}
 
-		rescords
+		records
 	})
 
 	if (sapply(records, function(x) class(x) == 'try-error') %>% any) {
@@ -238,9 +378,51 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 }
 
+#' Automatic search on IEEE database
+#'
+#' Perform a search on \url{https://ieeexplore.ieee.org/Xplore/home.jsp}. If an
+#' API key is available, IEEE API will be used, otherwise Google Chrome APIs
+#' will be used to scrape records simulating a manual user search. This second
+#' method is not ensured to work and IEEE may blacklist your IP if abused.
+#'
+#' @param query A boolean query with AND/OR/NOT operators, brackets for term
+#'   grouping and quotation marks for n-grams.
+#' @param year_query A year based filtering query. See
+#'   \code{\link{clean_date_filter_arg}} for more info.
+#' @param additional_fields Additional fields to add to the query. Won't be
+#'   normalized so it must already follow WOS specific syntax.
+#' @param api_key Necessary to use IEEE APIs. See details.
+#' @param allow_web_scraping If \code{api_key} is \code{NULL}, web scraping can
+#'   be attempted to collect the records. This approach is not suggested in
+#'   production and may fail with a large number of results. See Details.
+#' @param wait_for If web scraping is used, a certain amount of time is needed
+#'   to let the IEEE page to fully load before collecting the results. This
+#'   delay depends on the user network and browser speed, thus the default 20
+#'   seconds may not be sufficient.
+#' @param record_limit A limit on the number or records collected.
+#'
+#' @return A data frame of records.
+#'
+#' @examples
+#' \dontrun{
+#' # Initial query to be built on domain knowledge. It accepts OR, AND, NOT
+#' # boolean operators and round brackets to group terms.
+#' query <- '((model OR models OR modeling OR network OR networks) AND
+#' (dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR
+#' hospital OR "long-term-care" OR "long term care" OR "longterm care" OR
+#' "long-term care" OR "healthcare associated") AND (infection OR resistance OR
+#' resistant))'
+#'
+#' # Year filter. The framework converts it to the API-specific format seamlessly.
+#' # common logical comparators can be used, i.e. <, <=, >, >=, while dashes
+#' # denotes inclusive date intervals. A single year restricts results to one year
+#' # period.
+#' year_filter <- '2010-2020'
+#'
+#' records <- search_ieee(query, year_filter)
+#'}
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
-												api_key = getOption('baysren.ieee_api_key'), allow_web_scraping = T,
-												file_name = glue('IEEE_{safe_now()}'), save = T,
+												api_key = getOption('baysren.ieee_api_key'), allow_web_scraping = TRUE,
 												wait_for = 20, record_limit = NULL) {
 	message('Searching IEEE...')
 
@@ -254,7 +436,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 		})
 	}
 
-	if (is.null(api_key[[1]])) {
+	if (is.null(api_key)) {
 		warning('IEEE API key is not set, defaulting to webscraping.')
 
 		if (!allow_web_scraping) stop('If API key is not present web scraping must be allowed.')
@@ -491,6 +673,79 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	records
 }
 
+#' Wrapper function to acquire citation data from multiple sources
+#'
+#' It is better to use this function instead of the individual search_* tools,
+#' since it also automatically acquires manually downloaded record (e.g., for
+#' EMBASE and SCOPUS for which automatic search is not available).
+#'
+#' The function will organize search results into folder defined by the pattern
+#' \code{records_folder}/\code{session_name}/\code{query_name}, which allows to
+#' have different search sessions (and classification sessions) and multiple
+#' queries per session (useful when it is too complex to convey all information
+#' into a single query). These folder can be created manually and manually
+#' downloaded citation data must be put into these folders to be acquired by the
+#' functions.
+#'
+#' To acquire the manually downloaded files, they must given a name containing
+#' the source as in \code{sources}. There could be more files for the same
+#' sources, since all research database have download limits and users may need
+#' to download results in batches. The function acquires these files and parse
+#' them into a standard format, creating a new file for each source.
+#'
+#' The output is a "journal" file which store all information about the queries,
+#' the sources used, the number or results, etc... which allow to keep track of
+#' all search sessions. If a journal file is already present, the new results
+#' will be added.
+#'
+#' @param query A boolean query with AND/OR/NOT operators, brackets for term
+#'   grouping and quotation marks for n-grams.
+#' @param year_query A year based filtering query. See
+#'   \code{\link{clean_date_filter_arg}} for more info.
+#' @param actions Whether to acquire records through automatic search, parsing
+#'   of manually downloaded data, or both.
+#' @param sources The sources for which records should be collected
+#' @param session_name How to name the current search session and will be used
+#'   to create a folder to collect search results. Should be the same as the
+#'   name used for classification session of the same records.
+#' @param query_name A label for the current query. It will be used to name a
+#'   folder inside the \code{session_name} folder. It is useful to separate
+#'   records acquired with different queries in the same search session.
+#' @param records_folder The path to a folder where to store search results.
+#' @param overwrite Whether to overwrite results for a given
+#'   \code{session_name}/\code{query_name}/\code{sources} if the search is
+#'   repeated and a result file already exists.
+#' @param journal A path to a file (Excel or CSV) to store a summary of the
+#'   search results. If the file already exists the summary of the new
+#'   \code{session_name}/\code{query_name}/\code{sources} will be added to the
+#'   file.
+#'
+#' @return A "Journal" data frame containing a summary of the search results
+#'   grouped by
+#'   \code{session_name}/\code{query_name}/\code{sources}/\code{actions}.
+#'
+#' @examples
+#' \dontrun{
+#' # Initial query to be built on domain knowledge. It accepts OR, AND, NOT
+#' # boolean operators and round brackets to group terms.
+#' query <- '((model OR models OR modeling OR network OR networks) AND
+#' (dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR
+#' hospital OR "long-term-care" OR "long term care" OR "longterm care" OR
+#' "long-term care" OR "healthcare associated") AND (infection OR resistance OR
+#' resistant))'
+#'
+#' # Year filter. The framework converts it to the API-specific format seamlessly.
+#' # common logical comparators can be used, i.e. <, <=, >, >=, while dashes
+#' # denotes inclusive date intervals. A single year restricts results to one year
+#' # period.
+#' year_filter <- '2010-2020'
+#'
+#' journal <- perform_search_session(
+#' 	query = query, year_query = year_filter,
+#' 	session_name = 'Session1', query_name = 'Query1',
+#' 	records_folder = 'Records',
+#'	journal = 'Session_journal.csv')
+#'}
 perform_search_session <- function(query, year_query = NULL, actions = c('API', 'parsed'),
 																	 sources = c('IEEE', 'WOS', 'Pubmed', 'Scopus', 'Embase'),
 																	 session_name = 'Session1', query_name = 'Query1',
@@ -603,7 +858,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 		} else stop('Session journal file type must be csv or excel.')
 
 		if (file.exists(journal)) {
-			previous_data <- read_fun(journal)
+			previous_data <- read_fun(journal) #TODO: evaluate if import_data works as well
 
 			record_data <- previous_data %>%
 				bind_rows(record_data) %>%
