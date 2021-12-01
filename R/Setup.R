@@ -47,7 +47,7 @@ pkg.require(
 )
 
 
-# Windows do not support mclapply
+# Windows does not support mclapply, regressing to lapply
 if (.Platform$OS.type != 'unix') {
 	warning('Forked parallel operations not allowed on Windows. Falling back to sequential.')
 
