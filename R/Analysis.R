@@ -44,26 +44,6 @@ compute_changes <- function(Annotations) {
 		}
 }
 
-# estimate_positivity_rate_model <- function(train_data) {
-# 	library(brms)
-#
-# 	train_data <- train_data %>%
-# 		transmute(
-# 			Target = coalesce_labels(., c('Rev_manual', 'Rev_prediction',
-# 																		'Rev_prediction_new', 'Rev_previous')) %>% factor(),
-# 			Order
-# 			) %>%
-# 		na.omit()
-#
-# 	brm(bf(Target ~ a * Order ^ b, a + b ~ 1, nl = T), family = bernoulli,
-# 						data = train_data,
-# 						cores = 8, chains = 8, refresh = 0, iter = 8000, control = list(adapt_delta = .95),
-# 						backend = 'cmdstan',
-# 						prior = c(set_prior('student_t(1, 0, 5)', nlpar = "a"),
-# 											set_prior('student_t(1, 0, 2.5)', nlpar = "b")))
-#
-# }
-
 estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 	library(brms)
 
@@ -90,7 +70,6 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 
 		model <- estimate_positivity_rate_model(records, seed)
 	}
-
 
 	quants <- sort(quants)
 
@@ -147,6 +126,8 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 	}
 
 	if (plot) {
+		## TODO: move this into its own function in Reporting.R
+
 		cl <- suppressWarnings(makeCluster(getOption("mc.cores")))
 		on.exit(stopCluster(cl))
 		message('- computing cumulative trends...')
@@ -185,87 +166,6 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 
 	res
 }
-
-# plot_predicted_pos_rate <- function(Ann_data, block_size = 50) {
-#
-# 	# plot_predicted_pos_rate(a %>% mutate(Rev_previous = coalesce_labels(., c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new', 'Rev_previous')) %>% replace(Order > 1200, NA)), block_size = 50)
-#
-# 	Ann_data <- Ann_data %>%
-# 		transmute(
-# 			Order,
-# 			Train = Rev_previous == 'y',
-# 			Target = coalesce_labels(., c('Rev_manual', 'Rev_prediction', 'Rev_prediction_new', 'Rev_previous')) == 'y'
-# 		) %>%
-# 		group_by(Block = ceiling(1:n()/block_size)) %>%
-# 		summarise(
-# 			Order = last(Order),
-# 			block_size = n(),
-# 			Train = sum(Train),
-# 			Target = sum(Target, na.rm = T)
-# 		)
-# 	#
-# 	# mod <- brm(Train | trials(block_size) ~ Order, family = binomial, data = Ann_data,
-# 	# 					 cores = 8, refresh = 0, iter = 8000,
-# 	# 					 backend = 'cmdstan',
-# 	# 					 prior = c(prior(student_t(1, 0, 5), class = 'Intercept'),
-# 	# 					 					prior(student_t(1, 0, 2.5), class = 'b')))
-#
-# 	mod <- brms::brm(bf(Train | trials(block_size) ~ a * Order ^ b, a + b ~ 1, nl = T), family = binomial, data = Ann_data,
-# 									 cores = 8, refresh = 0, iter = 8000,
-# 									 backend = 'cmdstan',
-# 									 prior = c(set_prior('student_t(1, 0, 5)', nlpar = "a"),
-# 									 					set_prior('student_t(1, 0, 2.5)', nlpar = "b")))
-#
-# 	## To estimate the total number of positives and from there the positives in a
-# 	## random subsample
-# 	# posterior_predict(mod, newdata = data.frame( block_size,
-# 	# Order = seq(1200, nrow(a), block_size) )) %>% rowSums() %>% quantile(c(.01,
-# 	# .05, .5, .95, .99)) %>% {qhyper(p = .95, (96+ .)/nrow(a) * 1200, 1200 * (1 -
-# 	# (96+ .)/nrow(a)), 500)} print(mod)
-# browser()
-# 	posterior_predict(mod, newdata = data.frame(
-# 		block_size,
-# 		Order = seq(block_size, limit, block_size)
-# 	)) %>% rowSums() %>% quantile(seq(0,1, .1)) %>%
-# 		print()
-#
-# 	limit <- min(Ann_data$Order[last(which(Ann_data$Target > 0))], last(Ann_data$Order))
-#
-# 	train_limit = max(Ann_data$Order[!is.na(Ann_data$Train)])
-#
-# 	data.frame(
-# 		block_size,
-# 		Order = seq(block_size, limit, block_size)
-# 	) %>%
-# 		left_join(Ann_data) %>%
-# 		mutate(
-# 			Target_lab = Target,
-# 			Target = Target / block_size,
-# 			(posterior_predict(mod, newdata = cur_data()) / block_size) %>%
-# 				apply(2, quantile, c(.05, .5, .95)) %>% t %>%
-# 				as.data.frame() %>%
-# 				setNames(c('Low', 'Med', 'Up')),
-# 			across(c(Target_lab, Target), ~ replace(.x, .x == 0, NA))
-# 		) %>%
-# 		ggplot(aes(Order)) +
-# 		geom_ribbon(aes(ymin = Low, ymax = Up), alpha = .25) +
-# 		geom_vline(xintercept = train_limit, linetype = 'dashed', alpha = .5) +
-# 		geom_segment(aes(xend = Order, y = 0, yend = Target, color = 'Obs.'), size = 1) +
-# 		geom_line(aes(y = Med, color = 'Pred.'), size = 1, linetype = 'dashed', alpha = .8) +
-# 		geom_label(aes(y = Target, label = Target_lab)) +
-# 		theme_minimal() +
-# 		scale_x_continuous(breaks = seq(block_size, limit, block_size)) +
-# 		scale_y_continuous(trans = 'log1p', breaks = seq(0, .3, .01)) +
-# 		labs(y = 'Pos. rate', x = 'Records', color = NULL) +
-# 		theme(axis.text.x = element_text(angle = 45, hjust = 1))
-#
-# 	# ggplot(Ann_data, aes(Order)) +
-# 	# 	#geom_line(aes(y = Pred_Up, color = 'Up')) +
-# 	# 	#geom_line(aes(y = Pred_Low, color = 'Low')) +
-# 	# 	geom_errorbar(aes(ymin = Pred_Low, ymax = Pred_Up, color = coalesce_labels(a)), width = 0) +
-# 	# 	geom_point(aes(y = Pred_Med, color = Predicted_label), alpha = .8) +
-# 	# 	scale_y_continuous(trans = 'logit') + theme_minimal()
-# }
 
 extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, recompute_DTM = FALSE,
 														sessions_folder = getOption("baysren.sessions_folder")) {
