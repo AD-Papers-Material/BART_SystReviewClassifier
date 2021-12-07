@@ -576,7 +576,7 @@ format_performance <- function(..., session_names = NULL) {
 				'Observed positive matches (% over total records)' = glue("{obs_positives} ({percent(obs_positives/total_records)})"),
 				'Predicted positive matches [trunc. 90% PrI]' = pred_positives %>% format_interval(),
 				'Expected sensitivity [trunc. 90% PrI]' = sensitivity %>% format_interval(percent = TRUE),
-				'Simple Model $R^2$ [90% PrI]' = mod_r2 %>% format_interval(percent = TRUE)
+				'Simple Model $R^2$ [90% CrI]' = mod_r2 %>% format_interval(percent = TRUE)
 			) %>%
 				mutate_all(as.character) %>%
 				tidyr::pivot_longer(everything(), names_to = 'Indicator', values_to = session_names[i]) %>%
@@ -609,7 +609,7 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 	var_imp
 }
 
-print_table <- function(data, caption = '', allow_math = F) {
+print_table <- function(data, caption = '', allow_math = F, ...) {
 	if (knitr::is_latex_output()) {
 		if (isTRUE(allow_math)) {
 			data <- data %>%
@@ -621,7 +621,8 @@ print_table <- function(data, caption = '', allow_math = F) {
 			knitr::kable(format = "latex", booktabs = T,
 									 caption = caption %>% str_squish() %>%
 									 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
-									 escape = !allow_math
+									 escape = !allow_math,
+									 ...
 									 #format.args = list(floating = FALSE)
 			) %>%
 			kableExtra::kable_styling(
@@ -632,7 +633,7 @@ print_table <- function(data, caption = '', allow_math = F) {
 				)
 			)
 	} else {
-		knitr::kable(data, caption = caption)
+		knitr::kable(data, caption = caption, ...)
 	}
 
 }
