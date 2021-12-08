@@ -11,7 +11,6 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
-\usepackage{lipsum}
 \usepackage{graphicx}
 
 \title{Main manuscript}
@@ -34,6 +33,7 @@ agencies. Optional.}
   Santa Narimana, Levand \\
   \texttt{\href{mailto:stariate@ee.mount-sheikh.edu}{\nolinkurl{stariate@ee.mount-sheikh.edu}}} \\
   }
+
 
 
 % Pandoc citation processing
@@ -66,6 +66,8 @@ agencies. Optional.}
 \usepackage{caption}
 \usepackage{placeins}
 \usepackage{amsmath}
+\usepackage{lineno}
+\linenumbers
 \captionsetup[table]{labelformat=empty}
 \captionsetup[figure]{labelformat=empty}
 \usepackage{booktabs}
@@ -110,15 +112,15 @@ Enter the text of your abstract here.
 Scientific production has experienced continuous exponential growth in
 the last decades (Larsen and Von Ins 2010; Bornmann and Mutz 2015). This
 is especially true for biomedical research, a trend further increased by
-the COVID19 pandemic, thanks to decreased journals' processing time and
-the diffusion of preprint databases' usage (Aviv-Reuven and Rosenfeld
-2021; Horbach 2020; Hoy 2020). Consequently, it gets harder for
-researchers and practitioners to stay up-to-date on the latest findings
-in their field. Secondary research is of paramount relevance in this
-scenario, providing valuable summaries of the latest research results,
-but is getting ever more demanding in terms of time and human resources
-(Allen and Olkin 1999; Borah et al. 2017; A. M. Cohen et al. 2010;
-Bastian, Glasziou, and Chalmers 2010).\\
+the COVID-19 pandemic, thanks to faster article' processing time by
+publishers and the diffusion of preprint databases' usage (Aviv-Reuven
+and Rosenfeld 2021; Horbach 2020; Hoy 2020). Consequently, it gets
+harder for researchers and practitioners to stay up-to-date on the
+latest findings in their field. Secondary research is of paramount
+relevance in this scenario, providing valuable summaries of the latest
+research results, but is getting ever more demanding in terms of time
+and human resources (Allen and Olkin 1999; Borah et al. 2017; A. M.
+Cohen et al. 2010; Bastian, Glasziou, and Chalmers 2010).\\
 The article collection and screening phases of a systematic review are
 particularly demanding (Babar and Zhang 2009). First, relevant published
 research needs to be collected from scientific databases through
@@ -155,39 +157,33 @@ into quantitative features, with various levels of abstraction and
 generalisation (Ananiadou and McNaught 2006; K. B. Cohen and Hunter
 2008); with machine learning, such text-derived data can be used to map
 and reproduce human judgment, automating the citation screening
-(Ikonomakis, Kotsiantis, and Tampakas 2005). One of the most successful
-approaches to text screening is active machine learning: researchers
-review the predictions made by the learning algorithm, focusing on the
-most uncertain predictions (``uncertainty'' based active machine
-learning) or on those giving a document a higher probability of being
-relevant (``certainty'' based active ML) (Miwa et al. 2014).\\
-The automatisation of systematic reviews has been ripe with improvements
-in the last years, and it is possible to foresee that such techniques
-will become a standard approach (E. Beller et al. 2018). See Ananiadou
-et al. (2009); O'Mara-Eves et al. (2015); Tsafnat et al. (2013);
-Jonnalagadda, Goyal, and Huffman (2015) for in-depth evaluations of
-research in this field. Many of these studies have generated a set of
-user-friendly commercial and free-to-use tools (see Marshall and Wallace
-2019, table 1). Despite the significant advances, each method has
-various shortcomings, both in usability and efficiency (O'Mara-Eves et
-al. 2015). We tried to address some of these limitations by creating an
-integrated framework that tries to simplify systematic reviews in
-innovative ways: we provide solutions for automatic citation collection
-and management from multiple online sources and a Bayesian, active
-machine learning-based tool to support humans in the screening task,
-exponentially reducing the number of records to review. In particular,
-we exploit the characteristics of Bayesian analysis to overcome the
-shortcoming of both ``certainty'' and ``uncertainty'' based active
-learning and the difficulties in defining stopping rules (Miwa et al.
-2014). Finally, we propose an experimental method to semi-automatically
-generate efficient search queries given an already labelled set of
-publications.\\
+(Ikonomakis, Kotsiantis, and Tampakas 2005).\\
+The automation of systematic reviews has been ripe with improvements in
+the last years (Ananiadou et al. 2009; O'Mara-Eves et al. 2015; Tsafnat
+et al. 2013; Jonnalagadda, Goyal, and Huffman 2015), and it is possible
+to foresee that it is going to become the standard approach in the field
+(E. Beller et al. 2018), with many solutions already being turned into
+commercial and free-to-use tools (see Marshall and Wallace 2019, table
+1).\\
+In this manuscript we present an open source, production-ready framework
+which further contributes to the state-of-the-art in systematic review
+automation (SRA) and helpers (SRH) tools. We improve the ``retrieval
+phase'' by providing a unified framework for the automatic collection
+and management of scientific literature from multiple online sources.
+For the citation screening (appraisal) phase, we built an active machine
+learning-based Miwa et al. (2014) protocol, which exploits a Bayesian
+framework to efficiently identify potentially relevant documents that
+require human review while automatically screening-out the large
+majority of clearly non-relevant ones; the algorithm then uses human
+reviews to iteratively increase classification accuracy. Finally, we
+included a tool to generate new search queries given an already labelled
+citation data set, in order to identify relevant research possibly
+missed by human-made queries.\\
 We tested the framework in the retrieval and appraisal phases of an
 example topic of interest for our group: the evaluation of the
 mathematical modelling of patient referral networks among hospitals and
 their impact on the diffusion of healthcare-associated pathogenic
-microorganisms. The actual protocol of this systematic review is
-published in (Sadaghiani et al. 2020).\\
+microorganisms; the protocol is published in (Sadaghiani et al. 2020).\\
 We give an overview of the framework in the Methods section; in the
 Result section, we show the framework outputs and performance once
 applied to the example topic; in the Discussion, we lay out the
@@ -201,23 +197,24 @@ features of the framework.
 \subsection{General description}\label{general-description}}
 
 We built an R (R Core Team 2020) based framework to simplify two aspects
-of systematic reviews: record acquisition and classification. The
-framework comprises several modules that communicate through
+of systematic reviews: record acquisition and classification. The code
+used to generate the results in the manuscript is available at X while
+an update version of the framework is distributed as an R package at Y.
+The framework includes several modules that communicate through
 intermediate outputs stored in standard formats, which make it possible
 for users to extend the framework or easily integrate it with other
 tools in their pipeline. See Supplemental Material S1 for an in-depth
 description of the framework and how to use it.\\
 The tasks carried out by the framework are grouped into ``sessions'',
-i.e., a set of actions that starts from a search query to obtain a set
-of scientific citation data (records), which are then labelled as
-relevant (``positive'' in the rest of the text) or not (``negative'')
-for the topic of interest (Fig. 1). The framework can generate a new
-query from this labelled set and perform a new session to find records
-possibly missed by the first query.\\
-The researcher initiates the process with a starting query derived by
-domain knowledge from which she expects a high relevant/non-relevant
-record ratio.\\
-Follows a description of the framework's components.\\
+which comprise obtaining scientific citation data (records) using a
+search query and then labelling them as relevant (``positive'' in the
+rest of the text) or not (``negative'') for the topic of interest with
+the help of a machine learning engine (Fig. 1). The initial search query
+should be built using domain knowledge, trying to achieve a high
+relevant/non-relevant record ratio.\\
+The framework can then generate a new data-driven query from this
+labelled set to perform a new session to find records possibly missed by
+the first query.\\
 
 \begin{figure}
 \includegraphics[width=1\linewidth]{methods_diagram} \caption{Figure 1.Framework's visual depiction.}\label{fig:method_diagram}
@@ -236,16 +233,14 @@ and Electronics Engineers (IEEE,
 care of authorization management for non-open databases like WOS and
 IEEE. It is also possible to download and import records in the
 framework manually; this is particularly useful to acquire records from
-the SCOPUS
-(\url{https://www.scopus.com/search/form.uri?display=basic\#basic}) and
-EMBASE databases
-(\url{https://www.embase.com/\#advancedSearch/default}), for which a
-comprehensive API interface was not easy to build. An extra manual
-search was necessary also for Pubmed, since the API and the web
-interface have different rule expansion algorithms and return slightly
-different results ({`NCBI Insights : Updated Pubmed e-Utilities Coming
-in April 2022!'} n.d.). A short guide on how to set up the framework for
-each supported database is available in Supplemental Material S3.\\
+the SCOPUS (\url{https://www.scopus.com/}) and EMBASE databases
+(\url{https://www.embase.com/}), for which a comprehensive API interface
+was not easy to build. An extra manual search was necessary also for
+Pubmed, since the API and the web interface have different rule
+expansion algorithms and return slightly different results ({`NCBI
+Insights : Updated Pubmed e-Utilities Coming in April 2022!'}, n.d.). A
+short guide on how to set up the framework for each supported database
+is available in Supplemental Material S3.\\
 The acquired records are merged into a single database, resolving
 duplicates and different formatting between sources. The records are
 ordered according to the frequency of the positive query terms (e.g.,
@@ -262,22 +257,21 @@ classification (Chawla, Japkowicz, and Kotcz 2004).
 \hypertarget{text-feature-extraction}{%
 \subsection{Text feature extraction}\label{text-feature-extraction}}
 
-The collected citation data have a number of fields characterizing a
+The collected citation data have a number of fields characterising a
 scientific publication. The framework models the relevance of a record
 based on the following fields: title, abstract, authors, keywords, MESH
 terms (Lipscomb 2000). A series of Natural Language Processing (NLP)
-techniques (Baeza-Yates, Ribeiro-Neto, and others 1999; Marshall and
-Wallace 2019; Ananiadou and McNaught 2006) are employed to transform the
-textual information in these fields into features for machine learning
-through a bag-of-words approach (Marshall and Wallace 2019). The
-processing of free text fields (title, abstract) includes: tokenization
-(i.e., extracting the terms), common stopwords (i.e., sentence
-components bringing no meaning) removal, part-of-speech filtering (only
-nouns, adjectives, verbs and untagged terms are retained), and
-lemmatization of the terms (i.e., reduction to their base grammar form).
-Text processing for authors, keywords and MESH terms identifies logical
-units (e.g., author's full names, composite keywords) and extracts
-them.\\
+techniques (Baeza-Yates, Ribeiro-Neto, et al. 1999; Marshall and Wallace
+2019; Ananiadou and McNaught 2006) are employed to transform the textual
+information in these fields into features for machine learning through a
+bag-of-words approach (Marshall and Wallace 2019). The processing of
+free text fields (title, abstract) includes: tokenization (i.e.,
+extracting the terms), common stopwords (i.e., sentence components
+bringing no meaning) removal, part-of-speech filtering (only nouns,
+adjectives, verbs and untagged terms are retained), and lemmatization of
+the terms (i.e., reduction to their base grammar form). Text processing
+for authors, keywords and MESH terms identifies logical units (e.g.,
+author's full names, composite keywords) and extracts them.\\
 Terms appearing in less than 5\% of the labelled documents are removed
 from negative records. All terms in the positive set are kept to
 increase sensitivity at the cost of specificity.\\
@@ -323,7 +317,7 @@ averaging the PPD between models (Zhou 2021; Dietterich 2000).\\
 To assign the labels, we employed an ``active learning'' Miwa et al.
 (2014) approach, where a human reviews a specific subset of predictions
 made from the machine, which is then retrained on the manually reviewed
-dataset. This process proceeds iteratively, decreasing prediction
+data set. This process proceeds iteratively, decreasing prediction
 uncertainty.\\
 Label assignment is done through the identification of an ``uncertainty
 zone'' whose construction is possible thanks to the Bayesian nature of
@@ -379,9 +373,8 @@ The automatic classification and the manual review steps alternate in a
 loop (CR iterations) until no new positive matches are found in four
 consecutive iterations.
 
-\hypertarget{relevant-terms-extraction}{%
-\subsection{Relevant terms'
-extraction}\label{relevant-terms-extraction}}
+\hypertarget{relevant-term-extraction}{%
+\subsection{Relevant term extraction}\label{relevant-term-extraction}}
 
 BART model it is possible to extract the proportion of times a term was
 used in a posterior tree over the sum of total inclusions of all
@@ -450,7 +443,7 @@ The algorithm encompasses a number of steps:
 \end{itemize}
 
 Since the algorithm is data-driven, it creates queries that effectively
-select positive records from the input dataset but may be not specific
+select positive records from the input data set but may be not specific
 enough once applied to actual research databases. Therefore we appended
 an extra subquery in \(AND\), which specifies the general topics of our
 search and delimitates the search domain.\\
@@ -474,18 +467,21 @@ Given that this model is conditional only on the BART predictions and
 not on the DTM, it is characterized by more uncertainty, providing
 plausible worst-case scenarios.\\
 The surrogate model is then used to generate the predictive cumulative
-distribution of the number of missed positive records in the whole
-dataset. This distribution allows estimating the expected total
-posterior ``Sensitivity'' and the ``Work saved over random'' (WSoR) of
-the classification model in the full (unreviewed) dataset. The WSoR is
-one minus the number of records to manually label at random to find the
-same number of positives; this last quantity is estimated through a
-negative hypergeometric distribution (Chae 1993).\\
+distribution of the number of total positive records in the whole data
+set. This distribution allows estimating the expected total posterior
+``Sensitivity'' and ``Efficiency'' of the classification model in the
+full (unreviewed) data set. Efficiency is summarised by the ``Work saved
+over random'' (WSoR) statistic: one minus the ratio between the number
+of record manually reviewed and those that would be required to find the
+same number of positives if classification was performed choosing
+records randomly; this last quantity is estimated through a negative
+hypergeometric distribution (Chae 1993) over the predicted amount of
+positive records.\\
 For the number of predicted positive records, the sensitivity and the
-WSoR, we reported the ``truncated 90\% PrI'' {[}trunc. 90\% PrI{]},
-which is the uncertainty interval bounded at the number of observed
-total positive records (i.e., there cannot be less predicted positive
-records than observed).
+efficiency, we reported the ``truncated 90\% PrI'' {[}trunc. 90\%
+PrI{]}, which is the uncertainty interval bounded at the number of
+observed total positive records (i.e., there cannot be less predicted
+positive records than observed).
 
 \hypertarget{hyperparameter-evaluation}{%
 \subsection{Hyperparameter evaluation}\label{hyperparameter-evaluation}}
@@ -512,9 +508,9 @@ Our classification algorithm has a number of hyperparameters:
 To evaluate the hyperparameter effect of performance, we set up a ``grid
 search'' (Claesen and De Moor 2015; L. Yang and Shami 2020) on a
 prelabelled ``validation set'' made of the first 1200 records from the
-first session dataset. The framework tested each hyperparameter
+first session data set. The framework tested each hyperparameter
 combination until four CR iterations with no positive records were
-returned or the whole dataset got labelled.\\
+returned or the whole data set got labelled.\\
 For each combination, a performance score was computed as the product of
 ``Efficiency'' (1 minus the ratio of records that required review over
 the total) and ``Sensitivity'' (number of positive records found over
@@ -530,7 +526,7 @@ from the cluster with the highest average score.
 \hypertarget{first-session}{%
 \subsection{First session}\label{first-session}}
 
-The input search query for the first session was:\\
+The initial search query for the example topic was:\\
 
 \emph{((model OR models OR modeling OR network OR networks) AND
 (dissemination OR transmission OR spread OR diffusion) AND (nosocomial
@@ -549,13 +545,14 @@ SCOPUS, 2100 (11.8\%) from WOS, and 60 (0.34\%) from IEEE (Table 1).
 There were various degrees of overlapping between sources, with the
 38.4\% of records being present in more than one database and EMBASE and
 IEEE being the databases with the higher uniqueness ratios. The final
-dataset was composed by 17755 unique records.\\
-The first 250 records were manually labeled. Of these 43 (17.2\%) were
-labeled as positive, and 207 (82.8\%) as negative.
+data set was composed by 17755 unique records.\\
+The first 250 records (based on ``simple query ordering'') were manually
+labeled. Of these 43 (17.2\%) were labeled as positive, and 207 (82.8\%)
+as negative.
 
 \begin{table}[!h]
 
-\caption{\label{tab:session 1}\textbf{Table 1}. Distribution of retrieved records by source and session. For each source it is reported the number of records, percentage over the session total (after removing duplicates)' and, number or records specific for a source as absolute value and as percentage over the source total. All session shows records after joining and deduplication of the Session 1 and Session 2 dataset.}
+\caption{\label{tab:Table 1}\textbf{Table 1}. Distribution of retrieved records by source and session. For each source it is reported the number of records, percentage over the session total (after removing duplicates)' and, number or records specific for a source as absolute value and as percentage over the source total. All session shows records after joining and deduplication of the Session 1 and Session 2 data set.}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{llrlrl}
@@ -610,7 +607,7 @@ number of 101 positives were found over 766 manually reviewed records
 
 \begin{table}[!h]
 
-\caption{\label{tab:session 1}\textbf{Table 2}. Results of the automatic classifaction and manual review rounds. For each iteration, the cumulative number of positives and negative records and their sum (Total labelled) and percentage over total are shown. Also, the number of changes after review and their description is reported."Unlab." indicates unlabelled records marked for review. For each Iteration, also the number of features used by the engine is reported. The first row reports the results of the initial manual labelling of records, which acted as input for the automatic classification in Iteration 1. In Session 2, the engine uses the labels at the end of Session 1 to classify the newly added records.}
+\caption{\label{tab:Table 2}\textbf{Table 2}. Results of the automatic classifaction and manual review rounds. For each iteration, the cumulative number of positives and negative records and their sum (Total labelled) and percentage over total are shown. Also, the number of changes after review and their description is reported."Unlab." indicates unlabelled records marked for review. For each Iteration, also the number of features used by the engine is reported. The first row reports the results of the initial manual labelling of records, which acted as input for the automatic classification in Iteration 1. In Session 2, the engine uses the labels at the end of Session 1 to classify the newly added records.}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}[t]{llrrlrrrrrr}
@@ -640,9 +637,8 @@ Session & Iteration & Positives & Negatives & Total labelled (\%) & Unlab. -> y 
 By evaluating how often a term was used by the classification model, it
 is possible to define their relevance in labeling the records (see
 Methods). Here follows the 15 most relevant terms by inclusion rate over
-10,000 posterior tree inclusions, described as: Term (citation part):
-Inclusion Rate (Inclusion Stability) {[}linear Relative Risk,
-Statistic{]}.
+10,000 posterior tree, described as: Term (citation part): Inclusion
+Rate (Inclusion Stability) {[}linear Relative Risk, Statistic{]}.
 
 Patient Transport (Keyword): 61.2 (3.77) {[}99.1, 21.3{]}, Transfer
 (Abstract): 57 (3.93) {[}22.5, 15.4{]}, Network (Title): 56.5 (2.91)
@@ -661,14 +657,14 @@ documents.\\
 The engine was able to pick up the central concept of the research,
 i.e., ``patient transport'' or ``transfer'' through a ``network'' of
 ``facility''ies that facilitates the ``spread'' of infections, and even
-one of the authors of this study (Donker T.) or the region of interest
-(``Orange County'') of another research group active on the topic of
-healthcare asociated pathogen spreading over hospital networks. It is
-interesting to see that some terms were considered highly relevant for
-the BART models (e.g., ``Worker'' in 6th position out of more than 3800
-terms considered) although in a simpler linear model their effect would
-be hardly significant (statistic: -1.21 s.e.); these are terms which are
-relevant only together with other terms but not by themselves,
+one of the authors of this study (Donker T.) as well as the region of
+interest (``Orange County'') of another research group active on the
+topic of healthcare asociated pathogen spreading over hospital networks.
+It is interesting to see that some terms were considered highly relevant
+for the BART models (e.g., ``Worker'' in 6th position out of more than
+3800 terms considered) although in a simpler linear model their effect
+would be hardly significant (statistic: -1.21 s.e.); these are terms
+which are relevant only together with other terms but not by themselves,
 highlighting the extra predictive power brought by a non-linear model
 like BART.\\
 A more extensive set of terms is presented in Table 1 of Supplemental
@@ -795,7 +791,7 @@ positive matches.
 
 \begin{table}[!h]
 
-\caption{\label{tab:performance}\textbf{Table 3}. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, "Sensitivity" and "Work saved over random" (WSoR) are reported, with their 90\% PrI truncated to a number of positive matches equal to the observed one. Finally the median Bayesian $R^2$ [90\% CrI] of the logistic models is reported. [PrI] represents the 90\% Predictive Interval while [trunc. PrI] indicate the residual PrI truncated at the observed realization (see. methods).}
+\caption{\label{tab:Table 3}\textbf{Table 3}. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, "Sensitivity" and "Efficiency" (as WSoR) are reported, with their 90\% PrI truncated to the observed realization in the dataset [trunc. PrI] (see. methods). Finally the median Bayesian $R^2$ [90\% CrI] of the logistic models is reported. PrI: Predictive Intervals; CrI: Credibility Intervals}
 \centering
 \begin{tabular}[t]{lll}
 \toprule
@@ -808,7 +804,7 @@ Observed positive matches (\% over total records) & 101 (0.57\%) & 107 (0.11\%)\
 \cellcolor{gray!6}{Predicted positive matches [trunc. 90\% PrI]} & \cellcolor{gray!6}{101 [101, 108]} & \cellcolor{gray!6}{110 [107, 145]}\\
 \addlinespace
 Expected sensitivity [trunc. 90\% PrI] & 100\% [93.5\%, 100\%] & 97.3\% [73.8\%, 100\%]\\
-\cellcolor{gray!6}{Simple Model $R^2$ [90\% PrI]} & \cellcolor{gray!6}{98.1\% [97.4\%, 98.3\%]} & \cellcolor{gray!6}{98.2\% [97.6\%, 98.3\%]}\\
+\cellcolor{gray!6}{Simple Model $R^2$ [90\% CrI]} & \cellcolor{gray!6}{98.1\% [97.4\%, 98.3\%]} & \cellcolor{gray!6}{98.2\% [97.6\%, 98.3\%]}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -832,15 +828,15 @@ screen scientific publications characterised by high performance and
 versatility, joining the growing field of systematic review automation
 (SRA) and helpers (SRH) tools (A. M. Cohen et al. 2006, 2010; Ananiadou
 et al. 2009; O'Mara-Eves et al. 2015). This framework joins standard
-approaches and uses ad-hoc solutions to deal with common SRA issues.\\
-By freely sharing the tool as an open-source R package and by following
-a modular design, we tried to adopt some of the so-called Vienna
+approaches and uses ad-hoc solutions to deal with common SRA issues. By
+freely sharing the tool as an open-source R package and by following a
+modular design, we tried to adopt some of the so-called Vienna
 Principles advocated by the International Collaboration for the
 Automation of Systematic Reviews (ICASR) (E. Beller et al. 2018).\\
-Our tool consists of four main components: 1) an integrated query-based
-citation search and management engine, 2) a text-to-feature extractor
-module, 3) a Bayesian active machine learning-based citation classifier,
-and 4) a data-driven search query generation algorithm.\\
+The framework consists of four main components: 1) an integrated
+query-based citation search and management engine, 2) a text-to-feature
+extractor module, 3) a Bayesian active machine learning-based citation
+classifier, and 4) a data-driven search query generation algorithm.\\
 
 The framework's search engine module is capable of automatically
 collecting citation data from three well-known scientific databases
@@ -858,14 +854,14 @@ view of the literature (Bajpai et al. 2011; Wilkins, Gillies, and Davies
 2005; Woods and Trewheellar 1998): in our results, 18.7\% of the
 positive matches found were unique for one of the different data
 sources, and no positive record was present in all of them (data not
-shown).~ The online search algorithms are efficient enough to manage
-tens of thousands of search results, using various expedients to
-overcome the limitations of the online database in terms of traffic and
-download quota.\\
-The results are then automatically organized, deduplicated and arranged
-by ``simple query ordering'' in a uniform corpus. The preliminary
-ordering allow to increase the positivity rate in the initial training
-set (Wallace, Small, et al. 2010).
+shown).\\
+The online search algorithms are efficient enough to manage tens of
+thousands of search results, using various expedients to overcome the
+limitations of the queried databases in terms of traffic and download
+quota. The results are then automatically organized, deduplicated and
+arranged by ``simple query ordering'' in a uniform corpus. The
+preliminary ordering allow to increase the positivity rate in the
+initial training set (Wallace, Small, et al. 2010).
 
 The feature extractor module uses modern NLP techniques (Ananiadou and
 McNaught 2006; K. B. Cohen and Hunter 2008) to transform text into input
@@ -909,8 +905,8 @@ generating a shift of probability mass towards the distribution centre
 and stabilising it (i.e., decreasing variance without impacting bias).
 On the other hand, just imposing robust uninformative priors against
 extreme predictions would have decreased variance but also shifted the
-distribution towards a non-decision zone, increasing bias (Hansen and
-others 2000).\\
+distribution towards a non-decision zone, increasing bias (Hansen et al.
+2000).\\
 Since the number of model replications significantly impacts computation
 times, we decided to use ten replicas, the lower value after which
 showed performance stabilisation during the hyperparameter evaluation.\\
@@ -960,7 +956,7 @@ et al. 2014; Zhu et al. 2010). The parameters our algorithm needs are
 instead quite general and non task-specific, like the PPD intervals
 based on which the uncertainty zone is built ,and the maximum number of
 iterations with no positive matches after which a session is concluded;
-the hyperparamer evaluation shows that the algorithm is robust against
+the hyperparameter evaluation shows that the algorithm is robust against
 variations in these parameters and we expect the default values to
 preform well on most datasets.\\
 Since researchers are asked to review both records with a positive
@@ -973,16 +969,16 @@ We evaluated performance as the capability of the screening procedure
 of relevant records while reviewing as few of them as possible (i.e.,
 sensitivity \(\times\) efficiency).\\
 We avoided the classic out-of-sample approaches like train-test
-sampling, out-of-bag bootstrapping or cross-validation (Kohavi and
-others 1995; James et al. 2013). Such methods primarily assume that the
-rate of positivity is equal on average in every random subset of the
-data (Tashman 2000); this uniformity is broken by how the initial
-training set and the subsequent reviewed records are selected by the
-query-based ordering and the active learning algorithm, determining a
-lower positivity rate in the unlabelled records (Fig. 2). Also, a
-literature corpus is unique per search query/database combination, and
-therefore any out-of-sample performance estimate is not replicable since
-no new data can be acquired related to the current corpus.\\
+sampling, out-of-bag bootstrapping or cross-validation (Kohavi et al.
+1995; James et al. 2013). Such methods primarily assume that the rate of
+positivity is equal on average in every random subset of the data
+(Tashman 2000); this uniformity is broken by how the initial training
+set and the subsequent reviewed records are selected by the query-based
+ordering and the active learning algorithm, determining a lower
+positivity rate in the unlabelled records (Fig. 2). Also, a literature
+corpus is unique per search query/database combination, and therefore
+any out-of-sample performance estimate is not replicable since no new
+data can be acquired related to the current corpus.\\
 Instead, to estimate overall sensitivity, we employed simple Bayesian
 regression (surrogate model) on the manually reviewed data to abstract
 the classification model predictions and achieve a maximum entropy
@@ -1076,7 +1072,7 @@ in text mining.\\
 For example, our text processing approach is quite simple, based on the
 boolean bag-of-words paradigm, and indeed could be improved by more
 nuanced text representations. It could be evaluated if feature
-transformations like TF-IDF (Baeza-Yates, Ribeiro-Neto, and others 1999;
+transformations like TF-IDF (Baeza-Yates, Ribeiro-Neto, et al. 1999;
 Ananiadou and McNaught 2006) would be advantageous, even if we
 hypothesise that tree-based classification algorithms like BART are
 robust enough not to need such operations. Word embedding could be worth
@@ -1105,18 +1101,17 @@ Finally, a natural improvement would be to provide a graphical user
 interface to make the framework easy to use also for less technical
 users.
 
-The field of literature review automatisation is mature and ripe with
-innovation, and we expect an increasing use of such technologies to
-confront the ever-faster production of scientific literature. We believe
-it is appreciable that a multiplicity of tools are being made available
-to let researchers and policymakers find the instrument that better fits
-their needs.\\
-We tried to contribute to the field with an innovative methodology and
-tool that provides excellent performance and easy integration with
-existing systematic review pipelines. The value of this work lies not
-only in the framework itself, which we provide as open-source software,
-but in the set of solutions we developed to solve various SRA issues and
-that can be used to improve existing solutions.
+The field of literature review automation is maturing rapidly, and we
+expect an increasing use of such technologies to manage the ever-faster
+rate of scientific production. We believe it is appreciable that a
+multiplicity of tools are being made available to let researchers and
+policymakers find the instrument that better fits their needs.\\
+We contribute to this field with an innovative framework that provide
+excellent performance and easy integration with existing systematic
+review pipelines. The value of this work lies not only in the framework
+itself, which we provide as open-source software, but in the set of
+methodologies we developed to solve various SRA issues and that can be
+used to improve already existing solutions.
 
 \newpage
 
@@ -1126,455 +1121,455 @@ that can be used to improve existing solutions.
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
-\leavevmode\hypertarget{ref-abd2013review}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-abd2013review}{}}%
 Abd Elrahman, Shaza M, and Ajith Abraham. 2013. {`A Review of Class
-Imbalance Problem.'} \emph{Journal of Network and Innovative Computing}
+Imbalance Problem'}. \emph{Journal of Network and Innovative Computing}
 1 (2013): 332--40.
 
-\leavevmode\hypertarget{ref-allen1999estimating}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-allen1999estimating}{}}%
 Allen, I Elaine, and Ingram Olkin. 1999. {`Estimating Time to Conduct a
-Meta-Analysis from Number of Citations Retrieved.'} \emph{Jama} 282 (7):
+Meta-Analysis from Number of Citations Retrieved'}. \emph{Jama} 282 (7):
 634--35.
 
-\leavevmode\hypertarget{ref-ananiadou2006text}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ananiadou2006text}{}}%
 Ananiadou, Sophia, and John McNaught. 2006. \emph{Text Mining for
 Biology and Biomedicine}. Citeseer.
 
-\leavevmode\hypertarget{ref-ananiadou2009supporting}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ananiadou2009supporting}{}}%
 Ananiadou, Sophia, Brian Rea, Naoaki Okazaki, Rob Procter, and James
-Thomas. 2009. {`Supporting Systematic Reviews Using Text Mining.'}
+Thomas. 2009. {`Supporting Systematic Reviews Using Text Mining'}.
 \emph{Social Science Computer Review} 27 (4): 509--23.
 
-\leavevmode\hypertarget{ref-aviv2021publication}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-aviv2021publication}{}}%
 Aviv-Reuven, Shir, and Ariel Rosenfeld. 2021. {`Publication Patterns'
 Changes Due to the COVID-19 Pandemic: A Longitudinal and Short-Term
-Scientometric Analysis.'} \emph{Scientometrics}, 1--24.
+Scientometric Analysis'}. \emph{Scientometrics}, 1--24.
 
-\leavevmode\hypertarget{ref-babar2009systematic}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-babar2009systematic}{}}%
 Babar, Muhammad Ali, and He Zhang. 2009. {`Systematic Literature Reviews
 in Software Engineering: Preliminary Results from Interviews with
-Researchers.'} In \emph{2009 3rd International Symposium on Empirical
+Researchers'}. In \emph{2009 3rd International Symposium on Empirical
 Software Engineering and Measurement}, 346--55. IEEE.
 
-\leavevmode\hypertarget{ref-baeza1999modern}{}%
-Baeza-Yates, Ricardo, Berthier Ribeiro-Neto, and others. 1999.
-\emph{Modern Information Retrieval}. Vol. 463. ACM press New York.
+\leavevmode\vadjust pre{\hypertarget{ref-baeza1999modern}{}}%
+Baeza-Yates, Ricardo, Berthier Ribeiro-Neto, et al. 1999. \emph{Modern
+Information Retrieval}. Vol. 463. ACM press New York.
 
-\leavevmode\hypertarget{ref-bajpai2011search}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bajpai2011search}{}}%
 Bajpai, Akhilesh, Sravanthi Davuluri, Haritha Haridas, Greta Kasliwal, H
 Deepti, KS Sreelakshmi, Darshan Chandrashekar, et al. 2011. {`In Search
-of the Right Literature Search Engine (s).'} \emph{Nature Precedings},
+of the Right Literature Search Engine (s)'}. \emph{Nature Precedings},
 1--1.
 
-\leavevmode\hypertarget{ref-bannach2019machine}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bannach2019machine}{}}%
 Bannach-Brown, Alexandra, Piotr Przybyła, James Thomas, Andrew SC Rice,
 Sophia Ananiadou, Jing Liao, and Malcolm Robert Macleod. 2019. {`Machine
 Learning Algorithms for Systematic Review: Reducing Workload in a
 Preclinical Review of Animal Studies and Reducing Human Screening
-Error.'} \emph{Systematic Reviews} 8 (1): 1--12.
+Error'}. \emph{Systematic Reviews} 8 (1): 1--12.
 
-\leavevmode\hypertarget{ref-bastian2010seventy}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bastian2010seventy}{}}%
 Bastian, Hilda, Paul Glasziou, and Iain Chalmers. 2010. {`Seventy-Five
-Trials and Eleven Systematic Reviews a Day: How Will We Ever Keep Up?'}
+Trials and Eleven Systematic Reviews a Day: How Will We Ever Keep Up?'}.
 \emph{PLoS Medicine} 7 (9): e1000326.
 
-\leavevmode\hypertarget{ref-batista2004study}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-batista2004study}{}}%
 Batista, Gustavo EAPA, Ronaldo C Prati, and Maria Carolina Monard. 2004.
 {`A Study of the Behavior of Several Methods for Balancing Machine
-Learning Training Data.'} \emph{ACM SIGKDD Explorations Newsletter} 6
+Learning Training Data'}. \emph{ACM SIGKDD Explorations Newsletter} 6
 (1): 20--29.
 
-\leavevmode\hypertarget{ref-bekhuis2010towards}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bekhuis2010towards}{}}%
 Bekhuis, Tanja, and Dina Demner-Fushman. 2010. {`Towards Automating the
-Initial Screening Phase of a Systematic Review.'} \emph{MEDINFO 2010},
+Initial Screening Phase of a Systematic Review'}. \emph{MEDINFO 2010},
 146--50.
 
-\leavevmode\hypertarget{ref-bekhuis2012screening}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bekhuis2012screening}{}}%
 ---------. 2012. {`Screening Nonrandomized Studies for Medical
-Systematic Reviews: A Comparative Study of Classifiers.'}
+Systematic Reviews: A Comparative Study of Classifiers'}.
 \emph{Artificial Intelligence in Medicine} 55 (3): 197--207.
 
-\leavevmode\hypertarget{ref-beller2013systematic}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-beller2013systematic}{}}%
 Beller, Elaine M, Joyce Kee-Hsin Chen, Una Li-Hsiang Wang, and Paul P
 Glasziou. 2013. {`Are Systematic Reviews up-to-Date at the Time of
-Publication?'} \emph{Systematic Reviews} 2 (1): 1--6.
+Publication?'}. \emph{Systematic Reviews} 2 (1): 1--6.
 
-\leavevmode\hypertarget{ref-beller2018making}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-beller2018making}{}}%
 Beller, Elaine, Justin Clark, Guy Tsafnat, Clive Adams, Heinz Diehl,
 Hans Lund, Mourad Ouzzani, et al. 2018. {`Making Progress with the
 Automation of Systematic Reviews: Principles of the International
-Collaboration for the Automation of Systematic Reviews (ICASR).'}
+Collaboration for the Automation of Systematic Reviews (ICASR)'}.
 \emph{Systematic Reviews} 7 (1): 1--7.
 
-\leavevmode\hypertarget{ref-bhatt2020machine}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bhatt2020machine}{}}%
 Bhatt, Umang, McKane Andrus, Adrian Weller, and Alice Xiang. 2020.
-{`Machine Learning Explainability for External Stakeholders.'}
+{`Machine Learning Explainability for External Stakeholders'}.
 \emph{arXiv Preprint arXiv:2007.05408}.
 
-\leavevmode\hypertarget{ref-bibal2021legal}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bibal2021legal}{}}%
 Bibal, Adrien, Michael Lognoul, Alexandre De Streel, and Benoît Frénay.
-2021. {`Legal Requirements on Explainability in Machine Learning.'}
+2021. {`Legal Requirements on Explainability in Machine Learning'}.
 \emph{Artificial Intelligence and Law} 29 (2): 149--69.
 
-\leavevmode\hypertarget{ref-bibal2020impact}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bibal2020impact}{}}%
 Bibal, Adrien, Michael Lognoul, Alexandre de Streel, and Benoît Frénay.
 2020. {`Impact of Legal Requirements on Explainability in Machine
-Learning.'} \emph{arXiv Preprint arXiv:2007.05479}.
+Learning'}. \emph{arXiv Preprint arXiv:2007.05479}.
 
-\leavevmode\hypertarget{ref-blanco2019machine}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-blanco2019machine}{}}%
 Blanco-Justicia, Alberto, and Josep Domingo-Ferrer. 2019. {`Machine
-Learning Explainability Through Comprehensible Decision Trees.'} In
+Learning Explainability Through Comprehensible Decision Trees'}. In
 \emph{International Cross-Domain Conference for Machine Learning and
 Knowledge Extraction}, 15--26. Springer.
 
-\leavevmode\hypertarget{ref-bollegala2015embedding}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bollegala2015embedding}{}}%
 Bollegala, Danushka, Takanori Maehara, and Ken-ichi Kawarabayashi. 2015.
-{`Embedding Semantic Relations into Word Representations.'} In
+{`Embedding Semantic Relations into Word Representations'}. In
 \emph{Twenty-Fourth International Joint Conference on Artificial
 Intelligence}.
 
-\leavevmode\hypertarget{ref-borah2017analysis}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-borah2017analysis}{}}%
 Borah, Rohit, Andrew W Brown, Patrice L Capers, and Kathryn A Kaiser.
 2017. {`Analysis of the Time and Workers Needed to Conduct Systematic
 Reviews of Medical Interventions Using Data from the PROSPERO
-Registry.'} \emph{BMJ Open} 7 (2): e012545.
+Registry'}. \emph{BMJ Open} 7 (2): e012545.
 
-\leavevmode\hypertarget{ref-bornmann2015growth}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bornmann2015growth}{}}%
 Bornmann, Lutz, and Rüdiger Mutz. 2015. {`Growth Rates of Modern
 Science: A Bibliometric Analysis Based on the Number of Publications and
-Cited References.'} \emph{Journal of the Association for Information
+Cited References'}. \emph{Journal of the Association for Information
 Science and Technology} 66 (11): 2215--22.
 
-\leavevmode\hypertarget{ref-breiman1996bagging}{}%
-Breiman, Leo. 1996. {`Bagging Predictors.'} \emph{Machine Learning} 24
+\leavevmode\vadjust pre{\hypertarget{ref-breiman1996bagging}{}}%
+Breiman, Leo. 1996. {`Bagging Predictors'}. \emph{Machine Learning} 24
 (2): 123--40.
 
-\leavevmode\hypertarget{ref-burkart2021survey}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-burkart2021survey}{}}%
 Burkart, Nadia, and Marco F Huber. 2021. {`A Survey on the
-Explainability of Supervised Machine Learning.'} \emph{Journal of
+Explainability of Supervised Machine Learning'}. \emph{Journal of
 Artificial Intelligence Research} 70: 245--317.
 
-\leavevmode\hypertarget{ref-chae1993presenting}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chae1993presenting}{}}%
 Chae, Kyung-Chul. 1993. {`Presenting the Negative Hypergeometric
-Distribution to the Introductory Statistics Courses.'}
+Distribution to the Introductory Statistics Courses'}.
 \emph{International Journal of Mathematical Education in Science and
 Technology} 24 (4): 523--26.
 
-\leavevmode\hypertarget{ref-chawla2004special}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chawla2004special}{}}%
 Chawla, Nitesh V, Nathalie Japkowicz, and Aleksander Kotcz. 2004.
-{`Special Issue on Learning from Imbalanced Data Sets.'} \emph{ACM
+{`Special Issue on Learning from Imbalanced Data Sets'}. \emph{ACM
 SIGKDD Explorations Newsletter} 6 (1): 1--6.
 
-\leavevmode\hypertarget{ref-chen2018approximate}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chen2018approximate}{}}%
 Chen, Chao, Xiao Lin, and Gabriel Terejanu. 2018. {`An Approximate
-Bayesian Long Short-Term Memory Algorithm for Outlier Detection.'} In
+Bayesian Long Short-Term Memory Algorithm for Outlier Detection'}. In
 \emph{2018 24th International Conference on Pattern Recognition (ICPR)},
 201--6. IEEE.
 
-\leavevmode\hypertarget{ref-chen2016short}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chen2016short}{}}%
 Chen, Qiuxing, Lixiu Yao, and Jie Yang. 2016. {`Short Text
-Classification Based on LDA Topic Model.'} In \emph{2016 International
+Classification Based on LDA Topic Model'}. In \emph{2016 International
 Conference on Audio, Language and Image Processing (ICALIP)}, 749--53.
 IEEE.
 
-\leavevmode\hypertarget{ref-chen2015gaussian}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-chen2015gaussian}{}}%
 Chen, Sih-Huei, Yuan-Shan Lee, Tzu-Chiang Tai, and Jia-Ching Wang. 2015.
-{`Gaussian Process Based Text Categorization for Healthy Information.'}
+{`Gaussian Process Based Text Categorization for Healthy Information'}.
 In \emph{2015 International Conference on Orange Technologies (ICOT)},
 30--33. \url{https://doi.org/10.1109/ICOT.2015.7498487}.
 
-\leavevmode\hypertarget{ref-cheng2019document}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cheng2019document}{}}%
 Cheng, Y, Z Ye, M Wang, and Q Zhang. 2019. {`Document Classification
 Based on Convolutional Neural Network and Hierarchical Attention
-Network.'} \emph{Neural Network World} 29 (2): 83--98.
+Network'}. \emph{Neural Network World} 29 (2): 83--98.
 
-\leavevmode\hypertarget{ref-chipman2010bart}{}%
-Chipman, Hugh A, Edward I George, Robert E McCulloch, and others. 2010.
-{`BART: Bayesian Additive Regression Trees.'} \emph{The Annals of
+\leavevmode\vadjust pre{\hypertarget{ref-chipman2010bart}{}}%
+Chipman, Hugh A, Edward I George, Robert E McCulloch, et al. 2010.
+{`BART: Bayesian Additive Regression Trees'}. \emph{The Annals of
 Applied Statistics} 4 (1): 266--98.
 
-\leavevmode\hypertarget{ref-claesen2015hyperparameter}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-claesen2015hyperparameter}{}}%
 Claesen, Marc, and Bart De Moor. 2015. {`Hyperparameter Search in
-Machine Learning.'} \emph{arXiv Preprint arXiv:1502.02127}.
+Machine Learning'}. \emph{arXiv Preprint arXiv:1502.02127}.
 
-\leavevmode\hypertarget{ref-cohen2010evidence}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cohen2010evidence}{}}%
 Cohen, Aaron M, Clive E Adams, John M Davis, Clement Yu, Philip S Yu,
 Weiyi Meng, Lorna Duggan, Marian McDonagh, and Neil R Smalheiser. 2010.
 {`Evidence-Based Medicine, the Essential Role of Systematic Reviews, and
-the Need for Automated Text Mining Tools.'} In \emph{Proceedings of the
+the Need for Automated Text Mining Tools'}. In \emph{Proceedings of the
 1st ACM International Health Informatics Symposium}, 376--80.
 
-\leavevmode\hypertarget{ref-cohen2006reducing}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cohen2006reducing}{}}%
 Cohen, Aaron M, William R Hersh, Kim Peterson, and Po-Yin Yen. 2006.
 {`Reducing Workload in Systematic Review Preparation Using Automated
-Citation Classification.'} \emph{Journal of the American Medical
+Citation Classification'}. \emph{Journal of the American Medical
 Informatics Association} 13 (2): 206--19.
 
-\leavevmode\hypertarget{ref-cohen2008getting}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cohen2008getting}{}}%
 Cohen, K Bretonnel, and Lawrence Hunter. 2008. {`Getting Started in Text
-Mining.'} \emph{PLoS Computational Biology} 4 (1): e20.
+Mining'}. \emph{PLoS Computational Biology} 4 (1): e20.
 
-\leavevmode\hypertarget{ref-dietterich2000ensemble}{}%
-Dietterich, Thomas G. 2000. {`Ensemble Methods in Machine Learning.'} In
+\leavevmode\vadjust pre{\hypertarget{ref-dietterich2000ensemble}{}}%
+Dietterich, Thomas G. 2000. {`Ensemble Methods in Machine Learning'}. In
 \emph{International Workshop on Multiple Classifier Systems}, 1--15.
 Springer.
 
-\leavevmode\hypertarget{ref-diez2015diversity}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-diez2015diversity}{}}%
 Díez-Pastor, José F, Juan J Rodríguez, César I García-Osorio, and
 Ludmila I Kuncheva. 2015. {`Diversity Techniques Improve the Performance
-of the Best Imbalance Learning Ensembles.'} \emph{Information Sciences}
+of the Best Imbalance Learning Ensembles'}. \emph{Information Sciences}
 325: 98--117.
 
-\leavevmode\hypertarget{ref-edwards2002identification}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-edwards2002identification}{}}%
 Edwards, Phil, Mike Clarke, Carolyn DiGuiseppi, Sarah Pratap, Ian
 Roberts, and Reinhard Wentz. 2002. {`Identification of Randomized
 Controlled Trials in Systematic Reviews: Accuracy and Reliability of
-Screening Records.'} \emph{Statistics in Medicine} 21 (11): 1635--40.
+Screening Records'}. \emph{Statistics in Medicine} 21 (11): 1635--40.
 
-\leavevmode\hypertarget{ref-eppstein2010listing}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-eppstein2010listing}{}}%
 Eppstein, David, Maarten Löffler, and Darren Strash. 2010. {`Listing All
-Maximal Cliques in Sparse Graphs in Near-Optimal Time.'} In
+Maximal Cliques in Sparse Graphs in Near-Optimal Time'}. In
 \emph{International Symposium on Algorithms and Computation}, 403--14.
 Springer.
 
-\leavevmode\hypertarget{ref-farkas1995document}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-farkas1995document}{}}%
 Farkas, Jennifer. 1995. {`Document Classification and Recurrent Neural
-Networks.'} In \emph{Proceedings of the 1995 Conference of the Centre
+Networks'}. In \emph{Proceedings of the 1995 Conference of the Centre
 for Advanced Studies on Collaborative Research}, 21.
 
-\leavevmode\hypertarget{ref-frunza2010building}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-frunza2010building}{}}%
 Frunza, Oana, Diana Inkpen, and Stan Matwin. 2010. {`Building Systematic
-Reviews Using Automatic Text Classification Techniques.'} In
+Reviews Using Automatic Text Classification Techniques'}. In
 \emph{Coling 2010: Posters}, 303--11.
 
-\leavevmode\hypertarget{ref-galar2011review}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-galar2011review}{}}%
 Galar, Mikel, Alberto Fernandez, Edurne Barrenechea, Humberto Bustince,
 and Francisco Herrera. 2011. {`A Review on Ensembles for the Class
-Imbalance Problem: Bagging-, Boosting-, and Hybrid-Based Approaches.'}
+Imbalance Problem: Bagging-, Boosting-, and Hybrid-Based Approaches'}.
 \emph{IEEE Transactions on Systems, Man, and Cybernetics, Part C
 (Applications and Reviews)} 42 (4): 463--84.
 
-\leavevmode\hypertarget{ref-gelman2019r}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-gelman2019r}{}}%
 Gelman, Andrew, Ben Goodrich, Jonah Gabry, and Aki Vehtari. 2019.
-{`R-Squared for Bayesian Regression Models.'} \emph{The American
+{`R-Squared for Bayesian Regression Models'}. \emph{The American
 Statistician}.
 
-\leavevmode\hypertarget{ref-hammerstrom2010searching}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hammerstrom2010searching}{}}%
 Hammerstrøm, Karianne, Anne Wade, Anne-Marie Klint Jørgensen, and
-Karianne Hammerstrøm. 2010. {`Searching for Studies.'} \emph{Education}
+Karianne Hammerstrøm. 2010. {`Searching for Studies'}. \emph{Education}
 54 (11.3).
 
-\leavevmode\hypertarget{ref-hansen2000bayesian}{}%
-Hansen, Lars Kai, and others. 2000. {`Bayesian Averaging Is
-Well-Temperated.'} In \emph{Proceedings of NIPS}, 99:265--71.
+\leavevmode\vadjust pre{\hypertarget{ref-hansen2000bayesian}{}}%
+Hansen, Lars Kai et al. 2000. {`Bayesian Averaging Is Well-Temperated'}.
+In \emph{Proceedings of NIPS}, 99:265--71.
 
-\leavevmode\hypertarget{ref-harremoes2001maximum}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-harremoes2001maximum}{}}%
 Harremoës, Peter, and Flemming Topsøe. 2001. {`Maximum Entropy
-Fundamentals.'} \emph{Entropy} 3 (3): 191--226.
+Fundamentals'}. \emph{Entropy} 3 (3): 191--226.
 
-\leavevmode\hypertarget{ref-hastie2009boosting}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hastie2009boosting}{}}%
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. {`Boosting
-and Additive Trees.'} In \emph{The Elements of Statistical Learning},
+and Additive Trees'}. In \emph{The Elements of Statistical Learning},
 337--87. Springer.
 
-\leavevmode\hypertarget{ref-higgins2019cochrane}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-higgins2019cochrane}{}}%
 Higgins, Julian PT, James Thomas, Jacqueline Chandler, Miranda Cumpston,
 Tianjing Li, Matthew J Page, and Vivian A Welch. 2019. \emph{Cochrane
 Handbook for Systematic Reviews of Interventions}. John Wiley \& Sons.
 
-\leavevmode\hypertarget{ref-horbach2020pandemic}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-horbach2020pandemic}{}}%
 Horbach, Serge PJM. 2020. {`Pandemic Publishing: Medical Journals
-Strongly Speed up Their Publication Process for COVID-19.'}
+Strongly Speed up Their Publication Process for COVID-19'}.
 \emph{Quantitative Science Studies} 1 (3): 1056--67.
 
-\leavevmode\hypertarget{ref-hoy2020rise}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hoy2020rise}{}}%
 Hoy, Matthew B. 2020. {`Rise of the Rxivs: How Preprint Servers Are
-Changing the Publishing Process.'} \emph{Medical Reference Services
+Changing the Publishing Process'}. \emph{Medical Reference Services
 Quarterly} 39 (1): 84--89.
 
-\leavevmode\hypertarget{ref-ikonomakis2005text}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ikonomakis2005text}{}}%
 Ikonomakis, M, Sotiris Kotsiantis, and V Tampakas. 2005. {`Text
-Classification Using Machine Learning Techniques.'} \emph{WSEAS
+Classification Using Machine Learning Techniques'}. \emph{WSEAS
 Transactions on Computers} 4 (8): 966--74.
 
-\leavevmode\hypertarget{ref-james2013introduction}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-james2013introduction}{}}%
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani.
 2013. \emph{An Introduction to Statistical Learning}. Vol. 112.
 Springer.
 
-\leavevmode\hypertarget{ref-jayashree2020evaluation}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-jayashree2020evaluation}{}}%
 Jayashree, P, and PK Srijith. 2020. {`Evaluation of Deep Gaussian
-Processes for Text Classification.'} In \emph{Proceedings of the 12th
+Processes for Text Classification'}. In \emph{Proceedings of the 12th
 Language Resources and Evaluation Conference}, 1485--91.
 
-\leavevmode\hypertarget{ref-jonnalagadda2015automating}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-jonnalagadda2015automating}{}}%
 Jonnalagadda, Siddhartha R, Pawan Goyal, and Mark D Huffman. 2015.
 {`Automating Data Extraction in Systematic Reviews: A Systematic
-Review.'} \emph{Systematic Reviews} 4 (1): 1--16.
+Review'}. \emph{Systematic Reviews} 4 (1): 1--16.
 
-\leavevmode\hypertarget{ref-joo2020being}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-joo2020being}{}}%
 Joo, Taejong, Uijung Chung, and Min-Gwan Seo. 2020. {`Being Bayesian
-about Categorical Probability.'} In \emph{International Conference on
+about Categorical Probability'}. In \emph{International Conference on
 Machine Learning}, 4950--61. PMLR.
 
-\leavevmode\hypertarget{ref-jospin2020hands}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-jospin2020hands}{}}%
 Jospin, Laurent Valentin, Wray Buntine, Farid Boussaid, Hamid Laga, and
 Mohammed Bennamoun. 2020. {`Hands-on Bayesian Neural Networks--a
-Tutorial for Deep Learning Users.'} \emph{arXiv Preprint
+Tutorial for Deep Learning Users'}. \emph{arXiv Preprint
 arXiv:2007.06823}.
 
-\leavevmode\hypertarget{ref-kapelner2013bartmachine}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-kapelner2013bartmachine}{}}%
 Kapelner, Adam, and Justin Bleich. 2013. {`bartMachine: Machine Learning
-with Bayesian Additive Regression Trees.'} \emph{arXiv Preprint
+with Bayesian Additive Regression Trees'}. \emph{arXiv Preprint
 arXiv:1312.2171}.
 
-\leavevmode\hypertarget{ref-kapelner2015prediction}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-kapelner2015prediction}{}}%
 ---------. 2015. {`Prediction with Missing Data via Bayesian Additive
-Regression Trees.'} \emph{Canadian Journal of Statistics} 43 (2):
+Regression Trees'}. \emph{Canadian Journal of Statistics} 43 (2):
 224--39.
 
-\leavevmode\hypertarget{ref-khoshgoftaar2010comparing}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-khoshgoftaar2010comparing}{}}%
 Khoshgoftaar, Taghi M, Jason Van Hulse, and Amri Napolitano. 2010.
 {`Comparing Boosting and Bagging Techniques with Noisy and Imbalanced
-Data.'} \emph{IEEE Transactions on Systems, Man, and Cybernetics-Part A:
+Data'}. \emph{IEEE Transactions on Systems, Man, and Cybernetics-Part A:
 Systems and Humans} 41 (3): 552--68.
 
-\leavevmode\hypertarget{ref-kohavi1995study}{}%
-Kohavi, Ron, and others. 1995. {`A Study of Cross-Validation and
-Bootstrap for Accuracy Estimation and Model Selection.'} In
-\emph{Ijcai}, 14:1137--45. 2. Montreal, Canada.
+\leavevmode\vadjust pre{\hypertarget{ref-kohavi1995study}{}}%
+Kohavi, Ron et al. 1995. {`A Study of Cross-Validation and Bootstrap for
+Accuracy Estimation and Model Selection'}. In \emph{Ijcai}, 14:1137--45.
+2. Montreal, Canada.
 
-\leavevmode\hypertarget{ref-lai2015recurrent}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-lai2015recurrent}{}}%
 Lai, Siwei, Liheng Xu, Kang Liu, and Jun Zhao. 2015. {`Recurrent
-Convolutional Neural Networks for Text Classification.'} In
+Convolutional Neural Networks for Text Classification'}. In
 \emph{Twenty-Ninth AAAI Conference on Artificial Intelligence}.
 
-\leavevmode\hypertarget{ref-landauer1998introduction}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-landauer1998introduction}{}}%
 Landauer, Thomas K, Peter W Foltz, and Darrell Laham. 1998. {`An
-Introduction to Latent Semantic Analysis.'} \emph{Discourse Processes}
+Introduction to Latent Semantic Analysis'}. \emph{Discourse Processes}
 25 (2-3): 259--84.
 
-\leavevmode\hypertarget{ref-larsen2010rate}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-larsen2010rate}{}}%
 Larsen, Peder, and Markus Von Ins. 2010. {`The Rate of Growth in
 Scientific Publication and the Decline in Coverage Provided by Science
-Citation Index.'} \emph{Scientometrics} 84 (3): 575--603.
+Citation Index'}. \emph{Scientometrics} 84 (3): 575--603.
 
-\leavevmode\hypertarget{ref-laws2008stopping}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-laws2008stopping}{}}%
 Laws, Florian, and Hinrich Schütze. 2008. {`Stopping Criteria for Active
-Learning of Named Entity Recognition.'} In \emph{Proceedings of the 22nd
+Learning of Named Entity Recognition'}. In \emph{Proceedings of the 22nd
 International Conference on Computational Linguistics (Coling 2008)},
 465--72.
 
-\leavevmode\hypertarget{ref-lefebvre2011searching}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-lefebvre2011searching}{}}%
 Lefebvre, C, E Manheimer, J Glanville, J Higgins, and S Green. 2011.
-{`Searching for Studies (Chapter 6).'} \emph{Cochrane Handbook for
+{`Searching for Studies (Chapter 6)'}. \emph{Cochrane Handbook for
 Systematic Reviews of Interventions Version} 510.
 
-\leavevmode\hypertarget{ref-li2020survey}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-li2020survey}{}}%
 Li, Qian, Hao Peng, Jianxin Li, Congying Xia, Renyu Yang, Lichao Sun,
 Philip S Yu, and Lifang He. 2020. {`A Survey on Text Classification:
-From Shallow to Deep Learning.'} \emph{arXiv Preprint arXiv:2008.00364}.
+From Shallow to Deep Learning'}. \emph{arXiv Preprint arXiv:2008.00364}.
 
-\leavevmode\hypertarget{ref-lipscomb2000medical}{}%
-Lipscomb, Carolyn E. 2000. {`Medical Subject Headings (MeSH).'}
+\leavevmode\vadjust pre{\hypertarget{ref-lipscomb2000medical}{}}%
+Lipscomb, Carolyn E. 2000. {`Medical Subject Headings (MeSH)'}.
 \emph{Bulletin of the Medical Library Association} 88 (3): 265.
 
-\leavevmode\hypertarget{ref-malhi2020explainable}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-malhi2020explainable}{}}%
 Malhi, Avleen, Samanta Knapic, and Kary Främling. 2020. {`Explainable
-Agents for Less Bias in Human-Agent Decision Making.'} In
+Agents for Less Bias in Human-Agent Decision Making'}. In
 \emph{International Workshop on Explainable, Transparent Autonomous
 Agents and Multi-Agent Systems}, 129--46. Springer.
 
-\leavevmode\hypertarget{ref-marshall2015systematic}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-marshall2015systematic}{}}%
 Marshall, Iain J, and Byron C Wallace. 2019. {`Toward Systematic Review
 Automation: A Practical Guide to Using Machine Learning Tools in
-Research Synthesis.'} In \emph{Systematic Reviews}, 8:1--10. 1.
+Research Synthesis'}. In \emph{Systematic Reviews}, 8:1--10. 1.
 Springer.
 
-\leavevmode\hypertarget{ref-minaee2021deep}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-minaee2021deep}{}}%
 Minaee, Shervin, Nal Kalchbrenner, Erik Cambria, Narjes Nikzad, Meysam
 Chenaghlu, and Jianfeng Gao. 2021. {`Deep Learning--Based Text
-Classification: A Comprehensive Review.'} \emph{ACM Computing Surveys
+Classification: A Comprehensive Review'}. \emph{ACM Computing Surveys
 (CSUR)} 54 (3): 1--40.
 
-\leavevmode\hypertarget{ref-miwa2014reducing}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-miwa2014reducing}{}}%
 Miwa, Makoto, James Thomas, Alison O'Mara-Eves, and Sophia Ananiadou.
 2014. {`Reducing Systematic Review Workload Through Certainty-Based
-Screening.'} \emph{Journal of Biomedical Informatics} 51: 242--53.
+Screening'}. \emph{Journal of Biomedical Informatics} 51: 242--53.
 
-\leavevmode\hypertarget{ref-moore2018transparent}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-moore2018transparent}{}}%
 Moore, Alexander, Vanessa Murdock, Yaxiong Cai, and Kristine Jones.
-2018. {`Transparent Tree Ensembles.'} In \emph{The 41st International
+2018. {`Transparent Tree Ensembles'}. In \emph{The 41st International
 ACM SIGIR Conference on Research \& Development in Information
 Retrieval}, 1241--44.
 
-\leavevmode\hypertarget{ref-pubmedUpdate}{}%
-{`NCBI Insights : Updated Pubmed e-Utilities Coming in April 2022!'}
+\leavevmode\vadjust pre{\hypertarget{ref-pubmedUpdate}{}}%
+{`NCBI Insights : Updated Pubmed e-Utilities Coming in April 2022!'}.
 n.d. U.S. National Library of Medicine.
 \url{https://ncbiinsights.ncbi.nlm.nih.gov/2021/10/05/updated-pubmed-api/}.
 
-\leavevmode\hypertarget{ref-o2015using}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-o2015using}{}}%
 O'Mara-Eves, Alison, James Thomas, John McNaught, Makoto Miwa, and
 Sophia Ananiadou. 2015. {`Using Text Mining for Study Identification in
-Systematic Reviews: A Systematic Review of Current Approaches.'}
+Systematic Reviews: A Systematic Review of Current Approaches'}.
 \emph{Systematic Reviews} 4 (1): 1--22.
 
-\leavevmode\hypertarget{ref-ohsawa1998keygraph}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ohsawa1998keygraph}{}}%
 Ohsawa, Yukio, Nels E Benson, and Masahiko Yachida. 1998. {`KeyGraph:
 Automatic Indexing by Co-Occurrence Graph Based on Building Construction
-Metaphor.'} In \emph{Proceedings IEEE International Forum on Research
+Metaphor'}. In \emph{Proceedings IEEE International Forum on Research
 and Technology Advances in Digital Libraries-ADL'98-}, 12--18. IEEE.
 
-\leavevmode\hypertarget{ref-olorisade2016critical}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-olorisade2016critical}{}}%
 Olorisade, Babatunde K, Ed de Quincey, Pearl Brereton, and Peter Andras.
 2016. {`A Critical Analysis of Studies That Address the Use of Text
-Mining for Citation Screening in Systematic Reviews.'} In
+Mining for Citation Screening in Systematic Reviews'}. In
 \emph{Proceedings of the 20th International Conference on Evaluation and
 Assessment in Software Engineering}, 1--11.
 
-\leavevmode\hypertarget{ref-pavlinek2017text}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-pavlinek2017text}{}}%
 Pavlinek, Miha, and Vili Podgorelec. 2017. {`Text Classification Method
-Based on Self-Training and LDA Topic Models.'} \emph{Expert Systems with
+Based on Self-Training and LDA Topic Models'}. \emph{Expert Systems with
 Applications} 80: 83--93.
 
-\leavevmode\hypertarget{ref-poulter2008mscanner}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-poulter2008mscanner}{}}%
 Poulter, Graham L, Daniel L Rubin, Russ B Altman, and Cathal Seoighe.
-2008. {`MScanner: A Classifier for Retrieving Medline Citations.'}
+2008. {`MScanner: A Classifier for Retrieving Medline Citations'}.
 \emph{BMC Bioinformatics} 9 (1): 1--12.
 
-\leavevmode\hypertarget{ref-rstat}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-rstat}{}}%
 R Core Team. 2020. \emph{R: A Language and Environment for Statistical
 Computing}. Vienna, Austria: R Foundation for Statistical Computing.
 \url{https://www.R-project.org/}.
 
-\leavevmode\hypertarget{ref-ramezankhani2016impact}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ramezankhani2016impact}{}}%
 Ramezankhani, Azra, Omid Pournik, Jamal Shahrabi, Fereidoun Azizi,
 Farzad Hadaegh, and Davood Khalili. 2016. {`The Impact of Oversampling
 with SMOTE on the Performance of 3 Classifiers in Prediction of Type 2
-Diabetes.'} \emph{Medical Decision Making} 36 (1): 137--44.
+Diabetes'}. \emph{Medical Decision Making} 36 (1): 137--44.
 
-\leavevmode\hypertarget{ref-robert2004monte}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-robert2004monte}{}}%
 Robert, Christian P, George Casella, and George Casella. 2004.
 \emph{Monte Carlo Statistical Methods}. Vol. 2. Springer.
 
-\leavevmode\hypertarget{ref-roshan2020improvement}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-roshan2020improvement}{}}%
 Roshan, Seyed Ehsan, and Shahrokh Asadi. 2020. {`Improvement of Bagging
 Performance for Classification of Imbalanced Datasets Using Evolutionary
-Multi-Objective Optimization.'} \emph{Engineering Applications of
+Multi-Objective Optimization'}. \emph{Engineering Applications of
 Artificial Intelligence} 87: 103319.
 
-\leavevmode\hypertarget{ref-rousseau2015graph}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-rousseau2015graph}{}}%
 Rousseau, Francois. 2015. {`Graph-of-Words: Mining and Retrieving Text
-with Networks of Features.'} PhD thesis, Ph. D. dissertation.
+with Networks of Features'}. PhD thesis, Ph. D. dissertation.
 
-\leavevmode\hypertarget{ref-rousseau2015text}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-rousseau2015text}{}}%
 Rousseau, François, Emmanouil Kiagias, and Michalis Vazirgiannis. 2015.
-{`Text Categorization as a Graph Classification Problem.'} In
+{`Text Categorization as a Graph Classification Problem'}. In
 \emph{Proceedings of the 53rd Annual Meeting of the Association for
 Computational Linguistics and the 7th International Joint Conference on
 Natural Language Processing (Volume 1: Long Papers)}, 1702--12.
 
-\leavevmode\hypertarget{ref-newis}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-newis}{}}%
 Sadaghiani, Catharina, Tjibbe Donker, Xanthi Andrianou, Balázs Babarczy,
 Gerolf De Boer, Francesco Di Ruscio, Shona Cairns, et al. 2020.
 \emph{National Health Care Infrastructures, Health Care Utilization and
@@ -1582,113 +1577,113 @@ Patient Movements Between Hospitals - Networks Working to Improve
 Surveillance: A Systematic Literature Review}. PROSPERO.
 \url{http://www.crd.york.ac.uk/PROSPERO/display_record.asp?ID=CRD42020157987}.
 
-\leavevmode\hypertarget{ref-sampson2011precision}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-sampson2011precision}{}}%
 Sampson, Margaret, Jennifer Tetzlaff, and Christine Urquhart. 2011.
 {`Precision of Healthcare Systematic Review Searches in a
-Cross-Sectional Sample.'} \emph{Research Synthesis Methods} 2 (2):
+Cross-Sectional Sample'}. \emph{Research Synthesis Methods} 2 (2):
 119--25.
 
-\leavevmode\hypertarget{ref-schonlau2017text}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-schonlau2017text}{}}%
 Schonlau, Matthias, and Nick Guenther. 2017. {`Text Mining Using
-n-Grams.'} \emph{Schonlau, M., Guenther, N. Sucholutsky, I. Text Mining
+n-Grams'}. \emph{Schonlau, M., Guenther, N. Sucholutsky, I. Text Mining
 Using n-Gram Variables. The Stata Journal} 17 (4): 866--81.
 
-\leavevmode\hypertarget{ref-settles2009active}{}%
-Settles, Burr. 2009. {`Active Learning Literature Survey.'}
+\leavevmode\vadjust pre{\hypertarget{ref-settles2009active}{}}%
+Settles, Burr. 2009. {`Active Learning Literature Survey'}.
 
-\leavevmode\hypertarget{ref-soria2011belm}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-soria2011belm}{}}%
 Soria-Olivas, Emilio, Juan Gomez-Sanchis, José D Martin, Joan
 Vila-Frances, Marcelino Martinez, José R Magdalena, and Antonio J
-Serrano. 2011. {`BELM: Bayesian Extreme Learning Machine.'} \emph{IEEE
+Serrano. 2011. {`BELM: Bayesian Extreme Learning Machine'}. \emph{IEEE
 Transactions on Neural Networks} 22 (3): 505--9.
 
-\leavevmode\hypertarget{ref-soto2019thalia}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-soto2019thalia}{}}%
 Soto, Axel J, Piotr Przybyła, and Sophia Ananiadou. 2019. {`Thalia:
-Semantic Search Engine for Biomedical Abstracts.'} \emph{Bioinformatics}
+Semantic Search Engine for Biomedical Abstracts'}. \emph{Bioinformatics}
 35 (10): 1799--1801.
 
-\leavevmode\hypertarget{ref-tashman2000out}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-tashman2000out}{}}%
 Tashman, Leonard J. 2000. {`Out-of-Sample Tests of Forecasting Accuracy:
-An Analysis and Review.'} \emph{International Journal of Forecasting} 16
+An Analysis and Review'}. \emph{International Journal of Forecasting} 16
 (4): 437--50.
 
-\leavevmode\hypertarget{ref-rpart}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-rpart}{}}%
 Therneau, Terry, and Beth Atkinson. 2019. \emph{Rpart: Recursive
 Partitioning and Regression Trees}.
 \url{https://CRAN.R-project.org/package=rpart}.
 
-\leavevmode\hypertarget{ref-thomas2007eppi}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-thomas2007eppi}{}}%
 Thomas, James, and Jeff Brunton. 2007. {`EPPI-Reviewer: Software for
-Research Synthesis.'}
+Research Synthesis'}.
 
-\leavevmode\hypertarget{ref-tsafnat2013automation}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-tsafnat2013automation}{}}%
 Tsafnat, Guy, Adam Dunn, Paul Glasziou, and Enrico Coiera. 2013. {`The
-Automation of Systematic Reviews.'} British Medical Journal Publishing
+Automation of Systematic Reviews'}. British Medical Journal Publishing
 Group.
 
-\leavevmode\hypertarget{ref-tsafnat2014systematic}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-tsafnat2014systematic}{}}%
 Tsafnat, Guy, Paul Glasziou, Miew Keen Choong, Adam Dunn, Filippo
 Galgani, and Enrico Coiera. 2014. {`Systematic Review Automation
-Technologies.'} \emph{Systematic Reviews} 3 (1): 1--15.
+Technologies'}. \emph{Systematic Reviews} 3 (1): 1--15.
 
-\leavevmode\hypertarget{ref-turian2010word}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-turian2010word}{}}%
 Turian, Joseph, Lev Ratinov, and Yoshua Bengio. 2010. {`Word
 Representations: A Simple and General Method for Semi-Supervised
-Learning.'} In \emph{Proceedings of the 48th Annual Meeting of the
+Learning'}. In \emph{Proceedings of the 48th Annual Meeting of the
 Association for Computational Linguistics}, 384--94.
 
-\leavevmode\hypertarget{ref-violos2016sentiment}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-violos2016sentiment}{}}%
 Violos, John, Konstantinos Tserpes, Evangelos Psomakelis, Konstantinos
 Psychas, and Theodora Varvarigou. 2016. {`Sentiment Analysis Using
-Word-Graphs.'} In \emph{Proceedings of the 6th International Conference
+Word-Graphs'}. In \emph{Proceedings of the 6th International Conference
 on Web Intelligence, Mining and Semantics}, 1--9.
 
-\leavevmode\hypertarget{ref-visser2010performing}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-visser2010performing}{}}%
 Visser, Eelco. 2010. {`Performing Systematic Literature Reviews with
-Researchr: Tool Demonstration.'} \emph{Technical Report Series
+Researchr: Tool Demonstration'}. \emph{Technical Report Series
 TUD-SERG-2010-010}.
 
-\leavevmode\hypertarget{ref-wallace2010active}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-wallace2010active}{}}%
 Wallace, Byron C, Kevin Small, Carla E Brodley, and Thomas A Trikalinos.
-2010. {`Active Learning for Biomedical Citation Screening.'} In
+2010. {`Active Learning for Biomedical Citation Screening'}. In
 \emph{Proceedings of the 16th ACM SIGKDD International Conference on
 Knowledge Discovery and Data Mining}, 173--82.
 
-\leavevmode\hypertarget{ref-wallace2010semi}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-wallace2010semi}{}}%
 Wallace, Byron C, Thomas A Trikalinos, Joseph Lau, Carla Brodley, and
 Christopher H Schmid. 2010. {`Semi-Automated Screening of Biomedical
-Citations for Systematic Reviews.'} \emph{BMC Bioinformatics} 11 (1):
+Citations for Systematic Reviews'}. \emph{BMC Bioinformatics} 11 (1):
 1--11.
 
-\leavevmode\hypertarget{ref-wilkins2005embase}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-wilkins2005embase}{}}%
 Wilkins, Thad, Ralph A Gillies, and Kathy Davies. 2005. {`EMBASE Versus
 MEDLINE for Family Medicine Searches: Can MEDLINE Searches Find the
-Forest or a Tree?'} \emph{Canadian Family Physician} 51 (6): 848--49.
+Forest or a Tree?'}. \emph{Canadian Family Physician} 51 (6): 848--49.
 
-\leavevmode\hypertarget{ref-woods1998medline}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-woods1998medline}{}}%
 Woods, David, and Kate Trewheellar. 1998. {`Medline and Embase
-Complement Each Other in Literature Searches.'} \emph{BMJ: British
+Complement Each Other in Literature Searches'}. \emph{BMJ: British
 Medical Journal} 316 (7138): 1166.
 
-\leavevmode\hypertarget{ref-yang2020survey}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-yang2020survey}{}}%
 Yang, JinXiong, Liang Bai, and Yanming Guo. 2020. {`A Survey of Text
-Classification Models.'} In \emph{Proceedings of the 2020 2nd
+Classification Models'}. In \emph{Proceedings of the 2020 2nd
 International Conference on Robotics, Intelligent Control and Artificial
 Intelligence}, 327--34.
 
-\leavevmode\hypertarget{ref-yang2020hyperparameter}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-yang2020hyperparameter}{}}%
 Yang, Li, and Abdallah Shami. 2020. {`On Hyperparameter Optimization of
-Machine Learning Algorithms: Theory and Practice.'}
+Machine Learning Algorithms: Theory and Practice'}.
 \emph{Neurocomputing} 415: 295--316.
 
-\leavevmode\hypertarget{ref-zhou2021ensemble}{}%
-Zhou, Zhi-Hua. 2021. {`Ensemble Learning.'} In \emph{Machine Learning},
+\leavevmode\vadjust pre{\hypertarget{ref-zhou2021ensemble}{}}%
+Zhou, Zhi-Hua. 2021. {`Ensemble Learning'}. In \emph{Machine Learning},
 181--210. Springer.
 
-\leavevmode\hypertarget{ref-zhu2010confidence}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-zhu2010confidence}{}}%
 Zhu, Jingbo, Huizhen Wang, Eduard Hovy, and Matthew Ma. 2010.
 {`Confidence-Based Stopping Criteria for Active Learning for Data
-Annotation.'} \emph{ACM Transactions on Speech and Language Processing
+Annotation'}. \emph{ACM Transactions on Speech and Language Processing
 (TSLP)} 6 (3): 1--24.
 
 \end{CSLReferences}

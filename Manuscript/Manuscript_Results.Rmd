@@ -3,7 +3,6 @@ title: "Results"
 date: "`r lubridate::today()`"
 output:
   pdf_document:
-    keep_tex: true
     includes:
       in_header: header.tex
   github_document: default
