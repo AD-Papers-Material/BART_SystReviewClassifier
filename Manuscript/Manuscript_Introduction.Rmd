@@ -40,4 +40,4 @@ the evaluation of the mathematical modelling of patient referral networks among 
 the protocol is published in [@newis].\
 We give an overview of the framework in the Methods section;
 in the Result section, we show the framework outputs and performance once applied to the example topic;
-in the Discussion, we lay out the methodological justification behind the different components and features of the framework.
+in the Discussion, we lay out the methodological justification behind the different components and features of the framework.\

@@ -170,4 +170,4 @@ To evaluate the hyperparameter effect of performance, we set up a "grid search" 
 The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole data set got labelled.\
 For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required review over the total) and "Sensitivity" (number of positive records found over the total of positives).
 We then identified homogeneous "performance clusters" of scores given hyperparameter values using a partition tree [@rpart].
-For the rest of the study, we used the best hyperparameter set in terms of Sensitivity followed by Efficiency from the cluster with the highest average score.
+For the rest of the study, we used the best hyperparameter set in terms of Sensitivity followed by Efficiency from the cluster with the highest average score.\

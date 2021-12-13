@@ -110,4 +110,4 @@ Finally, a natural improvement would be to provide a graphical user interface to
 The field of literature review automation is maturing rapidly, and we expect an increasing use of such technologies to manage the ever-faster rate of scientific production.
 We believe it is appreciable that a multiplicity of tools are being made available to let researchers and policymakers find the instrument that better fits their needs.\
 We contribute to this field with an innovative framework that provide excellent performance and easy integration with existing systematic review pipelines.
-The value of this work lies not only in the framework itself, which we provide as open-source software, but in the set of methodologies we developed to solve various SRA issues and that can be used to improve already existing solutions.
+The value of this work lies not only in the framework itself, which we provide as open-source software, but in the set of methodologies we developed to solve various SRA issues and that can be used to improve already existing solutions.\
