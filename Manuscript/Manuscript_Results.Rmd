@@ -96,37 +96,30 @@ The initial search query for the example topic was:\
 selecting only results between 2010 and 2020 (included).
 Results were collected from Pubmed, WOS, IEEE, EMBASE and SCOPUS, using the framework tools as described in Methods and Supplemental Material S1.
 
-The first search session returned a total of `r all_records` unique records, specifically `r source_summary$Embase$Records` (`r source_summary$Embase$Perc_over_total` of the total) records from the EMBASE database, followed by `r source_summary$Pubmed$Records` (`r source_summary$Pubmed$Perc_over_total`) from Pubmed, `r source_summary$Scopus$Records` (`r source_summary$Scopus$Perc_over_total`) from SCOPUS, `r source_summary$WOS$Records` (`r source_summary$WOS$Perc_over_total`) from WOS, and `r source_summary$IEEE$Records` (`r source_summary$IEEE$Perc_over_total`) from IEEE (Table 1).
+The first search session returned a total of `r all_records` records, specifically `r source_summary$Embase$Records` (`r source_summary$Embase$Perc_over_total` of the total) records from the EMBASE database, followed by `r source_summary$Pubmed$Records` (`r source_summary$Pubmed$Perc_over_total`) from Pubmed, `r source_summary$Scopus$Records` (`r source_summary$Scopus$Perc_over_total`) from SCOPUS, `r source_summary$WOS$Records` (`r source_summary$WOS$Perc_over_total`) from WOS, and `r source_summary$IEEE$Records` (`r source_summary$IEEE$Perc_over_total`) from IEEE (Table 1).
 There were various degrees of overlapping between sources, with the `r percent(1 - source_distr[1])` of records being present in more than one database and EMBASE and IEEE being the databases with the higher uniqueness ratios.
 The final data set was composed by `r source_summary$Total$Records` unique records.\
 The first `r num_first_labeling` records (based on "simple query ordering") were manually labeled.
 Of these `r sprintf('%d (%s)', num_first_positives, percent(num_first_positives/num_first_labeling))` were labeled as positive, and `r sprintf('%d (%s)', num_first_negatives, percent(num_first_negatives/num_first_labeling))` as negative.
 
-`r print_table(search_results, caption = "**Table 1**. Distribution of retrieved records by source and session. For each source it is reported the number of records, percentage over the session total (after removing duplicates)' and, number or records specific for a source as absolute value and as percentage over the source total. All session shows records after joining and deduplication of the Session 1 and Session 2 data set.", label = "Table 1")`
+`r print_table(search_results, caption = "**Table 1**. Distribution of retrieved records by source and session. For each source it is reported the number of records, percentage over the session total (after removing duplicates), and number or records specific for a source as absolute value and as percentage over the source total. All session shows records after joining and deduplication of the Session 1 and Session 2 data set.", label = "Table 1")`
 
-Records were joined into a database and arrange by simple query ordering;
-of these, the first 250 records were labelled to create the initial training set.\
-Using the classification model,`r n_review_rounds` automatic classification and manual review iterations (CR) were performed (Table 2).
-It is possible to observe how the number of records that required manual review dropped rapidly between iterations, indicating that the engine was converging while the uncertainties were resolved.\
-This phenomenon is better depicted in Fig. 1 of the Supplemental Material S2.
-It shows the mixture distribution of the PPD of the records, specifically for the reviewed positive and negative records, and for records that need manual review after the classification step:
-it can be noticed how the distribution of the uncertain records shrinks (they concentrate in a shorter probability range) and shifts toward the negative zone as more positive matches are found and reviewed.
-Accordingly (Table 2), the number of new positives found drops after the first couple of iterations.
-As per default, the classification process was stopped after four rounds with no new positive matches;
-a total number of `r num_last_positives` positives were found over `r tot_reviewed` manually reviewed records (`r percent(num_last_positives/tot_reviewed)` positivity rate).\
+The labeled records were used to train the Bayesian classification model used to label the remaining records. After seven classification and review (CR) iterations (three resulting in new positive matches and four extra replications to account for stochastic variability), a total of `r num_last_positives` positives matches were found, requiring manual review of `r tot_reviewed` records (`r percent(num_last_positives/tot_reviewed)` positivity rate).\
+It is possible to observe how the number of records that required manual review dropped rapidly between iterations (Table 2), indicating that the engine was converging while the uncertainties were resolved.\
+This phenomenon is better depicted in Fig. 1 of the Supplemental Material S2, showing the mixture distribution of the PPDs of the records, specifically for the reviewed positive and negative records, and for records that need manual review after the classification step:
+it can be noticed how the distribution of the uncertain records shrinked (they concentrate in a shorter probability range) and shifted toward the negative zone as more positive matches are found and reviewed.
 
 `r print_table(annotation_results, caption = "**Table 2**. Results of the automatic classifaction and manual review rounds. For each iteration, the cumulative number of positives and negative records and their sum (Total labelled) and percentage over total are shown. Also, the number of changes after review and their description is reported.\"Unlab.\" indicates unlabelled records marked for review. For each Iteration, also the number of features used by the engine is reported. The first row reports the results of the initial manual labelling of records, which acted as input for the automatic classification in Iteration 1. In Session 2, the engine uses the labels at the end of Session 1 to classify the newly added records.", label = "Table 2")`
 
-By evaluating how often a term was used by the classification model, it is possible to define their relevance in labeling the records (see Methods).
-Here follows the 15 most relevant terms by inclusion rate over 10,000 posterior tree, described as:
+We extracted the 15 term more relevant for the classification model, described as:
 Term (citation part): Inclusion Rate (Inclusion Stability) [linear Relative Risk, Statistic].
 
 `r var_importance`.
 
 The "&" indicates nc-ngrams, i.e., terms strongly co-occurrent in the documents.\
 The engine was able to pick up the central concept of the research, i.e., "patient transport" or "transfer" through a "network" of "facility"ies that facilitates the "spread" of infections, and even one of the authors of this study (Donker T.) as well as the region of interest ("Orange County") of another research group active on the topic of healthcare asociated pathogen spreading over hospital networks.
-It is interesting to see that some terms were considered highly relevant for the BART models (e.g., "Worker" in 6th position out of more than 3800 terms considered) although in a simpler linear model their effect would be hardly significant (statistic: -1.21 s.e.);
-these are terms which are relevant only together with other terms but not by themselves, highlighting the extra predictive power brought by a non-linear model like BART.\
+Some terms were considered highly relevant for the BART models (e.g., "Worker" in 6th position out of more than 3800 terms considered) although in a simpler linear model their effect would be hardly significant (statistic: -1.21 s.e.);
+these are terms which are relevant only in conjunction with other terms but not by themselves, highlighting the extra predictive power brought by a non-linear model like BART.\
 A more extensive set of terms is presented in Table 1 of Supplemental Material S2.
 
 ## Second session
@@ -177,7 +170,7 @@ The percentage of records shared by two or more source dropped to `r percent(1 -
 `r english::as.english(n_review_rounds) %>% str_to_title()` CR rounds were necessary to complete the second session classification, with just `r sum(session_summary[-1, 'Unlab. -> y'])` new positive found after reviewing `r tot_reviewed - session_summary$tot_reviewed_[1]` extra records.
 The first CR iteration required the user to review a substantial number of records (1,273), but just labelling 275 of them (the canonical 250 plus 25 that were already labelled during the framework hyperparameter tuning) was sufficient to drop this number to just 190 in the subsequent round.
 An evaluation of the convergence (Figure 1, Supplemental Material S2) showed that, in addition to the dynamics already observed in session 1 (shrinkage and negative shift), a second mode appeared in the mixture distribution of the records to be reviewed, centred in a highly positive zone.
-The interpretation is that as the number of negative training records increases, the engine gets more and more skeptical and asks to review even some records labelled as positive in the initial training set in Session 1.
+The interpretation is that as the number of negative training records increases, the engine gets more and more skeptical and asks to review even some records labelled as positive in the initial training set generated during Session 1.
 This behaviour can be useful to spot classification errors and inconsistencies.
 Considering both sessions, `r tot_reviewed` records were reviewed and `r num_last_positives` (`r percent(num_last_positives / tot_reviewed)`) were found.
 
@@ -236,7 +229,7 @@ some relevant record was found even close to the end of the heuristically ordere
 Table 3 shows various performance indexes for both sessions, both descriptive (Total records, Reviewed records, Observed positive matches) and estimated through the surrogate model (Expected efficiency, Predicted positive matches, Expected sensitivity, $R^2$).\
 In session 1 we observe an expected total number of positives of `r Performance$s1$pred_positives %>% format_interval()` for an estimated sensitivity of `r Performance$s1$sensitivity %>% format_interval(percent = TRUE)` and efficiency of `r Performance$s1$efficiency %>% format_interval(percent = TRUE)`.
 In session 2 we observed a drop in the expected sensitivity, especially in the lower margin (`r Performance$s2$sensitivity %>% format_interval(percent = TRUE)`), due to the fact that as the number of records grows, even a small probability can translate, in the worst case scenario, into a relevant number of missed positive matches (`r Performance$s2$pred_positives %>% max()` in this case).
-To ascertain that no evident positives were missed, we evaluated 100 more records between the unreviewed ones with the highest median predicted probability produced by the engine and found no additional positive matches.
+To ascertain that no evident positives were missed, we evaluated 100 more records between the unreviewed ones with the highest median predicted probability produced by the engine and found no additional positive matches.\
 
 `r print_table(perf_table, caption = '**Table 3**. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, "Sensitivity" and "Efficiency" (as WSoR) are reported, with their 90% PrI truncated to the observed realization in the dataset [trunc. PrI] (see. methods). Finally the median Bayesian $R^2$ [90% CrI] of the logistic models is reported. PrI: Predictive Intervals; CrI: Credibility Intervals', allow_math = TRUE, label = "Table 3")`
 
