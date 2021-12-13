@@ -1,16 +1,13 @@
-# compute_rnd_sample_needed <- function(obs_pos, obs_neg, tot_records, tot_pos = obs_pos,
-# 																			tot_neg = tot_records - tot_pos,
-# 																			quants = c(.01, .99)) {
-# 	n_needed <- extraDistr::qnhyper(quants, tot_neg, tot_pos, obs_pos)
-#
-# 	list(
-# 		n_needed = n_needed,
-# 		used_prop = (obs_pos + obs_neg) / n_needed,
-# 		needed_prop = n_needed / (obs_pos + obs_neg),
-# 		efficiency = 1 - (obs_pos + obs_neg) / n_needed
-# 	)
-# }
-
+#' Describe changes in the record labels after a Classification/Review Iteration
+#'
+#' Once \code{\link{}}
+#'
+#' @param Annotations
+#'
+#' @return
+#' @export
+#'
+#' @examples
 compute_changes <- function(Annotations) {
 	Annotations %>%
 		transmute(

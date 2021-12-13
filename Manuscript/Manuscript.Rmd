@@ -1,5 +1,5 @@
 ---
-title: Main manuscript
+title: An open-source integrated framework for the automation of citation collection and screening in systematic reviews. 
 authors:
   - name: David S. Hippocampus
     thanks: Use footnote for providing further information about author (webpage, alternative address)---*not* for acknowledging funding agencies. Optional.
@@ -13,12 +13,27 @@ authors:
     location: Santa Narimana, Levand
     email: stariate@ee.mount-sheikh.edu
 abstract: |
-  Enter the text of your abstract here.
+  The exponential growth in scientific production makes its summarisation through secondary literature exceedingly demanding in terms of time and human resources.
+  We introduce a new open-source framework that significantly increases efficiency during the citation collection and screening phases of systematic reviews.\
+  The framework introduces three main tools:
+  an automatic citation search engine and manager that allows collecting records from multiple citation databases (PUBMED, WOS, SCOPUS, EMBASE, IEEE) with a unified query syntax;
+  a citation screening tool based on Bayesian active machine learning and natural language processing, which requires users feedback only on uncertain classifications to increase predictive accuracy iteratively;
+  a semi-automatic data-driven query generator to create new search queries from existing reviewed citation data sets.\
+  The framework was applied on an example topic performing citation collection and screening.
+  We estimated median posterior Sensitivity and Efficiency [90% Credible Intervals] using Bayesian simulation to predict the distribution of possibly missed relevant matches in the unreviewed records.\
+  17755 unique records were collected through the framework citation manager;
+  101 over 766 records were found to be relevant after manual evaluation, while the rest were excluded by the automatic classification;
+  the expected Efficiency was 95.7% [95.3%, 95.7%] for a Sensitivity of 100% [93.5%, 100%].
+  A new search query was generated from the labelled dataset, and 82579 more records were collected. Only 567 records required human review after the automatic screening, and six additional positive matches were found.
+  Including the additional records, the overall expected Sensitivity dropped to 97.3% [73.8%, 100%] while the Efficiency raised to 98.6% [98.2%, 98.7%].\
+  The framework can significantly reduce human resources requirements for systematic reviews by simplifying citation collection and screening while demonstrating exceptional sensitivity even on large data sets.
 keywords:
-  - blah
-  - blee
-  - bloo
-  - these are optional and can be removed
+  - Systematic review automation
+  - Citation management
+  - Online data collection
+  - Active machine learning
+  - Natural language processing
+  - Bayesian modeling
 bibliography: references.bib
 lang: en-GB
 output: 
