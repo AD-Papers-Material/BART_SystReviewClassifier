@@ -8,7 +8,7 @@
 #' considered from left to right.
 #'
 #' This function is a wrapper over
-#' \code{\link[dplyr:coalesce]{dplyr::coalesce()} which allow to have a standard
+#' \code{\link[dplyr:coalesce]{dplyr::coalesce()}} which allow to have a standard
 #' coalescing scheme for an annotation file.
 #'
 #' @param data An Annotation data frame.
@@ -166,7 +166,7 @@ create_training_set <- function(Records, min_freq = 0.05) {
 #' @param ... More argument to pass to
 #'   \code{\link[bartMachine:bartMachine]{bartMachine::bartMachine()}}
 #'
-#' @return An object of class “bartMachine”.
+#' @return An object of class \code{bartMachine}.
 #'
 compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 															 folder = getwd(), name = as.character(Y),
@@ -340,7 +340,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #'   to solve uncertain record labels.
 #' @param prev_classification A data frame with already labeled records to use
 #'   to solve automatically uncertain record labels during a CR iteration. Only
-#'   used if \code{use_prev_labels} is \{TRUE}.
+#'   used if \code{use_prev_labels} is \code{TRUE}.
 #' @param save_samples Whether to save on disk the PPDs of the records. These
 #'   are necessary (at least those related to the last CR iteration) to create a
 #'   new search query automatically with \code{\link{extract_rules}}.
