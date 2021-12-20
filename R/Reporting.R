@@ -1,9 +1,59 @@
+
+# Summarising -------------------------------------------------------------
+
+
+
+#' Summarise a discrete vector
+#'
+#' Shows for each unique element its numerosity and percentage.
+#'
+#' @param vec A vector.
+#'
+#' @return A string listing each unique element in the vector, its numerosity
+#'   and percentage over the vector length (including missings).
+#'
+#' @examples
+#'
+#' summarise_vector(iris$Species)
+#' # setosa: 50 (33.3%), versicolor: 50 (33.3%), virginica: 50 (33.3%)
+#'
 summarise_vector <- function(vec) {
-	if (length(vec) == 0) return(0)
+	if (length(vec) == 0 | is.list(vec) | !is.null(dim(vec))) return('incorrect input')
+	all_els <- length(vec)
 	table(vec) %>%
-		{paste0(names(.), ': ', ., ' (', percent(./sum(.)), ')', collapse = ', ')}
+		{paste0(names(.), ': ', ., ' (', percent(./all_els), ')', collapse = ', ')}
 }
 
+#' Record distribution between sources in an Annotation file
+#'
+#' Summarises the distribution of the source databases among the the citation
+#' records in an Annotation data set. Also reports the fraction of records which
+#' are unique for each database.
+#'
+#' @param annotation_file An annotation data frame or a file path to it.
+#' @param as_data_frame Whether to return the results as a data frame
+#'   (\code{TRUE}) or a list (\code{FALSE}).
+#' @param add_session_totals Whether to add the total number of record.
+#'
+#' @return For each source:\item{Records}{The number of records related to the
+#'   source.}\item{\% over total}{the percentage over the total
+#'   records.}\item{Source specific records}{the number of record derived only
+#'   from that source.}\item{\% over source total}{the value in \code{Source
+#'   specific records} as percentage over the source total.} If
+#'   \code{as_data_frame} is \code{TRUE}, the results are returned as a data
+#'   frame with a row for each source, otherwise as a nested list.
+#'   \code{add_session_totals} adds another entry with the total number of
+#'   records in the \code{annotation_file}.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' records <- get_session_files('Session1')$Records
+#'
+#' summarise_by_source(records)
+#'
+#' }
 summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 																add_session_totals = TRUE) {
 	data <- import_data(annotation_file)
@@ -44,6 +94,29 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 	res
 }
 
+#' Record distribution between sources for each session
+#'
+#' Applies \code{\link{summarise_by_source()}} to all selected sessions.
+#'
+#' @param sessions A vector of session identifiers corresponding to folders into
+#'   the \code{sessions_folder} folder.
+#' @param sessions_folder Where to find the \code{sessions} folders.
+#' @param add_global_totals Add results for all sessions considered together.
+#' @param keep_session_label Add a column which groups rows by session. Useful
+#'   for subsequent sub-setting of the results.
+#' @param ... Other arguments passed to \code{\link{summarise_by_source}}.
+#'
+#' @return A data frame with the number and fraction of total records per source
+#'   and number and fraction of source specific records, grouped by session. An
+#'   extra group with the overall results is reported if
+#'   \code{add_global_totals} is \code{TRUE}.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # Describe source distribution by source and in total
+#' summarise_sources_by_session(add_global_totals = TRUE)
+#' }
 summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 																				 sessions_folder = getOption("baysren.sessions_folder"),
 																				 add_global_totals = TRUE, keep_session_label = FALSE, ...) {
@@ -97,7 +170,26 @@ summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 	res
 }
 
-source_session_summary_to_list <- function(source_summary) {
+#' Format records' source distribution as a list
+#'
+#' Takes the output of \code{\link{summarise_sources_by_session}} and formats it
+#' as a list.
+#'
+#' @param source_summary A data frame produced by
+#'   \code{\link{summarise_sources_by_session}}.
+#'
+#' @return A hierarchical list with record distribution by source and session.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # Describe source distribution by source and in total
+#' source_summary <- summarise_sources_by_session(add_global_totals = TRUE)
+#'
+#' # Transform it into a list
+#' source_session_summary_to_list(source_summary)
+#' }
+source_session_summary_to_list <- function(source_summary) { #TODO: include inside summarise_sources_by_session
 	source_summary$Session_label %>% unique() %>%
 		lapply(function(session) {
 			df <- source_summary %>% filter(Session_label == session)
@@ -114,6 +206,28 @@ source_session_summary_to_list <- function(source_summary) {
 		}) %>% setNames(unique(source_summary$Session_label))
 }
 
+#' Distribution of the number of sources in common per record
+#'
+#' Describe the distribution of the number of sources shared by records.
+#'
+#' @param annotation_file An annotation data frame or a file path to it.
+#' @param as_propr Whether to output the results as absolute number of
+#'   proportion over the record total.
+#' @param format_fun If the results are shown as proportion (\code{as_propr ==
+#'   TRUE}), which function to use to format them.
+#'
+#' @return A named vector with the number of sources in common as names and the
+#'   absolute number/proportion as values.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # Get the annotation file
+#' Annotation_file <- get_session_files('Session1')$Annotations[1]
+#'
+#' # Transform it into a list
+#' get_source_distribution(Annotation_file)
+#' }
 get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun = percent) {
 	res <- import_data(annotation_file)$Source %>%
 		pbmclapply(function(sources) str_split(sources, '; *') %>% unlist %>% n_distinct) %>%
@@ -126,6 +240,33 @@ get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun
 	res
 }
 
+#' Describe results of a Classification/Review session
+#'
+#' Take a session identifier as input and describe the changes in the number of
+#' positive and negative matches after each Classification/Review iteration. It
+#' is necessary to run \code{\link{consolidate_results()}} before this command,
+#' otherwise the results would not consider the changes made through the manual
+#' review of the automatic classification.
+#'
+#' @param session_name A session identifier corresponding to folders into the
+#'   \code{sessions_folder} folder.
+#' @param sessions_folder Where to find the \code{sessions} folders.
+#' @param remove_empty_columns If \code{TRUE}, shows change columns even if no
+#'   changes of that type ever happened.
+#' @param remove_raw_data Remove the \code{tot_reviewed_} and
+#'   \code{total_records_} columns from the output, which store data and column
+#'   name in machine readable column formats.
+#'
+#' @return A data frame reporting for a session the number of positive and negative matches
+#'   after each Classification/Review iteration and the specific changes
+#'   corresponding to each iteration.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' summarise_annotations('Session1')
+#' }
 summarise_annotations <- function(session_name, sessions_folder = getOption("baysren.sessions_folder"),
 																	remove_empty_columns = TRUE, remove_raw_data = TRUE) {
 	result_list <- get_session_files(session_name, sessions_folder)$Results %>%
@@ -202,6 +343,27 @@ summarise_annotations <- function(session_name, sessions_folder = getOption("bay
 	}
 }
 
+#' Describe results of all Classification/Review sessions
+#'
+#' Applies \code{\link{summarise_annotations()}} to all session in the
+#' \code{sessions_folder} folder.
+#'
+#' @param sessions_folder A repository where session folders are stored.
+#' @param remove_empty_columns If \code{TRUE}, shows change columns even if no
+#'   changes of that type ever happened.
+#' @param remove_raw_data Remove the \code{tot_reviewed_} and
+#'   \code{total_records_} columns from the output, which store data and column
+#'   name in machine readable column formats.
+#'
+#' @return A data frame reporting for each session the number of positive and negative matches
+#'   after each Classification/Review iteration and the specific changes
+#'   corresponding to each iteration.
+#'
+#' @examples
+#' \dontrun{
+#'
+#' summarise_annotations_by_session()
+#' }
 summarise_annotations_by_session <- function(sessions_folder = getOption("baysren.sessions_folder"),
 																						 remove_empty_columns = TRUE,
 																						 remove_raw_data = TRUE) {
@@ -240,318 +402,26 @@ summarise_annotations_by_session <- function(sessions_folder = getOption("baysre
 	}
 }
 
-# summarise_annotations <- function(annotation.folder = 'Annotations', plot = F) {
-# 	# list.files('Models') %>% pbmclapply(function(file) {
-# 	# 	Model <- read_rds(file.path('Models', file))
-#
-# 	Res <- list.files(annotation.folder, recursive = T, pattern = 'Records_P') %>%
-# 		str_subset('~\\$', negate = T) %>%
-# 		pbmclapply(function(file) {
-#
-# 			file_path <- file.path(annotation.folder, file)
-#
-# 			Annotated_data <- read_excel(file_path)
-#
-# 			Performance <- read_excel(file_path, sheet = 'Out_of_sample_perf')
-# 			Performance <- as.list(Performance$Value) %>% setNames(Performance$Indicator)
-#
-# 			Var_imp <- read_excel(file_path, sheet = 'Variable_importance') %>%
-# 				filter(!str_detect(Term, 'MESH|KEYS')) %>%
-# 				mutate(Term = str_remove(Term, '.+__')) %>%
-# 				group_by(Term) %>% slice_max(order_by = Score) %>% ungroup() %>%
-# 				arrange(desc(Score)) %>% pull(Term) %>% head(15) %>%
-# 				str_replace('^\\w', str_to_upper) %>%
-# 				str_replace_all(c('\\._\\.' = ' ', '\\.' = ' OR ', '_' = ' ')) %>%
-# 				paste(collapse =', ')
-#
-# 			Predicted <- Annotated_data$Predicted_label
-# 			# Manual <- with(Annotated_data, case_when(
-# 			# 	!is.na(Rev_prediction) ~ as.character(Rev_prediction),
-# 			# 	!is.na(Rev_abstract) ~ Rev_abstract,
-# 			# 	T ~ Rev_title
-# 			# ))
-# 			Manual <- coalesce_labels(Annotated_data, c('Rev_prediction', 'Rev_manual'))
-#
-# 			status <- c(
-# 				Uncertain = sum(Predicted %in% 'unk'),
-# 				Positive = sum(Predicted %in% 'y'),
-# 				Negative = sum(Predicted %in% 'n'),
-# 				New_positive = sum(Predicted %in% 'y' & is.na(Manual)),
-# 				New_negative = sum(Predicted %in% 'n' & is.na(Manual)),
-# 				New_uncertain = with(Annotated_data, sum(Predicted_label == 'unk' & is.na(Rev_prediction))),
-# 				Reviewed_positive = sum(Manual %in% 'y'),
-# 				Reviewed_negative = sum(Manual %in% 'n'),
-# 				Reviewed = sum(!is.na(Manual)),
-# 				Discordant = sum(Predicted == 'check'),
-# 				False_positive = sum(Predicted %in% 'y' & Manual %in% 'n'),
-# 				AUC = Performance$AUC,
-# 				Sensitivity = Performance$Sens,
-# 				Specificity = Performance$Spec,
-# 				Important_vars = Var_imp
-# 			)
-#
-# 			data.frame(
-# 				Value = status,
-# 				Label = names(status),
-# 				Total_records = nrow(Annotated_data),
-# 				Date = str_remove_all(basename(file), 'Records_P_(R_)?|.xlsx') %>% as_datetime(),
-# 				File = basename(file),
-# 				Batch = dirname(file),
-# 				Parent_file = ifelse(!is.null(Annotated_data$Parent_file), basename(Annotated_data$Parent_file[1]), NA)
-# 			)
-# 		}) %>% bind_rows() %>% arrange(Date) %>%
-# 		mutate(
-# 			Ord = factor(paste(Date, str_detect(File, '_R_')), levels = unique(paste(Date, str_detect(File, '_R_')))) %>% as.numeric
-# 		) %>%
-# 		arrange(Ord)
-#
-# 	if (plot) {
-#
-# 		# p <- Res %>%
-# 		# 	mutate(
-# 		# 		Parent_ord = sapply(Parent_file, function(par_file) {
-# 		# 			res <- Ord[File == par_file] %>% unique()
-# 		#
-# 		# 			if (length(res) == 0) res <- NA
-# 		#
-# 		# 			res
-# 		# 		}),
-# 		# 		Rev_parent = sapply(1:n(), function(i) {
-# 		# 			d <- Date[i]
-# 		# 			ifelse(str_detect(File[i], '_R_') & !all(str_detect(File[Date %in% d], '_R_')), Ord[Date %in% d][1], NA)
-# 		# 		})
-# 		# 	) %>%
-# 		# 	ggplot(aes(x = Ord)) +
-# 		# 	geom_col(aes(fill = factor(Label) %>% relevel('Reviewed'), y = Value), width = .75, position = 'stack') +
-# 		# 	geom_line(aes(y = Total_positives, linetype = 'Positives'), color = 'red') +
-# 		# 	geom_point(aes(y = Total_positives, size = factor(Total_records)), color = 'red') +
-# 		# 	geom_label(aes(y = Total_positives, label = Total_positives), nudge_y = 5) +
-# 		# 	geom_label(aes(y = 0, label = paste0(
-# 		# 		ifelse(str_detect(File, '_R_'), 'R', 'P'),
-# 		# 		ifelse(!is.na(Rev_parent), paste0('(', Rev_parent, ')'), ''),
-# 		# 		ifelse(!is.na(Parent_ord), paste0(':', Parent_ord), '')
-# 		# 		)), nudge_y = 5) +
-# 		# 	geom_errorbarh(
-# 		# 		data = Res %>%
-# 		# 			group_by(Batch) %>%
-# 		# 			summarise(first = min(Ord), last = max(Ord), val = max(Value) * 1.05) %>%
-# 		# 			mutate(Ord = 1:n()),
-# 		# 		mapping = aes(xmin = first, xmax = last, y = val),
-# 		# 		height = 1
-# 		# 	) +
-# 		# 	geom_text(
-# 		# 		data = Res %>%
-# 		# 			group_by(Batch) %>%
-# 		# 			summarise(x = median(Ord), y = max(Value) * 1.1, text = paste('Query:', str_remove_all(Batch, 'Records_') %>% ymd())) %>%
-# 		# 			mutate(Ord = 1:n()),
-# 		# 		mapping = aes(x = x, y = y, label = text)
-# 		# 	) +
-# 		# 	scale_x_continuous(breaks = Res$Ord %>% unique) +
-# 		# 	theme_minimal() +
-# 		# 	labs(size = 'Total Records', x = 'Annotation sequence', y = 'Records', fill = 'Record type', linetype = NULL)
-#
-# 		Plot_data <- Res %>%
-# 			mutate(
-# 				Parent_ord = sapply(Parent_file, function(par_file) {
-# 					res <- Ord[File == par_file] %>% unique()
-#
-# 					if (length(res) == 0) res <- NA
-#
-# 					res
-# 				}),
-# 				Rev_parent = sapply(1:n(), function(i) {
-# 					d <- Date[i]
-# 					ifelse(str_detect(File[i], '_R_') & !all(str_detect(File[Date %in% d], '_R_')), Ord[Date %in% d][1], NA)
-# 				}),
-# 				Batch = Batch %>% str_remove('Records_'),
-# 				Ord_lab = case_when(
-# 					str_detect(File, '_R_') ~ sprintf('R%d (P%d)', Ord, Rev_parent),
-# 					T ~ sprintf('P%d: R%d', Ord, Parent_ord)
-# 				) %>% str_remove(': RNA')
-# 			) %>% ungroup()
-#
-#
-# 		Totals <- Plot_data %>% select(Batch, Total_records, Ord) %>% group_by(Batch) %>% slice_head(n = 1) %>% ungroup()
-#
-# 		Predictions <- Plot_data %>% filter(Label %in% c('Uncertain', 'Positive', 'Discordant') & !str_detect(File, '_R_'))
-#
-# 		Reviews_new <- Plot_data %>% filter(Label %in% c('New positive', 'New uncertain') & !str_detect(File, '_R_'))
-# 		Reviews_tot <- Plot_data %>% filter(Label %in% c('Total positive', 'Reviewed', 'False positive') & str_detect(File, '_R_'))
-#
-# 		p_totals <- ggplot(Totals, aes(Batch, Total_records)) +
-# 			geom_col(fill = 'steelblue', width = .25) +
-# 			geom_label(aes(label = format(Total_records, big.mark = ' '))) +
-# 			labs(x = 'Query date', y = 'Records') +
-# 			theme_minimal() +
-# 			ggtitle('A) Total records by query')
-#
-# 		p_review_new <- ggplot(Reviews_new, aes(reorder(Ord_lab, Ord), Value, group = Label)) +
-# 			geom_col(aes(fill = Label), Predictions, position = position_dodge2(padding = .5), alpha = .8) +
-# 			geom_line(aes(color = Label), size = 1) +
-# 			geom_point(aes(color = Label)) +
-# 			geom_label(aes(label = Value, color = Label), data = filter(Reviews_new, Value > 0), fontface = "bold", show.legend = F) +
-# 			labs(x = 'Task', y = 'Records', color = 'New results', fill = 'Predicted label') +
-# 			facet_wrap(~ paste('Query:', Batch), scales = 'free_x') +
-# 			scale_color_manual(values = c('#d95f02', '#7b3294')) +
-# 			theme_minimal() +
-# 			theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-# 			ggtitle('B) Prediction tasks')
-#
-# 		p_review_tot <- ggplot(Reviews_tot, aes(reorder(Ord_lab, Ord), Value, group = Label)) +
-# 			geom_line(aes(color = Label), size = 1) +
-# 			geom_point(aes(color = Label)) +
-# 			geom_label_repel(aes(label = Value, color = Label), data = filter(Reviews_tot, Value > 0), force = 0.01, force_pull = 20, fontface = "bold", show.legend = F) +
-# 			scale_color_manual(values = c('#ca0020', '#0571b0', '#008837')) +
-# 			labs(x = 'Task', y = 'Records', color = 'Review results') +
-# 			theme_minimal() +
-# 			theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-# 			ggtitle('C) Review tasks')
-#
-# 		p_review_tot <- Reviews_tot %>%
-# 			group_by(Batch) %>%
-# 			summarise(
-# 				med = Ord_lab[Ord == median(Ord)],
-# 				first = Ord_lab[which.min(Ord)],
-# 				last = Ord_lab[which.max(Ord)],
-# 				y = max(Value)) %>%
-# 			with(
-# 				p_review_tot +
-# 					annotate('errorbarh', xmin = first, xmax = last, y = max(y) * 1.05, height = 1) +
-# 					annotate('text', x = med, y = max(y) * 1.1, label = paste("Query:", Batch))
-# 			)
-#
-#
-# 		p <- p_totals | (p_review_new / p_review_tot)
-#
-# 		print(p)
-# 	}
-#
-# 	Res
-# }
-#
-# summarise_annotations2 <- function(sessions_folder = 'Sessions',
-# 																	 sessions = list.dirs(sessions_folder, recursive = F),
-# 																	 analyse_iterations = T, analyse_perf = T,
-# 																	 ...) {
-#
-# 	# Just to be sure
-# 	sessions <- file.path(sessions_folder, basename(sessions))
-#
-# 	output <- list()
-#
-# 	files <- lapply(sessions, function(session_folder) {
-# 		annotation_files <- list.files(file.path(session_folder, 'Annotations'),
-# 																	 pattern = '.xlsx', full.names = T) %>%
-# 			str_subset('~\\$', negate = T)
-#
-# 		results_files <- list.files(file.path(session_folder, 'Results'),
-# 																pattern = '.csv', full.names = T) %>%
-# 			str_subset('~\\$', negate = T)
-#
-# 		samples_files <- list.files(file.path(session_folder, 'Samples'),
-# 																pattern = '.rds', full.names = T)
-#
-# 		output <- lapply(0:length(annotation_files), function(i) {
-# 			if (i == 0) {
-# 				files <- c(Annotation = (list.files(session_folder, pattern = '.xlsx',
-# 																						full.names = T) %>%
-# 																 	str_subset('~\\$', negate = T))[1])
-# 			} else {
-# 				files <- c(Annotation = annotation_files[i], Samples = samples_files[i],
-# 									 Results = results_files[i])
-# 			}
-#
-# 			data.frame(
-# 				Session = basename(session_folder),
-# 				Iter = if (i == 0) 0 else str_extract(basename(files[1]), '^\\d+') %>%
-# 					as.numeric(),
-# 				Type = names(files),
-# 				File = files
-# 			)
-# 		}) %>% bind_rows()
-#
-# 	}) %>% bind_rows() %>%
-# 		tidyr::pivot_wider(id_cols = c(Session, Iter), names_from = Type,
-# 											 values_from = File) %>%
-# 		arrange(Session, Iter)
-#
-# 	message('...loading files')
-#
-# 	Annotations <- pbmclapply(files$Annotation, import_data) %>%
-# 		setNames(files$Annotation)
-#
-# 	Parent_files <- pbmclapply(na.omit(files$Results), function(f) {
-# 		df <- read_csv(f, col_types = cols())
-# 		df$Value[df$Indicator == 'Parent file']
-# 	}) %>% setNames(na.omit(files$Results))
-#
-# 	if (analyse_perf) {
-# 		Samples <- pbmclapply(na.omit(files$Samples), read_rds) %>%
-# 			setNames(na.omit(files$Samples))
-#
-# 		message('...compute performance data')
-#
-# 		output$Performance = pblapply(names(Samples), function(file) {
-#
-# 			files <- files %>% filter(Samples == file)
-#
-# 			output$Performance = compute_pred_performance(
-# 				Annotations[[files$Annotation]], samples = Samples[[file]],
-# 				show_progress = F, ...
-# 			) %>%
-# 				mutate(
-# 					Session = files$Session,
-# 					Iter = files$Iter,
-# 					File = basename(files$Annotation),
-# 					.before = 1
-# 				)
-#
-# 		}) %>% bind_rows()
-# 	}
-#
-# 	# TODO: use the Results files if existing and fix Iters_w_no_pos
-# 	if (analyse_iterations) {
-# 		message('...compute iteration data')
-#
-# 		output$Iterations = lapply(names(Annotations), function(file) {
-#
-# 			files <- files %>% filter(Annotation == file)
-#
-# 			Annotations[[file]] %>%
-# 				compute_changes() %>%
-# 				mutate(
-# 					Session = files$Session,
-# 					Iter = files$Iter,
-# 					File = basename(file),
-# 					Parent_file = if (!is.na(files$Results)) {
-# 						Parent_files[[files$Results]] %>% basename()
-# 					} else NA
-# 				) %>%
-# 				select(-matches('unlab\\. -> unlab\\.|y -> y|n -> n')) %>%
-# 				mutate(
-# 					Iters_w_no_pos = {
-# 						pos_vec <- select(., matches('-> y')) %>% rowSums(na.rm = T)
-# 						out <- rep(0, length(pos_vec))
-#
-# 						for (i in 2:length(pos_vec)) {
-# 							if (pos_vec[i] > 0) out[i] <- 0 else out[i] <- out[i - 1] + 1
-# 						}
-#
-# 						out
-# 					},
-# 					across(where(is.numeric), ~ replace(.x, 1:length(.x) != 1 & is.na(.x), 0))
-# 				)
-# 		}) %>% bind_rows() %>%
-# 			select(
-# 				Session, Iter, File, Parent_file,
-# 				matches('Target'), Total_labeled, New_labels, Iters_w_no_pos, matches('Change')
-# 			)
-# 	}
-#
-# 	output
-# }
 
-format_interval <- function(interval, percent = FALSE) {
+# Formatting --------------------------------------------------------------
+
+
+
+#'Format a 3-values statistic
+#'
+#'Useful to format a 3-values statistic in the "point statistic [interval
+#'boundaries]" format.
+#'
+#'@param interval A 3 values vector describing a point estimate and two interval
+#'  boundaries.
+#'@param percent Whether to format the results as percentages.
+#'
+#'@return A string in the "point statistic [interval boundaries]" format.
+#'
+#'@examples
+#'
+#'format_interval(qbeta(c(.05, .5, .95), 10, 14), percent = TRUE)
+format_interval <- function(interval, percent = FALSE) { #TODO: change "percent" into a user definable function, like for get_source_distribution()
 	interval <- sort(interval)
 
 	if (percent) interval <- percent(interval)
@@ -559,6 +429,34 @@ format_interval <- function(interval, percent = FALSE) {
 	interval %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
 }
 
+#' Pretty formatting of Session performance analysis
+#'
+#' Publication friendly formatting of the results of
+#' \code{\link{estimate_performance()}}. If more than one results set is passed
+#' (i.e., one per session), the will be added as new columns.
+#'
+#' @param ... One of more performance result data frames produced by
+#'   \code{\link{estimate_performance()}}.
+#' @param session_names Names of the sessions corresponding to the result data
+#'   frames passed to \code{...}. If missing they will be "Session" followed by
+#'   an incremental number for each data frame passed to \code{...}.
+#'
+#' @return A long format data frame with the statistical indicators on the first
+#'   column and a column with values for each data frame passed to \code{...}.
+#' @export
+#'
+#' @examples
+#'
+#' \dontrun{
+#'Performance <- list(
+#'  s1 = get_session_files('Session1')$Annotations %>% last() %>%
+#'	  import_data() %>% estimate_performance(),
+#'  s2 = get_session_files('Session2')$Annotations %>% last() %>%
+#'	  import_data() %>% estimate_performance()
+#')
+#'
+#'format_performance(Performance$s1, Performance$s2)
+#' }
 format_performance <- function(..., session_names = NULL) {
 
 	elements <- list(...)
@@ -589,6 +487,26 @@ format_performance <- function(..., session_names = NULL) {
 
 }
 
+#' Format variable importance results
+#'
+#' Publication ready formatting of the output of
+#' \code{\link{extract_var_imp()}}. Separate the term from the part of the
+#' record it was found in; uses "&" and "|" to identify non-consecutive ngrams
+#' and redundant terms; reduce numeric values to significant digits.
+#'
+#' @param var_imp A data frame produced by \code{\link{extract_var_imp()}}.
+#' @param as_data_frame Whether to format the output as data frame or as text.
+#'
+#' @return A formatted data frame or a string of text, depending on the
+#'   \code{as_data_frame} argument.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' output <- extract_var_imp('Session1')
+#'
+#' format_var_imp(output)
+#' }
 format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 	var_imp <- var_imp %>%
 		transmute(
@@ -609,7 +527,23 @@ format_var_imp <- function(var_imp, as_data_frame = TRUE) {
 	var_imp
 }
 
-print_table <- function(data, caption = '', allow_math = F, ...) {
+#' Publication friendly tables for .rmd files
+#'
+#' A publication friendly version of \code{\link[knitr:kable]{knitr::kable()}}.
+#' It automatically detect if the output is HTML or PDF and adapt the
+#' formatting, allowing for latex formulas, large table, etc in PDF outputs.
+#' Allows using \% in PDF tables.
+#'
+#' @param data A data frame
+#' @param caption A caption to be displayed in the table.
+#' @param allow_math Whether to allow latex math by disabling special character
+#'   escape.
+#' @param ... Other arguments passed to
+#'   \code{\link[knitr:kable]{knitr::kable()}}
+#'
+#' @return An \code{\link[rkmarkdown:render]{rkmarkdown::render()}} ready table.
+#'
+print_table <- function(data, caption = '', allow_math = FALSE, ...) {
 	if (knitr::is_latex_output()) {
 		if (isTRUE(allow_math)) {
 			data <- data %>%
@@ -638,10 +572,24 @@ print_table <- function(data, caption = '', allow_math = F, ...) {
 
 }
 
+
+# Plotting ----------------------------------------------------------------
+
+#' Plot posterior predictive distributions generated by the classification model
+#'
+#' For each Classification/Review iteration the function plots the mixture of
+#' the posterior predictive distributions (PPD) of a positive match as predicted
+#' by the classification model for the positive, negative, unknown labelled
+#' records in the Annotation data sets.
+#'
+#' @param session_name A session identifiers corresponding to folders into
+#'   the \code{sessions_folder} folder.
+#' @param sessions_folder Where to find the \code{sessions} folders.
+#'
+#' @return A \code{ggplot2} object.
+#'
 plot_predictive_densities <- function(session_name,
 																			sessions_folder = getOption("baysren.sessions_folder")) {
-
-	library(ggridges)
 
 	records_files <- get_session_files(session_name, sessions_folder)$Annotations
 	samples_files <- get_session_files(session_name, sessions_folder)$Samples
@@ -730,7 +678,6 @@ plot_predictive_densities <- function(session_name,
 #' @param limit How many records to display.
 #'
 #' @return A `ggplot2` object.
-#' @export
 #'
 #'\dontrun{
 #'data <- get_session_files('Session1')$Annotations %>% last() %>%
