@@ -479,7 +479,7 @@ fix_duplicated_records <- function(records) {
 				purrr::keep(~ str_length(.x) > 0) %>%
 				paste(collapse = '; '),
 			## TODO: clean up is necessary for Source and Source_type
-			N_citations = suppressWarnings(na.omit(N_citations) %>% max(na.rm = T) %>%
+			N_citations = suppressWarnings(na.omit(N_citations) %>% max(na.rm = TRUE) %>%
 																		 	purrr::modify_if(~ !is.finite(.x), ~ NA))
 		)
 
@@ -548,8 +548,8 @@ create_annotation_file <- function(records, reorder_query = NULL,
 
 	if (is.character(records)) {
 		records <- c(
-			list.files(records, full.names = T, recursive = T) %>%
-				str_subset('~\\$', negate = T) %>%
+			list.files(records, full.names = TRUE, recursive = TRUE) %>%
+				str_subset('~\\$', negate = TRUE) %>%
 				str_subset('(parsed|API)\\.csv'),
 			records[!dir.exists(records)]
 		) %>% unique()
@@ -734,14 +734,14 @@ create_session <- function(Records, session_name,
 	dup_session_action <- match.arg(dup_session_action)
 
 	initialise_session <- function(Records, session_path, DTM = NULL,
-																 use_time_stamp = T) {
+																 use_time_stamp = TRUE) {
 
 		if (use_time_stamp) ts <- glue('_{safe_now()}') else ''
 
 		# Create the session folder
 		if (!dir.exists(session_path)) {
 			message('- create session folder "', session_path, '".')
-			dir.create(session_path, recursive = T, showWarnings = FALSE)
+			dir.create(session_path, recursive = TRUE, showWarnings = FALSE)
 		}
 
 		# At the moment csv files will be converted to excel, eventually both file
@@ -754,9 +754,9 @@ create_session <- function(Records, session_name,
 		if (is.character(Records) | is.factor(Records)) {
 			if (!file.exists(Records)) stop(Records, ' does not exists.')
 
-			file.copy(Records, file_path, overwrite = T, recursive = F)
+			file.copy(Records, file_path, overwrite = TRUE, recursive = FALSE)
 		} else {
-			openxlsx::write.xlsx(Records, file = file_path, asTable = T)
+			openxlsx::write.xlsx(Records, file = file_path, asTable = TRUE)
 		}
 
 		message("- Copy or write the DTM data")
@@ -765,9 +765,9 @@ create_session <- function(Records, session_name,
 			if (is.character(DTM) | is.factor(DTM)) {
 				if (!file.exists(DTM)) stop(DTM, ' does not exists.')
 
-				file.copy(DTM, file_path, overwrite = T, recursive = F)
+				file.copy(DTM, file_path, overwrite = TRUE, recursive = FALSE)
 			} else {
-				readr::write_rds(DTM, file = file_path, asTable = T)
+				readr::write_rds(DTM, file = file_path, asTable = TRUE)
 			}
 		}
 	}
@@ -785,7 +785,7 @@ create_session <- function(Records, session_name,
 					 },
 					 add = {
 					 	warning('Session "', session_name, '" exists. Adding a replicate...')
-					 	cur_rep <- max(str_extract(session_name, '(?<=_r)\\d+') %>% as.numeric(), 1, na.rm = T)
+					 	cur_rep <- max(str_extract(session_name, '(?<=_r)\\d+') %>% as.numeric(), 1, na.rm = TRUE)
 
 					 	session_name <- str_remove(session_name, '_r\\d+$') %>% paste0('_r', cur_rep + 1)
 
@@ -795,7 +795,7 @@ create_session <- function(Records, session_name,
 					 },
 					 replace = {
 					 	warning('Session "', session_name, '" exists. Replacing...')
-					 	failure <- unlink(session_path, recursive = T)
+					 	failure <- unlink(session_path, recursive = TRUE)
 
 					 	if (failure == 1) stop('Session removal failed!')
 					 },
@@ -830,7 +830,7 @@ get_session_files <- function(session_name,
 	session_path <- file.path(sessions_folder, session_name)
 
 	lapply(which, function(type) {
-		files <- list.files(session_path, recursive = T) %>% str_subset(type)
+		files <- list.files(session_path, recursive = TRUE) %>% str_subset(type)
 
 		files <- files[str_detect(basename(files), '^\\w')]
 
@@ -845,7 +845,7 @@ get_session_files <- function(session_name,
 			iter = basename(files) %>%
 				str_extract('^\\d+') %>%
 				as.numeric() %>%
-				pmax(0, na.rm = T) # the source record file would have no iteration in the name, so will be considered as zero
+				pmax(0, na.rm = TRUE) # the source record file would have no iteration in the name, so will be considered as zero
 		) %>% arrange(iter) %>% pull(files)
 
 		file.path(session_path, files)

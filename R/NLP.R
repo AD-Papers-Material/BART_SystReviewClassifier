@@ -15,7 +15,7 @@ lemmatize <- function(text_vec, dict = lexicon::hash_lemmas) {
 	separator <- '_tagseparator_'
 
 	terms <- paste(text_vec, separator, collapse = ' ')
-	terms <- gsub(sprintf(' *%s$', separator), '', terms, perl = T) %>%
+	terms <- gsub(sprintf(' *%s$', separator), '', terms, perl = TRUE) %>%
 		str_split('\\b') %>% unlist()
 	terms <- terms[!(terms %in% c('', ' '))]
 
@@ -28,8 +28,8 @@ lemmatize <- function(text_vec, dict = lexicon::hash_lemmas) {
 		paste(collapse = ' ') %>%
 		str_split(sprintf(' *%s *', separator)) %>% unlist
 
-	output <- gsub('\\s+', ' ', output, perl = T)
-	output <- gsub('^\\s+|\\s+$', '', output, perl = T)
+	output <- gsub('\\s+', ' ', output, perl = TRUE)
+	output <- gsub('^\\s+|\\s+$', '', output, perl = TRUE)
 
 	replace(output, output == 'NA', NA)
 }
@@ -52,11 +52,11 @@ tokenize_text <- function(corpus) {
 
 	tictoc::tic()
 	corpus <- tolower(corpus)
-	corpus <- gsub('-', '_', corpus, fixed = T)
+	corpus <- gsub('-', '_', corpus, fixed = TRUE)
 	corpus <- removeWords(corpus, stopwords("english"))
-	corpus <- gsub("\'(s|re|t|d)?\\b", '', corpus, perl = T)
-	corpus <- gsub('_',' ', corpus, fixed = T)
-	corpus <- gsub('[^\\w\\d\\s]+', ' ', corpus, perl = T)
+	corpus <- gsub("\'(s|re|t|d)?\\b", '', corpus, perl = TRUE)
+	corpus <- gsub('_',' ', corpus, fixed = TRUE)
+	corpus <- gsub('[^\\w\\d\\s]+', ' ', corpus, perl = TRUE)
 	corpus <- lemmatize(corpus)
 
 	tictoc::toc()
@@ -357,9 +357,9 @@ DTM.aggr_synonyms <- function(DTM, min.sim = .9) {
 
 	mat.sparse <- as(mat, "dgCMatrix") # Using sparse matrices
 
-	TTM <- (t(mat.sparse) %*% mat.sparse)/sqrt(tcrossprod(colSums(mat^2, na.rm = T))) # Cosine similarity
+	TTM <- (t(mat.sparse) %*% mat.sparse)/sqrt(tcrossprod(colSums(mat^2, na.rm = TRUE))) # Cosine similarity
 
-	syn.components <- graph_from_adjacency_matrix(as.matrix(TTM) >= min.sim, mode = 'undirected', diag = F) %>% # From TTM to undirected network
+	syn.components <- graph_from_adjacency_matrix(as.matrix(TTM) >= min.sim, mode = 'undirected', diag = FALSE) %>% # From TTM to undirected network
 		components() # Extracting connected subgraphs
 
 	syn.components <- lapply(which(syn.components$csize > 1), function(i) {

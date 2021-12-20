@@ -203,7 +203,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 
 		if (str_detect(query, '^\\w+ ?= ?')) {
 			pieces <- str_split(query, '( ?AND ?)?\\w{2} ?= ?') %>% unlist() %>%
-				str_squish() %>% str_subset('^$', negate = T)
+				str_squish() %>% str_subset('^$', negate = TRUE)
 
 			fields <- str_extract_all(query, '\\w{2} ?= ?') %>% unlist() %>%
 				str_squish() %>% str_remove(' ?= ?')
@@ -336,7 +336,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 	query <- paste(query, year_query, additional_fields, collapse = ' AND ') %>% str_squish()
 
 	res <- rentrez::entrez_search(db = "pubmed", term = query, retmax = 0,
-																api_key = api_key, use_history = T)
+																api_key = api_key, use_history = TRUE)
 
 	total_count <- min(res$count, record_limit)
 
@@ -353,8 +353,8 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 		while (!have.results & trials < 20) {
 			records <- try(rentrez::entrez_fetch(db = "pubmed", web_history = res$web_history,
 																						retstart = step * 200, retmax = min(200, total_count - step * 200),
-																						rettype = 'medline', parsed = F,
-																						api_key = api_key), silent = T)
+																						rettype = 'medline', parsed = FALSE,
+																						api_key = api_key), silent = TRUE)
 
 			have.results <- class(records) == 'character'
 			trials <- trials + 1
@@ -756,11 +756,11 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 		if (file.exists(out_file)) {
 			if (!overwrite) {
-				warning(basename(out_file), ' already present and argument overwrite is FALSE.', call. = F)
+				warning(basename(out_file), ' already present and argument overwrite is FALSE.', call. = FALSE)
 
 				read_csv(out_file, col_types = cols())
 			} else {
-				warning(basename(out_file), ' will be overwritten.', call. = F)
+				warning(basename(out_file), ' will be overwritten.', call. = FALSE)
 				NULL
 			}
 		} else NULL
@@ -769,7 +769,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 
 	folder_path <- file.path(records_folder, session_name, query_name)
 
-	if (!dir.exists(folder_path)) dir.create(folder_path, recursive = T)
+	if (!dir.exists(folder_path)) dir.create(folder_path, recursive = TRUE)
 
 	search_ts <- now()
 
@@ -799,9 +799,9 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 				## Parsing downloaded records
 
 				# find input files (i.e. files not containing API or parsed in the name)
-				input_files <- list.files(folder_path, full.names = F) %>%
-					str_subset('API|parsed', negate = T) %>%
-					str_subset(regex(source, ignore_case = T))
+				input_files <- list.files(folder_path, full.names = FALSE) %>%
+					str_subset('API|parsed', negate = TRUE) %>%
+					str_subset(regex(source, ignore_case = TRUE))
 
 				if (length(input_files) > 0) { # continue if any input file exists
 
@@ -844,7 +844,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 	}) %>% bind_rows()
 
 	if (nrow(record_data) == 0) {
-		warning('No records were added', call. = F)
+		warning('No records were added', call. = FALSE)
 	}
 
 	if (!is.null(journal)) {
@@ -853,7 +853,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 			write_fun <- write_csv
 			read_fun <- function(x) read_csv(x, col_types = cols())
 		} else if (str_detect(journal, '\\.xlsx?$')) {
-			write_fun <- function(x, file) openxlsx::write.xlsx(x, file, asTable = T)
+			write_fun <- function(x, file) openxlsx::write.xlsx(x, file, asTable = TRUE)
 			read_fun <- read_excel
 		} else stop('Session journal file type must be csv or excel.')
 
@@ -863,7 +863,7 @@ perform_search_session <- function(query, year_query = NULL, actions = c('API', 
 			record_data <- previous_data %>%
 				bind_rows(record_data) %>%
 				group_by(Session_ID, Query_ID, Source, Type) %>%
-				arrange(Timestamp, .by_group = T) %>%
+				arrange(Timestamp, .by_group = TRUE) %>%
 				summarise(across(.fns = last))
 		}
 

@@ -377,7 +377,7 @@ summarise_annotations_by_session <- function(sessions_folder = getOption("baysre
 		session <- sessions[i]
 
 		res <- summarise_annotations(session, sessions_folder,
-																 remove_empty_columns = F, remove_raw_data = F)
+																 remove_empty_columns = FALSE, remove_raw_data = FALSE)
 
 		if (i > 1) {
 			res <- tail(res, -1)
@@ -552,7 +552,7 @@ print_table <- function(data, caption = '', allow_math = FALSE, ...) {
 		}
 
 		data %>%
-			knitr::kable(format = "latex", booktabs = T,
+			knitr::kable(format = "latex", booktabs = TRUE,
 									 caption = caption %>% str_squish() %>%
 									 	str_replace_all(c('%' = '\\\\%', '\\*\\*([^\\n]+)\\*\\*' = '\\\\textbf{\\1}')),
 									 escape = !allow_math,

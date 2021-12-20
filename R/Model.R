@@ -84,7 +84,7 @@ create_training_set <- function(Records, min_freq = 0.05) {
 	Abstract_DTM <- with(
 		Records,
 		Abstract %>%
-			str_remove_all(regex('\\b(background|introduction|method\\w*|result\\w*|conclusion\\w*|discussion)',ignore_case = T)) %>%
+			str_remove_all(regex('\\b(background|introduction|method\\w*|result\\w*|conclusion\\w*|discussion)',ignore_case = TRUE)) %>%
 			text_to_DTM(min.freq = min_freq, label = 'ABSTR__', ids = ID,
 									freq.subset.ids = ID[Target %in% c('y', 'n')])
 	)
@@ -96,7 +96,7 @@ create_training_set <- function(Records, min_freq = 0.05) {
 		Records,
 		text_to_DTM(Authors, tokenize.fun = tokenize_authors, min.freq = min_freq,
 								label = 'AUTH__', ids = ID, freq.subset.ids = ID[Target %in% c('y', 'n')],
-								add.ngrams = F, aggr.synonyms = F)
+								add.ngrams = FALSE, aggr.synonyms = FALSE)
 	)
 
 	message('dimensions: ', paste(dim(Authors_DTM), collapse = ', '))
@@ -116,7 +116,7 @@ create_training_set <- function(Records, min_freq = 0.05) {
 		Records,
 		text_to_DTM(Mesh, tokenize.fun = tokenize_MESH, min.freq = min_freq,
 								label = 'MESH__', ids = ID, freq.subset.ids = ID[Target %in% c('y', 'n')],
-								add.ngrams = F)
+								add.ngrams = FALSE)
 	)
 
 	message('dimensions: ', paste(dim(Mesh_DTM), collapse = ', '))
@@ -132,7 +132,7 @@ create_training_set <- function(Records, min_freq = 0.05) {
 		distinct() %>% # remove the duplicated positive matches
 		select(
 			where(~ !is.numeric(.x)), # Keep ID and Target
-			where(~ suppressWarnings(sum(as.numeric(.x), na.rm = T)) > 1) # Keep features with more than one match in a document
+			where(~ suppressWarnings(sum(as.numeric(.x), na.rm = TRUE)) > 1) # Keep features with more than one match in a document
 		)
 
 }
@@ -383,7 +383,7 @@ enrich_annotation_file <- function(session_name,
 																	 ## Model parameters
 																	 pos_mult = 10,
 																	 n_models = 10,
-																	 resample = F,
+																	 resample = FALSE,
 																	 pred_quants = c(.01, .5, .99),
 																	 #
 																	 sessions_folder = getOption("baysren.sessions_folder"),
@@ -482,7 +482,7 @@ enrich_annotation_file <- function(session_name,
 		# replication is extracted from the file title or set to one
 		prev_run <- str_extract(file, '(?<=_rep)\\d+') %>% as.numeric()
 
-		repl <- max(1, prev_run, na.rm = T)
+		repl <- max(1, prev_run, na.rm = TRUE)
 
 		# increase the replication if no new positives
 		iter_data <- compute_changes(Records) %>%
@@ -623,13 +623,13 @@ enrich_annotation_file <- function(session_name,
 	# Add features reporting the number of terms present in each block
 	for (field in c('ABSTR', 'TITLE', 'KEYS', 'MESH')) {
 		DTM[[paste0(field, '.count')]] <- select(DTM, contains(field)) %>%
-			rowSums(na.rm = T)
+			rowSums(na.rm = TRUE)
 	}
 	tictoc::toc()
 
 	message('Training data:')
-	message('Positives: ', sum(DTM$Target == 'y', na.rm = T))
-	message('Negatives: ', sum(DTM$Target == 'n', na.rm = T))
+	message('Positives: ', sum(DTM$Target == 'y', na.rm = TRUE))
+	message('Negatives: ', sum(DTM$Target == 'n', na.rm = TRUE))
 	message('Features: ', select(DTM, -ID, -Target) %>% ncol)
 
 	message(glue('\nModel generation (repl: {repl})'))
@@ -655,15 +655,15 @@ enrich_annotation_file <- function(session_name,
 			train_data <- DTM %>% filter(!is.na(Target))
 
 			if (resample) {
-				train_data <- slice_sample(train_data, prop = 1, replace = T)
+				train_data <- slice_sample(train_data, prop = 1, replace = TRUE)
 			}
 
 			train_data <- train_data[c(rep(which(train_data$Target %in% 'y'), pos_mult),
 																 which(!(train_data$Target %in% 'y'))),]
 
 			bart.mod <- suppressMessages(compute_BART_model(train_data %>% select(-ID), 'Target',
-																											name = 'BartModel', rebuild = T, save = F,
-																											verbose = F, ...))
+																											name = 'BartModel', rebuild = TRUE, save = FALSE,
+																											verbose = FALSE, ...))
 			rm(train_data)
 			gc()
 
@@ -795,7 +795,7 @@ enrich_annotation_file <- function(session_name,
 
 	Results <- tibble(
 		Iter = (list.files(file.path(session_path, 'Annotations'), pattern = '.xlsx') %>%
-							str_subset('~\\$', negate = T) %>% length()) + 1,
+							str_subset('~\\$', negate = TRUE) %>% length()) + 1,
 		'Parent file' = file,
 		'Replication n.' = repl,
 		'N. features' = select(DTM, -ID, -Target) %>% ncol,
@@ -832,9 +832,9 @@ enrich_annotation_file <- function(session_name,
 	output_file_ann <- file.path(session_path, 'Annotations',
 															 glue('{iter}.Records_{common_tag}.xlsx'))
 
-	dir.create(dirname(output_file_ann), showWarnings = F, recursive = T)
+	dir.create(dirname(output_file_ann), showWarnings = FALSE, recursive = TRUE)
 
-	openxlsx::write.xlsx(out, file = output_file_ann, asTable = T)
+	openxlsx::write.xlsx(out, file = output_file_ann, asTable = TRUE)
 
 	tictoc::toc()
 
@@ -842,7 +842,7 @@ enrich_annotation_file <- function(session_name,
 	tictoc::tic()
 	output_file_res <- file.path(session_path, 'Results',
 															 glue('{iter}.Results_{common_tag}.csv'))
-	dir.create(dirname(output_file_res), showWarnings = F, recursive = T)
+	dir.create(dirname(output_file_res), showWarnings = FALSE, recursive = TRUE)
 
 	write_csv(Results, file = output_file_res)
 
@@ -854,7 +854,7 @@ enrich_annotation_file <- function(session_name,
 
 		output_file_samp <- file.path(session_path, 'Samples',
 																	glue('{iter}.Samples_{common_tag}.rds'))
-		dir.create(dirname(output_file_samp), showWarnings = F, recursive = T)
+		dir.create(dirname(output_file_samp), showWarnings = FALSE, recursive = TRUE)
 
 		readr::write_rds(Samples, file = output_file_samp, compress = 'gz')
 

@@ -72,7 +72,7 @@ options(baysren.sessions_folder = 'Sessions')
 if (file.exists('secrets.R')) source('secrets.R')
 
 local({
-	for (file in file.path('R', list.files('R') %>% str_subset('Setup', negate = T))) {
+	for (file in file.path('R', list.files('R') %>% str_subset('Setup', negate = TRUE))) {
 		source(file)
 	}
 })

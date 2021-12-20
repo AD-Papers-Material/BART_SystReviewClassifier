@@ -1,4 +1,4 @@
-extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
+extract_rules <- function(session_name, rebuild_dtm = FALSE, vimp.threshold = 1.25,
 													n.trees = 800, sessions_folder = getOption("baysren.sessions_folder"), ...) {
 
 	message('Preparing the data')
@@ -28,13 +28,13 @@ extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
 	message('Generating feature dataset')
 
 	specific.terms <- Variable_importance %>% filter(Score > vimp.threshold) %>% pull(Term) %>%
-		str_subset('^MESH', negate = T) %>% str_remove('.+__') %>%
+		str_subset('^MESH', negate = TRUE) %>% str_remove('.+__') %>%
 		str_sub(1, 2500) %>% # str_sub() is necessary since many functions cannot use such long names
 		unique()
 
 
 	SpecificDTM <- pbmclapply(specific.terms, function(term) {
-		values <- select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = T)
+		values <- select(DTM, matches(paste0('__', term, '$'))) %>% rowSums(na.rm = TRUE)
 
 		factor((values > 0) + 0)
 	}) %>%
@@ -64,7 +64,7 @@ extract_rules <- function(session_name, rebuild_dtm = F, vimp.threshold = 1.25,
 		)
 
 		rpart(Pred ~ ., data = df, control = rpart.control(...)) %>%
-			tidytrees::tidy_tree(eval_ready = T, simplify_rules = T)
+			tidytrees::tidy_tree(eval_ready = TRUE, simplify_rules = TRUE)
 	}) %>% bind_rows()
 
 	list(
@@ -138,7 +138,7 @@ generate_rule_selection_set <- function(rules, target_vec, target_data, add_nega
 	rules <- rules %>%
 		add_cumulative() %>%
 		group_by(cum_pos) %>%
-		mutate(selected_rule = c(T, rep(F, n() - 1)), .before = rule) %>%
+		mutate(selected_rule = c(TRUE, rep(FALSE, n() - 1)), .before = rule) %>%
 		summarise_all(~ c(.x, NA)) %>%
 		mutate(cum_pos = replace(cum_pos, is.na(rule), NA)) %>%
 		relocate(cum_pos, .after = score) %>%
@@ -171,8 +171,8 @@ add_negative_terms <- function(rules, target_vec, target_data) {
 		tot_neg <- sum(target_vec == 'n')
 
 		terms <- colnames(target_data) %>%
-			str_subset('V__\\d+$', negate = T) %>%
-			str_subset('V__\\w{1,3}$', negate = T)
+			str_subset('V__\\d+$', negate = TRUE) %>%
+			str_subset('V__\\w{1,3}$', negate = TRUE)
 
 		term_pos_dict <- lexicon::hash_grady_pos %>% with(setNames(pos, word))
 		excluded_pos <- term_pos_dict[term_pos_dict %nin% c('Adjective', 'Noun', 'Plural', 'Noun Phrase')]
