@@ -15,23 +15,24 @@ output:
 We propose a new integrated framework to help researchers collect and screen scientific publications characterised by high performance and versatility, joining the growing field of systematic review automation (SRA) and helpers (SRH) tools [@cohen2006reducing; @cohen2010evidence; @ananiadou2009supporting; @o2015using].
 This framework joins standard approaches and uses ad-hoc solutions to deal with common SRA issues.
 By freely sharing the tool as an open-source R package and by following a modular design, we tried to adopt some of the so-called Vienna Principles advocated by the International Collaboration for the Automation of Systematic Reviews (ICASR) [@beller2018making].\
-The framework consists of four main components: 1) an integrated query-based citation search and management engine, 2) a text-to-feature extractor module, 3) a Bayesian active machine learning-based citation classifier, and 4) a data-driven search query generation algorithm.\
+The framework consists of four main components: 1) an integrated query-based citation search and management engine, 2) a Bayesian active machine learning-based citation classifier, and 3) a data-driven search query generation algorithm.\
 
-The framework's search engine module is capable of automatically collecting citation data from three well-known scientific databases (i.e. Pubmed, Web of Science, and the database of the Institute of Electrical and Electronics Engineers) as well as process manually downloaded results from both the mentioned and other (SCOPUS, EMBASE) databases.
+The framework's search engine module is capable of automatically collecting citation data from three well-known scientific databases (i.e., Pubmed, Web of Science, and the database of the Institute of Electrical and Electronics Engineers) as well as process manually downloaded results from both the mentioned and other (SCOPUS, EMBASE) databases.
 In comparison, most SRH tools, commercial or free to use, rely either on internal databases (e.g., Mendeley https://www.mendeley.com/) sometimes focusing just on a particular topic [@visser2010performing] or on a single external data source [@thomas2007eppi; @poulter2008mscanner; @soto2019thalia].\
 Mixing different databases is fundamental to have a more comprehensive view of the literature [@bajpai2011search; @wilkins2005embase; @woods1998medline]:
 in our results, 18.7% of the positive matches found were unique for one of the different data sources, and no positive record was present in all of them (data not shown).\
 The online search algorithms are efficient enough to manage tens of thousands of search results, using various expedients to overcome the limitations of the queried databases in terms of traffic and download quota.
 The results are then automatically organized, deduplicated and arranged by "simple query ordering" in a uniform corpus.
-The preliminary ordering allow to increase the positivity rate in the initial training set [@wallace2010active]. 
+The preliminary ordering allow to increase the positivity rate in the initial training set [@wallace2010active].\
 
+For the framework's record classification module we employed an active machine learning approach [@settles2009active, @miwa2014reducing] based on the best practices from other SRA studies, bringing further improvements at various levels.\
 The feature extractor module uses modern NLP techniques [@ananiadou2006text; @cohen2008getting] to transform text into input data for machine learning.
 We did not include classical n-grams [@schonlau2017text], but we used network analysis to find non-consecutive frequently associated terms, a generalisation of n-grams relaxing the term adjacency assumption.
-A similar network approach was applied to merge redundant terms to make model estimation more efficient and reduce noise.\
+This approach allows also to find term connections across fields, for example a term having a different relevancy if associated with a specific author.
+The same technique but with different parameters was applied to merge redundant terms to make model estimation more efficient and reduce noise.\
 The use of concurrency network-driven modelling of text is not new [@rousseau2015graph; @violos2016sentiment; @rousseau2015text; @ohsawa1998keygraph] and is a valuable tool to extract semantic information not evident in one-word or consecutive n-gram models.\
 
-The framework's record classification module implements an active machine learning approach [@settles2009active, @miwa2014reducing] and is based on Bayesian Additive Regression Trees (BART) [@chipman2010bart; @kapelner2013bartmachine].
-When implementing our algorithm we adopted best practices from other SRA studies, bringing improvements at various levels.\
+The automatic classification algorithm is based on Bayesian Additive Regression Trees (BART) [@chipman2010bart; @kapelner2013bartmachine].
 As with other boosted trees algorithms [@hastie2009boosting], BART can explore complex non-linearities, perform variable selection, manage missing data while sporting high performance in predictive power.\
 However, its Bayesian foundation provides further benefits:
 less sensitivity on hyperparameter choices, natural regularisation through priors, and, especially, predictive distributions as output in place of point-wise predictions [@soria2011belm; @joo2020being; @jospin2020hands].
