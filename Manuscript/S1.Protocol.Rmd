@@ -198,7 +198,7 @@ Records <- perform_search_session(
 
 ## Manual classification and prediction
 
-Now the annotation file is ready for the manual classification records.
+Now the annotation file is ready for the manual classification of records.
 The annotation file has a column called `Rev_manual`, where records need to be classified as "positive" (y) or "negative" (n) matches by the user.
 We suggest manually labelling an **initial training set** of 250 records, which should be sufficient if a minimum ~20% positivity rate is present (see the section about model hyperparameter optimisation)./
 The function `plot_classification_trends()` can help visualise the trend of the positives/negatives as the number of classified records increases./
@@ -247,7 +247,7 @@ The function adds a number of diagnostic pages to the annotation file:
 
 - A results summary page reporting the number of records in need of manual review (which includes "unk", "check", and unreviewed "y" records), the changes, and the final distribution of the labels.
 It also shows other information like the number of features in the DTM, the path to the parent file from which the annotation file was created, the replication number (see later). The content of this summary is also saved as a CSV file in the Results folder.
-- A variable importance page which list the used terms in order of the fraction of BART trees in which they were used. If an ensemble of models is used, a more robust score is computed, taking the ratio of the mean of the term tree fraction among models and its standard deviation.
+- A variable importance page that lists the used terms in order of the fraction of BART trees in which they were used. If an ensemble of models is used, a more robust score is computed, taking the ratio of the mean of the term tree fraction among models and its standard deviation.
 - The arguments passed to the function if different from the default, useful for reproducibility.
 - A classification performance summary. The procedure may take some time and requires `cmdstan` installed on the machine. Therefore the `compute_performance` argument is set to `FALSE` by default.
 
@@ -282,7 +282,7 @@ The function `consolidate_results(session_name)` will update the results files t
 It is not uncommon for the first query used in a systematic review not to be the most effective one, especially in terms of sensitivity.
 We tried to address the problem by creating an automatic query generation system.\
 The solution is experimental and greatly favours sensitivity at the expense of specificity.
-This is the general query generation mechanism:
+The general query generation mechanism is the following:
 
 - We fit a partition tree between the DTM and 800 samples from the PPD;
 if a term is present multiple times in the DTM (e.g., both title and abstract), they are counted just one, and field term count features are removed.
@@ -306,23 +306,22 @@ The steps for generating a query are the following:
 # simple prediction trees are used to map the terms to a random subset of the
 # posterior probabilities (extracted from the posterior sample matrix saved
 # during the last CR iteration). The score threshold and the number of trees can
-# be chosen by the user; less stringent values can greatly increase computation
-# time. By default results will be saved in file called rule_data.rds in the
-# session folder.
+# be chosen by the user; less stringent values can significantly increase
+# computation time. By default results will be saved in a file called
+# rule_data.rds in the session folder.
 
 candidate_queries <- extract_rules('Session1')
 
-# The 'candidate_queries' contains the rules and the DMT and the labels on which
-# the rules were built, which need to be passed to
-# generate_rule_selection_set(). This function selects the most effective
-# (higher positive/negative matches delta) rules; also adds negative terms to
-# increase specificity. A data frame is generated (or automatically saved if
-# save_path is set). The output proposes groups of equivalent (in terms of the
-# number of positive matches found) groups of query, ordered by specificity; for
-# each group, the user needs to select the best rule by setting the
-# selected_rule column to TRUE. The groups are in order of growing
-# sensitivity/decreasing specificity, so it may make sense to exclude the last
-# groups totally in order to avoid too many search results.
+# The 'candidate_queries' contains the rules, the DMT and the labels on which
+# the rules were built, which must be passed to generate_rule_selection_set().
+# This function selects the most effective (higher positive/negative matches
+# delta) rules; also adds negative terms to increase specificity. A data frame
+# is generated (or automatically saved if save_path is set). The output proposes
+# groups of equivalent (in terms of the number of positive matches found) groups
+# of query, ordered by specificity; for each group, the user needs to select the
+# best rule by setting the selected_rule column to TRUE. The groups are in order
+# of growing sensitivity/decreasing specificity, so it may make sense to exclude
+# the last groups totally in order to avoid too many search results.
 
 Target <- candidate_queries$DTM$Target
 SpecificDTM <- candidate_queries$SpecificDTM
@@ -339,7 +338,7 @@ selection_set <- generate_rule_selection_set(
 
 # Once the manual selection is performed the selected rules can be further
 # simplified in order to remove redundant rules and terms. The aim is to provide
-# the shortest rule without loss of retrieving accuracy.
+# the shortest rule without loss of sensitivity.
 
 simplified_rules <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx') %>%
 	import_data() %>%
@@ -385,17 +384,17 @@ Once the new query was generated, a second search session called `Session2` was 
 Due to the lower specificity of the second query, particular care may be needed in managing the far larger amount of records:
 multiple record files may need to be downloaded from Pubmed, EMBASE, and SCOPUS since they have limits on the number of records one can download at once;
 also, the machine learning classification processing time increases proportionally with the number of records to label.\
-It is advisable then to consider removing the less specific rules iteratively from the new query until a manageable number of records is obtained, considering that the probability of finding new positive matches not already found by more specific queries drops exponentially.\
+It is advisable to consider removing the less specific rules iteratively from the new query until a manageable number of records is obtained, considering that the probability of finding new positive matches not already found by more specific queries drops exponentially.\
 
 Once the new records are collected, `enrich_annotation_file('Session2')` (or any other new session name) can be used to perform the new CR iterations.
-It may be possible that during the first CR iteration, the number of records requiring manual review is a significant number:
+It may be possible that during the first CR iteration, the number of records requiring manual review is significant:
 we suggest evaluating still not more than 250, keeping in mind to set the `stop_on_unreviewed` argument to `FALSE`.
 
 ## Result analysis and reporting
 
-A number of tools are available to evaluate the classification performance.\
+Several tools are available to evaluate the classification performance.\
 As said before, a result file is stored in the session folder for each CR iteration with information on the classification status;
-remember to run `consolidate_results(session_name)` if you want these results to take into account the manual review of the predicted labels.\
+remember to run `consolidate_results(session_name)` if you want these results to account for the manual review of the predicted labels.\
 `compute_changes()` is a simple function that take an annotation data frame and computes the changes from the last annotation iteration.\
 The primary function for result analysis is `estimate_performance()`.
 The function uses a Bayesian model to estimate how the probability of a positive match drops as records' lower boundary of the posterior predictive interval decreases.
@@ -425,7 +424,7 @@ $$
 
 We utilise a “grid search” algorithm to find the best set of hyperparameters.
 We tested these tools on our dataset, manually labelling the first 1200 records, ordered by simple query match.\
-The first step is to create a folder where to store the file required for the search, for example, *Grid Search*.
+The first step is to create a folder to store the file required for the search, for example, *Grid Search*.
 Then a fully reviewed record file in the format generated by `create_annotation_file()` is necessary;
 this file can be put in the *Grid Search*, but it is not mandatory.\
 
@@ -447,7 +446,7 @@ Grid_search <- perform_grid_evaluation(
 )
 ```
 
-with `records` being the fully annotated data frame or a file path to it.
+with `records` being the fully annotated data frame or a file path.
 `prev_classification` can be used to import a different classification file with prelabeled records.
 
 The hyperparameters are the following:
@@ -463,7 +462,7 @@ This function uses a partition tree analysis to identify hyperparameter sets (**
 As said before, the default score is Sensitivity x Efficiency;
 alternatives are the Positive Rate (i.e., positive records found over total records) or Positive Rate x Sensitivity.\
 The function produces a data frame with the score and the cluster of reference of each combination of parameters, the best hyperparameter set (i.e., the most efficient set among the most sensitive in the best cluster) and the best set for each cluster.
-Also, the function creates a plot to visualise the individual impact on performance of each hyperparameter.
+Also, the function creates a plot to visualise each hyperparameter's impact on performance.
 
 Once chosen, the hyperparameters can be passed to `enrich_annotation_file()`.\
 Mind that the grid search process may take many days, even on powerful computers, so we suggest sticking to the default set of parameters when using `enrich_annotation_file()`. \
