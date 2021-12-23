@@ -326,13 +326,13 @@ candidate_queries <- extract_rules('Session1')
 Target <- candidate_queries$DTM$Target
 SpecificDTM <- candidate_queries$SpecificDTM
 
+selection_set_file <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx')
+
 selection_set <- generate_rule_selection_set(
 	candidate_queries$rule,
 	target_vec = Target,
-	target_data = SpecificDTM)
-
-selection_set_file <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx')
-openxlsx::write.xlsx(selection_set, selection_set_file)
+	target_data = SpecificDTM,
+	save_path = selection_set_file)
 
 # Once the manual selection is performed the selected rules can be further
 # simplified in order to remove redundant rules and terms. The aim is to provide
@@ -340,7 +340,7 @@ openxlsx::write.xlsx(selection_set, selection_set_file)
 
 simplified_rules <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx') %>%
 	import_data() %>%
-	simplify_ruleset(ruleset = Target, SpecificDTM) %>%
+	simplify_ruleset(target_vec = Target, target_data = SpecificDTM) %>%
 	pull(rule)
 
 # Finally, the selected rules need to be joined in a query that scientific
