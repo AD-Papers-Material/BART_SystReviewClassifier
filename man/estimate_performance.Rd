@@ -91,3 +91,14 @@ including their uncertainty intervals.
 Optionally, a plot showing the observed cumulative number of positive matches
 plus its posterior predictive distribution according to the surrogate model.
 }
+\examples{
+
+\dontrun{
+
+annotation_file <- get_session_files('Session1')$Annotations \%>\% last()
+
+analysis <- estimate_performance(annotation_file)
+
+}
+
+}

@@ -163,6 +163,16 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 #'   of the Sensitivity computed over the predicted number of positives
 #'   according to the surrogate model.}
 #'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' annotation_file <- get_session_files('Session1')$Annotations %>% last()
+#'
+#' analysis <- estimate_performance(annotation_file)
+#'
+#' }
+#'
 estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE,
 																 quants = getOption('baysren.probs'),
 																 nsamples = min(2500, sum(model$fit@sim$n_save)),
