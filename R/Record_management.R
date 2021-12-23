@@ -26,6 +26,8 @@ import_data <- function(input, ...) {
 			return(read_excel(input, guess_max = 10^6, ...))
 		} else if (str_detect(input, '\\.csv$')) {
 			return(read_csv(input, guess_max = 10^6, col_types = cols(), ...))
+		} else if (str_detect(input, '\\.rds$')) {
+			return(read_rds(input))
 		}
 	} else if (is.data.frame(input)) {
 		return(input)
