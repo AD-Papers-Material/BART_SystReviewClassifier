@@ -307,7 +307,8 @@ The steps for generating a query are the following:
 # posterior probabilities (extracted from the posterior sample matrix saved
 # during the last CR iteration). The score threshold and the number of trees can
 # be chosen by the user; less stringent values can greatly increase computation
-# time;
+# time. By default results will be saved in file called rule_data.rds in the
+# session folder.
 
 candidate_queries <- extract_rules('Session1')
 
@@ -326,6 +327,8 @@ candidate_queries <- extract_rules('Session1')
 Target <- candidate_queries$DTM$Target
 SpecificDTM <- candidate_queries$SpecificDTM
 
+# No default is given for the save file, since generate_rule_selection_set()
+# have no info about the session it's working on.
 selection_set_file <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx')
 
 selection_set <- generate_rule_selection_set(
