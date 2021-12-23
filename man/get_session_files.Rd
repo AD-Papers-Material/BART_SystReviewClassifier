@@ -22,7 +22,7 @@ initialized with the \code{baysren.sessions_folder} option.}
 A list of vectors of file paths.
 }
 \description{
-An helper to retrieve the paths to the original annotation data, the updated
-files after each classification iteration, the DTM, the results summaries and
-the Bayesian posterior samples.
+A helper to retrieve the paths to the original annotation data, the updated
+files after each classification iteration, the Document Term Matrix, the
+results summaries and the Bayesian posterior samples.
 }

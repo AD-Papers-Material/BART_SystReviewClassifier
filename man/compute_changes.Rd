@@ -13,14 +13,14 @@ it.}
 \value{
 A data frame with total reviewed positive and negative labels and
   their sum, the new labels added in the \code{Rev_prediction_new} column,
-  and and summary of all changes in the last iteration, e.g.: n -> y (a
-  previously non relevant record becoming relevant) or unlab. -> n (an
-  unlabeled record becoming negative).
+  and and summary of all changes in the last iteration, e.g.: \code{n -> y}
+  (a previously non relevant record becoming relevant) or \code{unlab. -> n}
+  (an unlabeled record becoming negative).
 }
 \description{
 Takes an Annotation file with a \code{Rev_prediction_new} column and computes
-differences in the labeling introduced by the last automatic classification /
-review.
+differences in the labelling introduced by the last automatic classification
+/ review.
 }
 \examples{
 

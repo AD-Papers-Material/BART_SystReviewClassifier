@@ -2,7 +2,7 @@
 #'
 #' @param text_vec A vector of text documents.
 #' @param dict A dictionary to use to find base forms. See
-#'   \code{\link[lexicon:hash_lemmas]{lexicon::hash_lemmas()}} for the required
+#'   \code{\link[lexicon:hash_lemmas]{lexicon::hash_lemmas}()} for the required
 #'   structure.
 #'
 #' @return The vector with terms transformed into their base form, when
@@ -152,15 +152,15 @@ tokenize_MESH <- function(mesh) {
 #' Convert a vector of text documents into a Document Term Matrix
 #'
 #' A Document Term Matrix (DTM) is a structure describing the association of a
-#' term to a document. In this case we used a binary matrix with ones if a term
+#' term to a document. In this case, we used a binary matrix with ones if a term
 #' is present in a document and one otherwise.
 #'
 #' Before computing the DTM, document terms are cleaned, tokenized and
 #' lemmatized, and stop-words are removed.
 #'
 #' To reduce noise, only terms that appear in a fraction of documents higher
-#' than \code{min.freq} are considered. The function uses also cosine similarity
-#' to identify relevant subclusters of related terms or redundant one.
+#' than \code{min.freq} are considered. The function also uses cosine similarity
+#' to identify relevant subclusters of related terms or redundant ones.
 #'
 #' @param corpus A vector of text documents.
 #' @param min.freq Minimum number of document in which a term need to be present
@@ -168,7 +168,7 @@ tokenize_MESH <- function(mesh) {
 #' @param ids Identification ID of documents.
 #' @param freq.subset.ids IDs to consider when computing term frequency.
 #' @param included.pos Part of speech (POS) to consider when building the DTM.
-#'   See \code{\link[lexicon:hash_grady_pos]{lexicon::hash_grady_pos()}} for a
+#'   See \code{\link[lexicon:hash_grady_pos]{lexicon::hash_grady_pos}()} for a
 #'   list of recognized POS.
 #' @param tokenize.fun Function to use to clean up text.
 #' @param add.ngrams Whether to search and add non-consecutive n-grams. See
@@ -176,15 +176,15 @@ tokenize_MESH <- function(mesh) {
 #' @param n.gram.thresh The threshold to use to identify the network of
 #'   non-consecutive n-grams if \code{add.ngrams} is \code{TRUE}.
 #' @param aggr.synonyms Whether to aggregate terms which almost always appear
-#'   together. See \code{\link{DTM.aggr_synonyms}}.
+#'   together. See \code{\link{DTM.aggr_synonyms}()}.
 #' @param syn.thresh The threshold to use to identify the network of terms to
 #'   aggregate if \code{aggr.synonyms} is \code{TRUE}.
 #' @param label A label to prepend to term columns in the DTM.
 #' @param na.as.missing Whether to set as \code{NA} the DTM cells for empty
 #'   document. If \code{FALSE} those cells will be set to zero.
 #'
-#' @return A Document Term Matrix with a row for each document and a column for the terms
-#'   plus a column with the document IDs.
+#' @return A Document Term Matrix with a row for each document and a column for
+#'   the terms plus a column with the document IDs.
 #'
 #' @examples
 #'
@@ -299,16 +299,17 @@ text_to_DTM <- function(corpus, min.freq = 20, ids = 1:length(corpus),
 
 #' Find non-consecutive n-grams
 #'
-#' Build a term-term network using a cosine similarity measure build on the term
+#' Build a term-term network using a cosine similarity measure built on the term
 #' co-presence in documents. A threshold defined in \code{min.sim} is used to
 #' identify edges. The maximal cliques of the network represent the discovered
 #' n-grams.
 #'
 #' @param DTM A Document Term Matrix.
-#' @param min.sim The mininal cosine similarity that identify an edge.
-#' @param max.terms The maximum size (i.e., the number of terms) in a n-gram.
+#' @param min.sim The minimal cosine similarity that identifies an edge.
+#' @param max.terms The maximum size (i.e., the number of terms) in an n-gram.
 #'
-#' @return The same input Document Term Matrix with extra columns for the n-grams.
+#' @return The same input Document Term Matrix with extra columns for the
+#'   n-grams.
 #'
 DTM.add_ngrams <- function(DTM, min.sim = .5, max.terms = 10) {
 
@@ -340,13 +341,13 @@ DTM.add_ngrams <- function(DTM, min.sim = .5, max.terms = 10) {
 
 #' Aggregate redundant terms
 #'
-#' Build a term-term network using a cosine similarity measure build on the term
+#' Build a term-term network using a cosine similarity measure built on the term
 #' co-presence in documents. A high threshold defined in \code{min.sim} is used
 #' to identify edges. The high edge threshold splits the network into multiple
 #' components which identify redundant terms.
 #'
 #' @param DTM A Document Term Matrix.
-#' @param min.sim The mininal cosine similarity that identify an edge.
+#' @param min.sim The minimal cosine similarity that identifies an edge.
 #'
 #' @return The same input Document Term Matrix with redundant terms removed and
 #'   joined into new columns.

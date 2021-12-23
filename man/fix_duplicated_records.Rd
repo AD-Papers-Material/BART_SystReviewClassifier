@@ -7,7 +7,8 @@
 fix_duplicated_records(records)
 }
 \arguments{
-\item{record_list}{A list of data frames as created by \code{read_bib_files}.}
+\item{record_list}{A list of data frames as created by
+\code{\link{read_bib_files}()}.}
 }
 \value{
 A record data frame with no duplicated records.

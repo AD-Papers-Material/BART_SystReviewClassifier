@@ -44,17 +44,17 @@ backup will be used instead.}
 exists.}
 
 \item{...}{More argument to pass to
-\code{\link[bartMachine:bartMachine]{bartMachine::bartMachine()}}}
+\code{\link[bartMachine:bartMachine]{bartMachine::bartMachine}()}}
 
-\item{um_trees, k, num_iterations_after_burn_in, run_in_sample, mem_cache_for_speed, use_missing_data, verbose}{\code{\link[bartMachine:bartMachine]{bartMachine::bartMachine()}} specific
+\item{um_trees, k, num_iterations_after_burn_in, run_in_sample, mem_cache_for_speed, use_missing_data, verbose}{\code{\link[bartMachine:bartMachine]{bartMachine::bartMachine}()} specific
 parameters.}
 }
 \value{
 An object of class \code{bartMachine}.
 }
 \description{
-This the prediction engine of the framework. It produces a model which
-assignes a probability distribution for each record of the probability of
+The prediction engine of the framework. It produces a model which
+assigns a probability distribution for each record of the probability of
 being relevant (i.e., positive label). It is not used alone but inside
 \code\link{enrich_annotation_file}.
 }

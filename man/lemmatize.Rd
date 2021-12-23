@@ -10,7 +10,7 @@ lemmatize(text_vec, dict = lexicon::hash_lemmas)
 \item{text_vec}{A vector of text documents.}
 
 \item{dict}{A dictionary to use to find base forms. See
-\code{\link[lexicon:hash_lemmas]{lexicon::hash_lemmas()}} for the required
+\code{\link[lexicon:hash_lemmas]{lexicon::hash_lemmas}()} for the required
 structure.}
 }
 \value{

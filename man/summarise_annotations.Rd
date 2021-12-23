@@ -25,14 +25,14 @@ changes of that type ever happened.}
 name in machine readable column formats.}
 }
 \value{
-A data frame reporting for a session the number of positive and negative matches
-  after each Classification/Review iteration and the specific changes
-  corresponding to each iteration.
+A data frame reporting for a session the number of positive and
+  negative matches after each Classification/Review iteration and the
+  specific changes corresponding to each iteration.
 }
 \description{
 Take a session identifier as input and describe the changes in the number of
 positive and negative matches after each Classification/Review iteration. It
-is necessary to run \code{\link{consolidate_results()}} before this command,
+is necessary to run \code{\link{consolidate_results}()} before this command,
 otherwise the results would not consider the changes made through the manual
 review of the automatic classification.
 }

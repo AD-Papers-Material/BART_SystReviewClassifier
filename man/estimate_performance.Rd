@@ -25,12 +25,12 @@ estimate_performance(
 \code{records} if \code{NULL}.}
 
 \item{preds}{A matrix of posterior predictions as produced by
-\code{\link[brms:posterior_predict]{brms::posterior_predict()}}. If passed
+\code{\link[brms:posterior_predict]{brms::posterior_predict}()}. If passed
 they need to be derived by the same model in \code{model}.}
 
 \item{plot}{Whether to plot the cumulative number of positive matches plus
-the posterior predictive distribtion as computed by \code{model}, truncated
-at the number of observed ones.}
+the posterior predictive distribution as computed by \code{model},
+truncated at the number of observed ones.}
 
 \item{quants}{Point estimate and boundaries of the posterior distributions to
 use in the results and in the plot.}
@@ -46,49 +46,48 @@ passed to \code{preds}.}
 \item{save_model}{Whether to save the model. Can be passed to \code{model}}
 }
 \value{
-A data frame with the following columns:
-  \itemize{\item{obs_positives}{the observed number of positive
-  matches;}\item{pred_positives}{the quantiles of the predicted distribution
-  of the number of positive matches;} \item{mod_r2}{the surrogate model fit
-  (R^2);}\item{n_reviewed}{the number of records
-  reviewed;}\item{total_records}{the total records in the Annotation
-  file;}\item{used_prop}{the posterior distribution of the proportion of
-  reviewed record over the amount needed with random classification (1 -
-  WSoR)};\item{efficiency}{the posterior distribution of one minus the
+A data frame with the following columns: \item{obs_positives}{the
+  observed number of positive matches;}\item{pred_positives}{the quantiles of
+  the predicted distribution of the number of positive matches.}
+  \item{mod_r2}{the surrogate model fit (\eqn{R^2}).}\item{n_reviewed}{the
+  number of records reviewed.}\item{total_records}{the total records in the
+  Annotation file;}\item{used_prop}{the posterior distribution of the
   proportion of reviewed record over the amount needed with random
-  classification (WSoR)}\item{sensitivity}{the posterior distribution of the
-  sensitivity computed over the predicted number of positives according to
-  the surrogate model.}}
+  classification (1  - WSoR).}\item{efficiency}{the posterior distribution of
+  one minus the proportion of reviewed record over the amount needed with
+  random classification (WSoR).}\item{Sensitivity}{the posterior distribution
+  of the Sensitivity computed over the predicted number of positives
+  according to the surrogate model.}
 }
 \description{
-This function estimate Sensitivity and Efficiency (the latter as Work saved
-over random classification, WSoR) of the classification process (i.e., both
-the automatic classification and the human). To compute these statistics,
-first a robust estimate of the total number of relevant (positive) records in
-the whole data set is needed.
+This function estimate Sensitivity and Efficiency (the latter as "Work saved
+over random classification", WSoR) of the classification process (i.e., both
+the automatic classification and the human). A robust estimate of the total
+number of relevant (positive) records in the whole data set is produced to
+compute these statistics.
 }
 \details{
-For this purpose, \code{\link{estimate_positivity_rate_model()}} is employed,
+For this purpose, \code{\link{estimate_positivity_rate_model}()} is employed,
 which uses a Bayesian logistic model to estimate the probability of a
 relevant record given the lower boundaries of the PPD produced by the
 classification model for the records whose label was manually reviewed. This
-model does not take into account the record other characteristics, providing
-a simple, maximum uncertainty model.
+model does not take into account records' other characteristics, providing a
+simple, maximum uncertainty model.
 
-The model is used to predict the distribution of number of missed relevant
-matches among the unreviewed records which is then used to compute the
-expected Sensitivity (i.e, the ratio of observed positive matches and the
-theoretical ones) and Efficiency (i.e. ratio of number of reviewed records
-and the amount of records needed to review at random to find the same amount
-of relevant matches, according to the hypergeometric distribution).
+The model is used to predict the distribution of the number of missed
+relevant matches among the unreviewed records. This number is then used to
+compute the expected Sensitivity (i.e., the ratio of observed positive
+matches and the theoretical ones) and Efficiency (i.e. ratio of the number of
+reviewed records and the number of records needed to review at random to find
+the same amount of relevant matches, according to the hypergeometric
+distribution).
 
-Finally, a number of summary statistics are reported, describing the observed
+Finally, several summary statistics are reported, describing the observed
 results of the classification (i.e., number of reviewed records, number of
 positives found) and the statistics computed using the surrogate logistic
-model (i.e., sensitivity, efficiency and the R^2 of the surrogate model),
+model (i.e., Sensitivity, Efficiency and the R^2 of the surrogate model),
 including their uncertainty intervals.
 
 Optionally, a plot showing the observed cumulative number of positive matches
-plus the its posterior predictive distribution according to the surrogate
-model.
+plus its posterior predictive distribution according to the surrogate model.
 }

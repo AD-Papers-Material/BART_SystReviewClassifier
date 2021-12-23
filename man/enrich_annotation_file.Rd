@@ -11,7 +11,7 @@ enrich_annotation_file(
   DTM = NULL,
   pos_mult = 10,
   n_models = 10,
-  resample = F,
+  resample = FALSE,
   pred_quants = c(0.01, 0.5, 0.99),
   sessions_folder = getOption("baysren.sessions_folder"),
   pred_batch_size = 5000,
@@ -29,7 +29,7 @@ enrich_annotation_file(
 )
 }
 \arguments{
-\item{session_name}{A session name which identifies also a subfolder of
+\item{session_name}{A session name which also identifies a subfolder of
 \code{sessions_folder}. The function will automatically retrieve the out of
 the last CR iteration to continue the cycle if the conditions in
 \code{limits} are not fulfilled.}
@@ -49,11 +49,11 @@ records before training. A higher number increases sensitivity at the cost
 of lower efficiency (more records to manually review) and training times.}
 
 \item{n_models}{A model parameter. The Bayesian model is run multiple times
-and the multiple generated PPDs are averaged creating an ensemble PPD. A
+and the multiple generated PPDs are averaged, creating an ensemble PPD. A
 higher number of models decrease uncertainty and increases efficiency, but
 greatly increases computation times.}
 
-\item{resample}{A model parameter. Whether to boostrap the training data
+\item{resample}{A model parameter. Whether to bootstrap the training data
 before modelling. It makes sense only if \code{n_models >> 1}, otherwise it
 equates to loose data.}
 
@@ -76,10 +76,9 @@ iteration automatically.}
 \item{stop_on_unreviewed}{Raise an error if there are uncertain records that
 have not been yet manually reviewed (i.e. "*" in the
 \code{Rev_prediction_new} column). It should be set to \code{FALSE} if the
-user decides that the number of records to manually review is too high. In
-general we suggest to avoid reviewing more than 250 records per iteration,
-since this number is usually enough to provide enough information for the
-model.}
+number of records to manually review is too high. In general we suggest
+reviewing manually no more than 250 records per iteration, since this
+number is usually enough to provide enough information for the model.}
 
 \item{dup_session_action}{Similar to the argument in
 \code{link{create_session}}. The default \code{fill} tells the function to
@@ -136,9 +135,6 @@ session name or the path to an Annotation data frame and trains a Bayesian
 model to predict the labels of all records.
 }
 \details{
-The function follow the paradigm
-
-
 The outcome on which the model is trained on a coalesced column \code{Target}
 made by the initial manual labels in \code{Rev_manual} and previous predicted
 labels in \code{Rev_prediction} that were manually reviewed. The labels can
@@ -162,17 +158,17 @@ still called a number of times (defined in the \code{limits$stop_after}
 argument) to produce "replication" CR iterations. These are needed to avoid
 missing uncertain record due to the stochasticity in the Bayesian model.
 
-The Bayesian model generate a posterior predictive distributions (PPD) of
+The Bayesian model generates posterior predictive distributions (PPD) of
 positive label for each record (saved into Samples in the session folder).
-The PPDs are used to define the "Uncertainty Zone" which is delimited by the
+The PPDs are used to define the "Uncertainty Zone", which is delimited by the
 lowermost of all PPDs' credibility intervals boundaries at a chosen level for
-the positive labeled records and the uppermost of the interval boundaries
-among the manually reviewed negative labeled records. A record is labelled as
-positive/negative in the \code{Predicted_label} column if both its
+the positive labelled records and the uppermost of the interval boundaries
+among the manually reviewed negative labelled records. A record is labelled
+as positive/negative in the \code{Predicted_label} column if both its
 uncertainty interval boundaries are above/below the Uncertainty Zone.
-Otherwise it will be labelled as uncertain and will require manual review. If
-a prediction in \code{Predicted_label} contradicts one in \code{Rev_manual},
-will need to be reviewed by the user.
+Otherwise, it will be labelled as uncertain and will require manual review.
+If a prediction in \code{Predicted_label} contradicts one in
+\code{Rev_manual}, will need to be reviewed by the user.
 
 If just a session name is passed, the function will identify automatically
 the last Annotation file to use and if its a new CR iteration or a
@@ -193,7 +189,7 @@ The function saves a number of output files on disk.
 
 \dontrun{
 
-##A simple call using a session name will automatically pick up the right
+## A simple call using a session name will automatically pick up the right
 # annotation file (the initial one or an already classified one if existing)
 # and start a CR iteration.
 

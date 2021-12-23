@@ -16,7 +16,7 @@ automatic classification.}
 }
 \value{
 An annotation data frame with an extra column \code{Rev_previous}
-  which stores the imported classification.
+  storing the imported classification.
 }
 \description{
 The classification is imported in a new column called \code{Rev_previous}.

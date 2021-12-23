@@ -16,7 +16,7 @@ parse_wos(entries, timestamp = now())
 A data frame with the parsed data.
 }
 \description{
-Parse and normalize Web of Science data downloaded manually (as csv or excel
+Parse and normalize Web of Science data downloaded manually (as CSV or Excel
 files) from \url{https://www.webofknowledge.com}.
 }
 \examples{

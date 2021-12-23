@@ -10,13 +10,13 @@ parse_pubmed(entries, timestamp = now())
 \item{entries}{A character vector containing the citation data.}
 
 \item{timestamp}{A timestamp as provided by
-\code{\link[lubridate:now]{lubridate::now()}}.}
+\code{\link[lubridate:now]{lubridate::now}()}.}
 }
 \value{
-A data frame with the parsed data
+A data frame with the parsed data.
 }
 \description{
-Parse and normalize Pubmed nbib files downloaded through
+Parse and normalize Pubmed ".nbib" files downloaded through
 \url{https://pubmed.ncbi.nlm.nih.gov/}.
 }
 \examples{

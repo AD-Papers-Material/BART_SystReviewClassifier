@@ -20,14 +20,14 @@ a value is missing in the upper level one.}
 A vector with the coalesce labels.
 }
 \description{
-In the same Annotation file there could be multiple classification labels for
-a record, derived by different phases of the labeling procedure. This
-function joins them hierarchically, using the label from the label from the
-lower hierarchies to fill up \code{NA}s in the upper ones. The hierarchy is
+In the same Annotation file, there could be multiple classification labels
+for a record derived by different phases of the labelling procedure. This
+function joins them hierarchically, using the label from the lower
+hierarchies to fill up \code{NA}s in the upper ones. The hierarchy is
 considered from left to right.
 }
 \details{
 This function is a wrapper over
-\code{\link[dplyr:coalesce]{dplyr::coalesce()}} which allow to have a standard
-coalescing scheme for an annotation file.
+\code{\link[dplyr:coalesce]{dplyr::coalesce}()} which allow to have a
+standard coalescing scheme for an annotation file.
 }

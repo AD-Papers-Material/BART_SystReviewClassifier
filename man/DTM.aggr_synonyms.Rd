@@ -9,14 +9,14 @@ DTM.aggr_synonyms(DTM, min.sim = 0.9)
 \arguments{
 \item{DTM}{A Document Term Matrix.}
 
-\item{min.sim}{The mininal cosine similarity that identify an edge.}
+\item{min.sim}{The minimal cosine similarity that identifies an edge.}
 }
 \value{
 The same input Document Term Matrix with redundant terms removed and
   joined into new columns.
 }
 \description{
-Build a term-term network using a cosine similarity measure build on the term
+Build a term-term network using a cosine similarity measure built on the term
 co-presence in documents. A high threshold defined in \code{min.sim} is used
 to identify edges. The high edge threshold splits the network into multiple
 components which identify redundant terms.

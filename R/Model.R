@@ -1,15 +1,15 @@
 
 #' Join classification labels into one
 #'
-#' In the same Annotation file there could be multiple classification labels for
-#' a record, derived by different phases of the labeling procedure. This
-#' function joins them hierarchically, using the label from the label from the
-#' lower hierarchies to fill up \code{NA}s in the upper ones. The hierarchy is
+#' In the same Annotation file, there could be multiple classification labels
+#' for a record derived by different phases of the labelling procedure. This
+#' function joins them hierarchically, using the label from the lower
+#' hierarchies to fill up \code{NA}s in the upper ones. The hierarchy is
 #' considered from left to right.
 #'
 #' This function is a wrapper over
-#' \code{\link[dplyr:coalesce]{dplyr::coalesce()}} which allow to have a standard
-#' coalescing scheme for an annotation file.
+#' \code{\link[dplyr:coalesce]{dplyr::coalesce}()} which allow to have a
+#' standard coalescing scheme for an annotation file.
 #'
 #' @param data An Annotation data frame.
 #' @param label_cols The label columns to coalesce. They are considered
@@ -28,12 +28,12 @@ coalesce_labels <- function(data, label_cols = c('Rev_prediction_new','Rev_predi
 #'
 #' Given an Annotation file, it creates and join Document Term Matrices (DTM)
 #' for the title, abstract, authors, keywords and MESH terms of a record,
-#' keeping terms above a given document frequency among the negative labeled
+#' keeping terms above a given document frequency among the negative labelled
 #' records and which are present in at least two records
 #'
 #' @param Records An Annotation data frame.
 #' @param min_freq Minimum document frequency (between 0 and 1) in negative
-#'   labeled records above which a term is considered.
+#'   labelled records above which a term is considered.
 #'
 #' @return An enriched DTM which is the merge of the title, abstract, authors,
 #'   keywords and MESH terms DTMs plus the record ID and label if present.
@@ -139,8 +139,8 @@ create_training_set <- function(Records, min_freq = 0.05) {
 
 #' Use Bayesian Additive Regression Trees to predict records labels
 #'
-#' This the prediction engine of the framework. It produces a model which
-#' assignes a probability distribution for each record of the probability of
+#' The prediction engine of the framework. It produces a model which
+#' assigns a probability distribution for each record of the probability of
 #' being relevant (i.e., positive label). It is not used alone but inside
 #' \code\link{enrich_annotation_file}.
 #'
@@ -161,10 +161,10 @@ create_training_set <- function(Records, min_freq = 0.05) {
 #' @param rebuild If \code{TRUE}, retrain the model even if a model backup file
 #'   exists.
 #' @param um_trees,k,num_iterations_after_burn_in,run_in_sample,mem_cache_for_speed,use_missing_data,verbose
-#'    \code{\link[bartMachine:bartMachine]{bartMachine::bartMachine()}} specific
+#'    \code{\link[bartMachine:bartMachine]{bartMachine::bartMachine}()} specific
 #'   parameters.
 #' @param ... More argument to pass to
-#'   \code{\link[bartMachine:bartMachine]{bartMachine::bartMachine()}}
+#'   \code{\link[bartMachine:bartMachine]{bartMachine::bartMachine}()}
 #'
 #' @return An object of class \code{bartMachine}.
 #'
@@ -224,8 +224,6 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #' session name or the path to an Annotation data frame and trains a Bayesian
 #' model to predict the labels of all records.
 #'
-#' The function follow the paradigm
-#'
 #'
 #' The outcome on which the model is trained on a coalesced column \code{Target}
 #' made by the initial manual labels in \code{Rev_manual} and previous predicted
@@ -250,17 +248,17 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #' argument) to produce "replication" CR iterations. These are needed to avoid
 #' missing uncertain record due to the stochasticity in the Bayesian model.
 #'
-#' The Bayesian model generate a posterior predictive distributions (PPD) of
+#' The Bayesian model generates posterior predictive distributions (PPD) of
 #' positive label for each record (saved into Samples in the session folder).
-#' The PPDs are used to define the "Uncertainty Zone" which is delimited by the
+#' The PPDs are used to define the "Uncertainty Zone", which is delimited by the
 #' lowermost of all PPDs' credibility intervals boundaries at a chosen level for
-#' the positive labeled records and the uppermost of the interval boundaries
-#' among the manually reviewed negative labeled records. A record is labelled as
-#' positive/negative in the \code{Predicted_label} column if both its
+#' the positive labelled records and the uppermost of the interval boundaries
+#' among the manually reviewed negative labelled records. A record is labelled
+#' as positive/negative in the \code{Predicted_label} column if both its
 #' uncertainty interval boundaries are above/below the Uncertainty Zone.
-#' Otherwise it will be labelled as uncertain and will require manual review. If
-#' a prediction in \code{Predicted_label} contradicts one in \code{Rev_manual},
-#' will need to be reviewed by the user.
+#' Otherwise, it will be labelled as uncertain and will require manual review.
+#' If a prediction in \code{Predicted_label} contradicts one in
+#' \code{Rev_manual}, will need to be reviewed by the user.
 #'
 #' If just a session name is passed, the function will identify automatically
 #' the last Annotation file to use and if its a new CR iteration or a
@@ -278,7 +276,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #' The function saves a number of output files on disk.
 #'
 #'
-#' @param session_name A session name which identifies also a subfolder of
+#' @param session_name A session name which also identifies a subfolder of
 #'   \code{sessions_folder}. The function will automatically retrieve the out of
 #'   the last CR iteration to continue the cycle if the conditions in
 #'   \code{limits} are not fulfilled.
@@ -294,10 +292,10 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #'   records before training. A higher number increases sensitivity at the cost
 #'   of lower efficiency (more records to manually review) and training times.
 #' @param n_models A model parameter. The Bayesian model is run multiple times
-#'   and the multiple generated PPDs are averaged creating an ensemble PPD. A
+#'   and the multiple generated PPDs are averaged, creating an ensemble PPD. A
 #'   higher number of models decrease uncertainty and increases efficiency, but
 #'   greatly increases computation times.
-#' @param resample A model parameter. Whether to boostrap the training data
+#' @param resample A model parameter. Whether to bootstrap the training data
 #'   before modelling. It makes sense only if \code{n_models >> 1}, otherwise it
 #'   equates to loose data.
 #' @param pred_quants A model parameter. The levels of the PPD uncertainty
@@ -315,10 +313,9 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #' @param stop_on_unreviewed Raise an error if there are uncertain records that
 #'   have not been yet manually reviewed (i.e. "*" in the
 #'   \code{Rev_prediction_new} column). It should be set to \code{FALSE} if the
-#'   user decides that the number of records to manually review is too high. In
-#'   general we suggest to avoid reviewing more than 250 records per iteration,
-#'   since this number is usually enough to provide enough information for the
-#'   model.
+#'   number of records to manually review is too high. In general we suggest
+#'   reviewing manually no more than 250 records per iteration, since this
+#'   number is usually enough to provide enough information for the model.
 #' @param dup_session_action Similar to the argument in
 #'   \code{link{create_session}}. The default \code{fill} tells the function to
 #'   create a Session folder with the data in \code{file} if the session does
@@ -364,7 +361,7 @@ compute_BART_model <- function(train_data, Y, preds = NULL, save = FALSE,
 #'
 #' \dontrun{
 #'
-#' ##A simple call using a session name will automatically pick up the right
+#' ## A simple call using a session name will automatically pick up the right
 #' # annotation file (the initial one or an already classified one if existing)
 #' # and start a CR iteration.
 #'
@@ -899,20 +896,21 @@ enrich_annotation_file <- function(session_name,
 
 #' Include manual review in annotation result summaries
 #'
-#' \code{\link{enrich_annotation_file}} creates summary files of each
+#' \code{\link{enrich_annotation_file}()} creates summary files of each
 #' classification iteration into the Results session sub-folder, but these
 #' summaries do not includes the manual review of the predicted labels.
 #' \link{consolidate_results} regenerates these files including the changes
 #' resulting from the manual review of the automatic classification.
 #'
-#' The results summary not including the manual review is still available inside
-#' the annotation files.
+#' The results summary, not including the manual review, is still available
+#' inside the annotation files.
 #'
 #' @param session_name The session with the result files to consolidate.
 #' @param sessions_folder The path to the folder where all the sessions are
 #'   stored.
 #'
-#' @return The regenerated Results file content as data frames, invisibly.
+#' @return The list of the regenerated Results' file content as data frames,
+#'   invisibly.
 #'
 consolidate_results <- function(session_name, sessions_folder = getOption("baysren.sessions_folder")) {
 	annotations_files <- get_session_files(session_name, sessions_folder)$Annotations
@@ -971,28 +969,28 @@ consolidate_results <- function(session_name, sessions_folder = getOption("baysr
 #' used to summarise the records' PPD and built the Uncertainty zone. }
 #'
 #' Check \code{\link{enrich_annotation_file}} for more insight about their
-#' influence on the framework and on the classification results. Since all
-#' records are pre-labeled, the manual review phase is performed automatically.
+#' influence on the framework and the classification results. Since all records
+#' are pre-labelled, the manual review phase is performed automatically.
 #'
-#' The algorithm starts from a fully labeled Annotation set and perform a
+#' The algorithm starts from a fully labelled Annotation set and performs a
 #' Classification/Review cycle for each combination of parameters.
 #'
 #' A great number of files will be created (40 GB with the default grid
 #' parameters for a input \code{records} file with 1200 labelled records), one
 #' session folder for each parameter combination. Therefore, be sure to have
-#' enough disk space before starting. Also keep in mind that a full search may
-#' require many days even on powerful computers.
+#' enough disk space before starting. Also, keep in mind that a full search may
+#' requires many days, even on powerful computers.
 #'
-#' @param records A fully labeled Annotation data set (data frame or a path to a
-#'   Excel / CSV file).
+#' @param records A fully labelled Annotation data set (data frame or a path to
+#'   a Excel / CSV file).
 #' @param sessions_folder A path to a folder where to store the grid search
 #'   results.
-#' @param prev_classification An Annotation data set or file with labeled
-#'   records. The labels in this data set will be used as a ground truth for the
-#'   \code{records} file, but the records themselves won't be used.
+#' @param prev_classification An Annotation data set or file with labelled
+#'   records. The labels in this data set will be used as ground truth for the
+#'   \code{records} file, but the records themselves will not be used.
 #' @param n_init A vector of numbers enumerating the size of the initial
 #'   training set. The initial training set simulates the initial manual
-#'   labeling of records used to train the model. Is generated by the
+#'   labelling of records used to train the model. It is generated by the
 #'   \code{records} data set selecting records in descending order.
 #' @param pos_mult,n_models,resample,pred_quants A vector of values for each
 #'   parameter. For \code{pred_quants} a list of vectors. \See
@@ -1006,8 +1004,8 @@ consolidate_results <- function(session_name, sessions_folder = getOption("baysr
 #'
 #' \dontrun{
 #'
-#' #' # First, the user needs to manually label a great number of records, we
-#' # suggest one thousands or more. The new record file can be stored anywhere,
+#' # First, the user needs to manually label a significant number of records; we
+#' # suggest one thousand or more. The new record file can be stored anywhere,
 #' # but putting it into the grid search folder is a better practice.
 #'
 #' records <- file.path('Grid_Search', 'Classification_data.xlsx')

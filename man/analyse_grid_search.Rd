@@ -18,29 +18,29 @@ analyse_grid_search(
 
 \item{tot_pos}{Total number of positive matches among records. If \code{NULL}
 it will be inferred by the Annotation files in \code{session_folder} which
-then need to be fully labeled.}
+then need to be fully labelled.}
 
 \item{tot_records}{Total number of records. If \code{NULL} it will be
 inferred by the Annotation files in \code{session_folder} which then need
-to be fully labeled.}
+to be fully labelled.}
 
 \item{plot}{Whether to plot the marginal impact of each parameter.}
 
-\item{score}{Which score to use to measure classification performance. Can be
-\code{Sens_adj_eff}: sensitivity by efficacy, \code{Pos_rate}: the ratio of
-positive labels found over the total record (positive rate),
-\code{Pos_rate_adj_sens}: sensitivity by positive rate.}
+\item{score}{Which one of the scores to use to measure classification
+performance. Can be \code{Sens_adj_eff}: sensitivity by efficacy,
+\code{Pos_rate}: the ratio of positive labels found over the total record
+(positive rate), \code{Pos_rate_adj_sens}: sensitivity by positive rate.}
 }
 \value{
-A list with: \item{iterations}{A dataframe describing each
+A list with: \item{iterations}{A data frame describing each
   classification/review iteration for each session, reporting the parameter
   values used and the performance score.}\item{best_parms}{The highest
-  performance parameter set in the best parameter cluster. First the
+  performance parameter set in the best parameter cluster. First, the
   parameter clusters are ordered by average performance score, then parameter
   combinations inside the cluster are ordered by sensitivity followed by
   efficiency. A data frame with the score, the ratio of positive matches over
   the total records, the ratio of reviewed records, the sensitivity and the
-  efficiency is reported.}\item{best_by_rule}{A data frame with performance
+  efficiency, is reported.}\item{best_by_rule}{A data frame with performance
   info (like for \code{best_parms}) for the best parameter set for each
   performance cluster.}\item{plot}{A plot with the marginal impact of each
   parameter if the \code{plot} argument is \code{TRUE}, otherwise
@@ -48,7 +48,7 @@ A list with: \item{iterations}{A dataframe describing each
 }
 \description{
 Takes as input a folder with multiple session data produced by
-\code{\link{perform_grid_evaluation()}}, each session representing a
+\code{\link{perform_grid_evaluation}()}, each session representing a
 combination of parameters and computes the best combinations in terms of a
 perfomance score.
 }
@@ -59,11 +59,11 @@ with \eqn{efficiency} being the \emph{one minus the ratio of reviewed records
 over the total}. The statistics are computed on a subset of fully labeled
 records.
 
-The analysis is performed on the "Results" files in each session.
+The analysis is performed on each session's "Results" files.
 
 A partition tree algorithm is used to group parameter combinations by average
-scores, identifying "performance clusters". For each cluster is then shown
-the combination with the best sensitivity followed by the best efficiency.
+scores, identifying "performance clusters". The combination with the best
+sensitivity followed by the best efficiency is then shown for each cluster.
 Optionally, a plot can be generated with the marginal impact of each
 parameter.
 }
@@ -81,4 +81,5 @@ parameter.
   # plot parameter marginal impact is the plot argument is TRUE
   out$plot
 }
+
 }

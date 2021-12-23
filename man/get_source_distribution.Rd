@@ -9,8 +9,8 @@ get_source_distribution(annotation_file, as_propr = TRUE, format_fun = percent)
 \arguments{
 \item{annotation_file}{An annotation data frame or a file path to it.}
 
-\item{as_propr}{Whether to output the results as absolute number of
-proportion over the record total.}
+\item{as_propr}{Whether to output the results as absolute numbers or
+proportions over the record total.}
 
 \item{format_fun}{If the results are shown as proportion (\code{as_propr ==
 TRUE}), which function to use to format them.}

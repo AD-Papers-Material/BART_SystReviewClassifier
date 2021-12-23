@@ -10,7 +10,7 @@ create_training_set(Records, min_freq = 0.05)
 \item{Records}{An Annotation data frame.}
 
 \item{min_freq}{Minimum document frequency (between 0 and 1) in negative
-labeled records above which a term is considered.}
+labelled records above which a term is considered.}
 }
 \value{
 An enriched DTM which is the merge of the title, abstract, authors,
@@ -19,7 +19,7 @@ An enriched DTM which is the merge of the title, abstract, authors,
 \description{
 Given an Annotation file, it creates and join Document Term Matrices (DTM)
 for the title, abstract, authors, keywords and MESH terms of a record,
-keeping terms above a given document frequency among the negative labeled
+keeping terms above a given document frequency among the negative labelled
 records and which are present in at least two records
 }
 \examples{

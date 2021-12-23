@@ -21,12 +21,12 @@ changes of that type ever happened.}
 name in machine readable column formats.}
 }
 \value{
-A data frame reporting for each session the number of positive and negative matches
-  after each Classification/Review iteration and the specific changes
-  corresponding to each iteration.
+A data frame reporting for each session the number of positive and
+  negative matches after each Classification/Review iteration and the
+  specific changes corresponding to each iteration.
 }
 \description{
-Applies \code{\link{summarise_annotations()}} to all session in the
+Applies \code{\link{summarise_annotations}()} to all session in the
 \code{sessions_folder} folder.
 }
 \examples{

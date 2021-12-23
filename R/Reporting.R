@@ -26,9 +26,9 @@ summarise_vector <- function(vec) {
 
 #' Record distribution between sources in an Annotation file
 #'
-#' Summarises the distribution of the source databases among the the citation
-#' records in an Annotation data set. Also reports the fraction of records which
-#' are unique for each database.
+#' Summarises the distribution of the source databases among the citation
+#' records in an Annotation data set. It also reports the fraction of records
+#' that are unique for each database.
 #'
 #' @param annotation_file An annotation data frame or a file path to it.
 #' @param as_data_frame Whether to return the results as a data frame
@@ -96,7 +96,7 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 
 #' Record distribution between sources for each session
 #'
-#' Applies \code{\link{summarise_by_source()}} to all selected sessions.
+#' Applies \code{\link{summarise_by_source}()} to all selected sessions.
 #'
 #' @param sessions A vector of session identifiers corresponding to folders into
 #'   the \code{sessions_folder} folder.
@@ -104,10 +104,10 @@ summarise_by_source <- function(annotation_file, as_data_frame = FALSE,
 #' @param add_global_totals Add results for all sessions considered together.
 #' @param keep_session_label Add a column which groups rows by session. Useful
 #'   for subsequent sub-setting of the results.
-#' @param ... Other arguments passed to \code{\link{summarise_by_source}}.
+#' @param ... Other arguments passed to \code{\link{summarise_by_source}()}.
 #'
 #' @return A data frame with the number and fraction of total records per source
-#'   and number and fraction of source specific records, grouped by session. An
+#'   and number and fraction of source-specific records, grouped by session. An
 #'   extra group with the overall results is reported if
 #'   \code{add_global_totals} is \code{TRUE}.
 #'
@@ -172,11 +172,11 @@ summarise_sources_by_session <- function(sessions = list.files(sessions_folder),
 
 #' Format records' source distribution as a list
 #'
-#' Takes the output of \code{\link{summarise_sources_by_session}} and formats it
+#' Takes the output of \code{\link{summarise_sources_by_session}()} and formats it
 #' as a list.
 #'
 #' @param source_summary A data frame produced by
-#'   \code{\link{summarise_sources_by_session}}.
+#'   \code{\link{summarise_sources_by_session}()}.
 #'
 #' @return A hierarchical list with record distribution by source and session.
 #'
@@ -211,8 +211,8 @@ source_session_summary_to_list <- function(source_summary) { #TODO: include insi
 #' Describe the distribution of the number of sources shared by records.
 #'
 #' @param annotation_file An annotation data frame or a file path to it.
-#' @param as_propr Whether to output the results as absolute number of
-#'   proportion over the record total.
+#' @param as_propr Whether to output the results as absolute numbers or
+#'   proportions over the record total.
 #' @param format_fun If the results are shown as proportion (\code{as_propr ==
 #'   TRUE}), which function to use to format them.
 #'
@@ -244,7 +244,7 @@ get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun
 #'
 #' Take a session identifier as input and describe the changes in the number of
 #' positive and negative matches after each Classification/Review iteration. It
-#' is necessary to run \code{\link{consolidate_results()}} before this command,
+#' is necessary to run \code{\link{consolidate_results}()} before this command,
 #' otherwise the results would not consider the changes made through the manual
 #' review of the automatic classification.
 #'
@@ -257,9 +257,9 @@ get_source_distribution <- function(annotation_file, as_propr = TRUE, format_fun
 #'   \code{total_records_} columns from the output, which store data and column
 #'   name in machine readable column formats.
 #'
-#' @return A data frame reporting for a session the number of positive and negative matches
-#'   after each Classification/Review iteration and the specific changes
-#'   corresponding to each iteration.
+#' @return A data frame reporting for a session the number of positive and
+#'   negative matches after each Classification/Review iteration and the
+#'   specific changes corresponding to each iteration.
 #'
 #' @examples
 #'
@@ -345,7 +345,7 @@ summarise_annotations <- function(session_name, sessions_folder = getOption("bay
 
 #' Describe results of all Classification/Review sessions
 #'
-#' Applies \code{\link{summarise_annotations()}} to all session in the
+#' Applies \code{\link{summarise_annotations}()} to all session in the
 #' \code{sessions_folder} folder.
 #'
 #' @param sessions_folder A repository where session folders are stored.
@@ -355,9 +355,9 @@ summarise_annotations <- function(session_name, sessions_folder = getOption("bay
 #'   \code{total_records_} columns from the output, which store data and column
 #'   name in machine readable column formats.
 #'
-#' @return A data frame reporting for each session the number of positive and negative matches
-#'   after each Classification/Review iteration and the specific changes
-#'   corresponding to each iteration.
+#' @return A data frame reporting for each session the number of positive and
+#'   negative matches after each Classification/Review iteration and the
+#'   specific changes corresponding to each iteration.
 #'
 #' @examples
 #' \dontrun{
@@ -421,6 +421,7 @@ summarise_annotations_by_session <- function(sessions_folder = getOption("baysre
 #'@examples
 #'
 #'format_interval(qbeta(c(.05, .5, .95), 10, 14), percent = TRUE)
+#'
 format_interval <- function(interval, percent = FALSE) { #TODO: change "percent" into a user definable function, like for get_source_distribution()
 	interval <- sort(interval)
 
@@ -429,21 +430,21 @@ format_interval <- function(interval, percent = FALSE) { #TODO: change "percent"
 	interval %>% {glue("{.[2]} [{.[1]}, {.[3]}]")}
 }
 
-#' Pretty formatting of Session performance analysis
+#'Pretty formatting of Session performance analysis
 #'
-#' Publication friendly formatting of the results of
-#' \code{\link{estimate_performance()}}. If more than one results set is passed
-#' (i.e., one per session), the will be added as new columns.
+#'Publication friendly formatting of the results of
+#'\code{\link{estimate_performance}()}. If more than one results set is passed
+#'(i.e., one per session), the will be added as new columns.
 #'
-#' @param ... One of more performance result data frames produced by
-#'   \code{\link{estimate_performance()}}.
-#' @param session_names Names of the sessions corresponding to the result data
-#'   frames passed to \code{...}. If missing they will be "Session" followed by
-#'   an incremental number for each data frame passed to \code{...}.
+#'@param ... One or more performance result data frames produced by
+#'  \code{\link{estimate_performance}()}.
+#'@param session_names Names of the sessions corresponding to the result data
+#'  frames passed to \code{...}. If missing, they will be "Session" followed by
+#'  an incremental number for each data frame passed to \code{...}.
 #'
-#' @return A long format data frame with the statistical indicators on the first
-#'   column and a column with values for each data frame passed to \code{...}.
-#' @export
+#'@return A long format data frame with the statistical indicators on the first
+#'  column and a column with values for each data frame passed to \code{...}.
+#'@export
 #'
 #' @examples
 #'
@@ -577,13 +578,13 @@ print_table <- function(data, caption = '', allow_math = FALSE, ...) {
 
 #' Plot posterior predictive distributions generated by the classification model
 #'
-#' For each Classification/Review iteration the function plots the mixture of
+#' For each Classification/Review iteration, the function plots the mixture of
 #' the posterior predictive distributions (PPD) of a positive match as predicted
 #' by the classification model for the positive, negative, unknown labelled
 #' records in the Annotation data sets.
 #'
-#' @param session_name A session identifiers corresponding to folders into
-#'   the \code{sessions_folder} folder.
+#' @param session_name A session identifiers corresponding to folders into the
+#'   \code{sessions_folder} folder.
 #' @param sessions_folder Where to find the \code{sessions} folders.
 #'
 #' @return A \code{ggplot2} object.

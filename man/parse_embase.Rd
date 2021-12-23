@@ -22,7 +22,8 @@ from \url{https://www.embase.com/#advancedSearch/default}.
 \examples{
 
 \dontrun{
-dataRaw <- import_data(file.path("Records", "Session 1", 'Query', 'EMBASE.csv'))
+dataRaw <- import_data(file.path("Records", "Session 1", 'Query',
+  'EMBASE.csv'))
 
 parse_embase(dataRaw)
 }

@@ -13,7 +13,7 @@ read_bib_files(files)
 A list of data frames containing the parsed citation data.
 }
 \description{
-Parse and normalize citation data files. If the file was already parsed will
+Parse and normalize citation data files. If the file was already parsed, will
 be just read.
 }
 \examples{

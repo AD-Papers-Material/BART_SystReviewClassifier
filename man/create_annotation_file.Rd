@@ -12,23 +12,23 @@ create_annotation_file(
 )
 }
 \arguments{
-\item{records}{Either a vector of citation file paths and or folder containing
-such files, or a list of record data frames.}
+\item{records}{Either a vector of citation file paths and or folder
+containing such files, or a list of record data frames.}
 
-\item{reorder_query}{A boolean query (as characters) of keywords which can be
-used to empirically reorder records putting on top those more probably
-identified by such query. Usually the initial query used to collect records
-is used.}
+\item{reorder_query}{A boolean query (as characters) of keywords that can be
+used to empirically reorder records by putting on top those more probably
+identified by such query. Usually, the initial query used to collect
+records is used.}
 
 \item{prev_records}{A previously created data frame of records to join with
 the new ones, removing duplicates.}
 
-\item{prev_classification}{A previous set of labeled records from which import
-the classification, without importing the records themselves.}
+\item{prev_classification}{A previous set of labelled records from which
+import the classification, without importing the records themselves.}
 }
 \value{
 A data frame of records ready for manual or automatic relevance
- classification.
+  classification.
 }
 \description{
 This function imports citation data, joins them and possibly reorder them in
@@ -41,9 +41,9 @@ the data).
 \examples{
 
 \dontrun{
-# This function extracts the appropriate file paths from a session journal. By
-# default it passes all stored files, otherwise it can be filtered by session,
-# query, and source (i.e. Pubmed, WOS, IEEE)
+# This function extracts the appropriate file paths from a session journal.
+# By default it passes all stored files, otherwise it can be filtered by
+# session, query, and source (i.e., Pubmed, WOS, IEEE)
 record_files <- extract_source_file_paths(journal)
 
 # create_annotation_file() accept a great variety of inputs:

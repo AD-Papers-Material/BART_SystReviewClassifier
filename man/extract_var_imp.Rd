@@ -32,7 +32,7 @@ A data frame with the features (and the part of the record they are
   and the linear Z score.
 }
 \description{
-Inside \code{\link{enrich_annotation_file()}}, the feature relevance for the
+Inside \code{\link{enrich_annotation_file}()}, the feature relevance for the
 classification model is estimated from the Document Term Matrix (DTM) and
 stored in the Annotation file. In the case of the default BART model, the
 feature importance is the rate of posterior trees in which a term was used,
@@ -40,11 +40,11 @@ plus its Z score if an ensemble of models is used.
 }
 \details{
 In addition to the model derived scores, the variable importance according to
-a Poisson regression is used to estimate the association (as log linear
-regressor and Z score) of a term with relevant records. This is useful to
-distinguish between terms being relevant by themselves (both the model
-related and the linear Z scores are high) or in association with other terms
-(only the model Z score is high).
+a Poisson regression is used to estimate the association (as log-linear
+regressor and Z score) of a term with relevant records. This approach is
+helpful to distinguish between terms being relevant by themselves (both the
+model related and the linear Z scores are high) or in association with other
+terms (only the model Z score is high).
 }
 \examples{
 

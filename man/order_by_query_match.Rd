@@ -12,11 +12,11 @@ order_by_query_match(records, query)
 \item{query}{The query to use to arrange the records.}
 }
 \value{
-The recordered record data frame.
+The ordered record data frame.
 }
 \description{
-This function uses a simple algorithm which counts the keywords matches in
+This function uses a simple algorithm that counts the keywords matches in
 the query in the record abstract and title, and use the count to arrange the
-records in descending order. Usually the same query used to collect the
-records in the first place is used.
+records in descending order. Usually, the same query used to collect the
+records in the first place are used.
 }

@@ -10,8 +10,8 @@ clean_record_textfields(df)
 \item{df}{The data frame to be cleaned.}
 }
 \value{
-The cleaned data frame
+The cleaned data frame.
 }
 \description{
-Clean up problematic text in the citation data.
+Used internally by the \code{parse_*} functions.
 }

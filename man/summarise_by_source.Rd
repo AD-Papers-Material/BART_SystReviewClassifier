@@ -30,9 +30,9 @@ For each source:\item{Records}{The number of records related to the
   records in the \code{annotation_file}.
 }
 \description{
-Summarises the distribution of the source databases among the the citation
-records in an Annotation data set. Also reports the fraction of records which
-are unique for each database.
+Summarises the distribution of the source databases among the citation
+records in an Annotation data set. It also reports the fraction of records
+that are unique for each database.
 }
 \examples{
 

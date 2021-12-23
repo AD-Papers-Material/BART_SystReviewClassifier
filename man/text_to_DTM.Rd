@@ -30,7 +30,7 @@ to be considered.}
 \item{freq.subset.ids}{IDs to consider when computing term frequency.}
 
 \item{included.pos}{Part of speech (POS) to consider when building the DTM.
-See \code{\link[lexicon:hash_grady_pos]{lexicon::hash_grady_pos()}} for a
+See \code{\link[lexicon:hash_grady_pos]{lexicon::hash_grady_pos}()} for a
 list of recognized POS.}
 
 \item{tokenize.fun}{Function to use to clean up text.}
@@ -39,7 +39,7 @@ list of recognized POS.}
 \code{\link{DTM.add_ngrams}}.}
 
 \item{aggr.synonyms}{Whether to aggregate terms which almost always appear
-together. See \code{\link{DTM.aggr_synonyms}}.}
+together. See \code{\link{DTM.aggr_synonyms}()}.}
 
 \item{n.gram.thresh}{The threshold to use to identify the network of
 non-consecutive n-grams if \code{add.ngrams} is \code{TRUE}.}
@@ -53,12 +53,12 @@ aggregate if \code{aggr.synonyms} is \code{TRUE}.}
 document. If \code{FALSE} those cells will be set to zero.}
 }
 \value{
-A Document Term Matrix with a row for each document and a column for the terms
-  plus a column with the document IDs.
+A Document Term Matrix with a row for each document and a column for
+  the terms plus a column with the document IDs.
 }
 \description{
 A Document Term Matrix (DTM) is a structure describing the association of a
-term to a document. In this case we used a binary matrix with ones if a term
+term to a document. In this case, we used a binary matrix with ones if a term
 is present in a document and one otherwise.
 }
 \details{
@@ -66,8 +66,8 @@ Before computing the DTM, document terms are cleaned, tokenized and
 lemmatized, and stop-words are removed.
 
 To reduce noise, only terms that appear in a fraction of documents higher
-than \code{min.freq} are considered. The function uses also cosine similarity
-to identify relevant subclusters of related terms or redundant one.
+than \code{min.freq} are considered. The function also uses cosine similarity
+to identify relevant subclusters of related terms or redundant ones.
 }
 \examples{
 

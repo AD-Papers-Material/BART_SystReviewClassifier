@@ -1,17 +1,17 @@
 #' Describe changes in the record labels after a Classification/Review Iteration
 #'
 #' Takes an Annotation file with a \code{Rev_prediction_new} column and computes
-#' differences in the labeling introduced by the last automatic classification /
-#' review.
+#' differences in the labelling introduced by the last automatic classification
+#' / review.
 #'
 #' @param Annotations An Annotation data set, as data frame or as a file path to
 #'   it.
 #'
 #' @return A data frame with total reviewed positive and negative labels and
 #'   their sum, the new labels added in the \code{Rev_prediction_new} column,
-#'   and and summary of all changes in the last iteration, e.g.: n -> y (a
-#'   previously non relevant record becoming relevant) or unlab. -> n (an
-#'   unlabeled record becoming negative).
+#'   and and summary of all changes in the last iteration, e.g.: \code{n -> y}
+#'   (a previously non relevant record becoming relevant) or \code{unlab. -> n}
+#'   (an unlabeled record becoming negative).
 #'
 #' @examples
 #'
@@ -73,14 +73,14 @@ compute_changes <- function(Annotations) {
 #' number of total unseen positive records.
 #'
 #' Usually this function is not to be used directly but through
-#' \code{\link{estimate_performance()}}.
+#' \code{\link{estimate_performance}()}.
 #'
 #' @param train_data An Annotation data set with predictions produced by
-#'   \code{enrich_annotation_file()}.
+#'   \code{\link{enrich_annotation_file}()}.
 #' @param seed An integer to replicate results
 #'
 #' @return An object of class \code{brmsfit}. See
-#'   \code{\link[brms:brm]{brms::brm()}} for mode info.
+#'   \code{\link[brms:brm]{brms::brm}()} for mode info.
 #'
 estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 
@@ -99,35 +99,35 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 
 #' Evaluate and report classification performance of given an Annotation file
 #'
-#' This function estimate Sensitivity and Efficiency (the latter as Work saved
-#' over random classification, WSoR) of the classification process (i.e., both
-#' the automatic classification and the human). To compute these statistics,
-#' first a robust estimate of the total number of relevant (positive) records in
-#' the whole data set is needed.
+#' This function estimate Sensitivity and Efficiency (the latter as "Work saved
+#' over random classification", WSoR) of the classification process (i.e., both
+#' the automatic classification and the human). A robust estimate of the total
+#' number of relevant (positive) records in the whole data set is produced to
+#' compute these statistics.
 #'
-#' For this purpose, \code{\link{estimate_positivity_rate_model()}} is employed,
+#' For this purpose, \code{\link{estimate_positivity_rate_model}()} is employed,
 #' which uses a Bayesian logistic model to estimate the probability of a
 #' relevant record given the lower boundaries of the PPD produced by the
 #' classification model for the records whose label was manually reviewed. This
-#' model does not take into account the record other characteristics, providing
-#' a simple, maximum uncertainty model.
+#' model does not take into account records' other characteristics, providing a
+#' simple, maximum uncertainty model.
 #'
-#' The model is used to predict the distribution of number of missed relevant
-#' matches among the unreviewed records which is then used to compute the
-#' expected Sensitivity (i.e, the ratio of observed positive matches and the
-#' theoretical ones) and Efficiency (i.e. ratio of number of reviewed records
-#' and the amount of records needed to review at random to find the same amount
-#' of relevant matches, according to the hypergeometric distribution).
+#' The model is used to predict the distribution of the number of missed
+#' relevant matches among the unreviewed records. This number is then used to
+#' compute the expected Sensitivity (i.e., the ratio of observed positive
+#' matches and the theoretical ones) and Efficiency (i.e. ratio of the number of
+#' reviewed records and the number of records needed to review at random to find
+#' the same amount of relevant matches, according to the hypergeometric
+#' distribution).
 #'
-#' Finally, a number of summary statistics are reported, describing the observed
+#' Finally, several summary statistics are reported, describing the observed
 #' results of the classification (i.e., number of reviewed records, number of
 #' positives found) and the statistics computed using the surrogate logistic
-#' model (i.e., sensitivity, efficiency and the R^2 of the surrogate model),
+#' model (i.e., Sensitivity, Efficiency and the R^2 of the surrogate model),
 #' including their uncertainty intervals.
 #'
 #' Optionally, a plot showing the observed cumulative number of positive matches
-#' plus the its posterior predictive distribution according to the surrogate
-#' model.
+#' plus its posterior predictive distribution according to the surrogate model.
 #'
 #'
 #' @param records An Annotation data set produced by
@@ -136,11 +136,11 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 #'   \code{\link{estimate_positivity_rate_model()}}. Will be created from
 #'   \code{records} if \code{NULL}.
 #' @param preds A matrix of posterior predictions as produced by
-#'   \code{\link[brms:posterior_predict]{brms::posterior_predict()}}. If passed
+#'   \code{\link[brms:posterior_predict]{brms::posterior_predict}()}. If passed
 #'   they need to be derived by the same model in \code{model}.
 #' @param plot Whether to plot the cumulative number of positive matches plus
-#'   the posterior predictive distribtion as computed by \code{model}, truncated
-#'   at the number of observed ones.
+#'   the posterior predictive distribution as computed by \code{model},
+#'   truncated at the number of observed ones.
 #' @param quants Point estimate and boundaries of the posterior distributions to
 #'   use in the results and in the plot.
 #' @param nsamples Number of samples to use to build the posterior distribution,
@@ -150,19 +150,18 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
 #'   passed to \code{preds}.
 #' @param save_model Whether to save the model. Can be passed to \code{model}
 #'
-#' @return A data frame with the following columns:
-#'   \itemize{\item{obs_positives}{the observed number of positive
-#'   matches;}\item{pred_positives}{the quantiles of the predicted distribution
-#'   of the number of positive matches;} \item{mod_r2}{the surrogate model fit
-#'   (R^2);}\item{n_reviewed}{the number of records
-#'   reviewed;}\item{total_records}{the total records in the Annotation
-#'   file;}\item{used_prop}{the posterior distribution of the proportion of
-#'   reviewed record over the amount needed with random classification (1 -
-#'   WSoR)};\item{efficiency}{the posterior distribution of one minus the
+#' @return A data frame with the following columns: \item{obs_positives}{the
+#'   observed number of positive matches;}\item{pred_positives}{the quantiles of
+#'   the predicted distribution of the number of positive matches.}
+#'   \item{mod_r2}{the surrogate model fit (\eqn{R^2}).}\item{n_reviewed}{the
+#'   number of records reviewed.}\item{total_records}{the total records in the
+#'   Annotation file;}\item{used_prop}{the posterior distribution of the
 #'   proportion of reviewed record over the amount needed with random
-#'   classification (WSoR)}\item{sensitivity}{the posterior distribution of the
-#'   sensitivity computed over the predicted number of positives according to
-#'   the surrogate model.}}
+#'   classification (1  - WSoR).}\item{efficiency}{the posterior distribution of
+#'   one minus the proportion of reviewed record over the amount needed with
+#'   random classification (WSoR).}\item{Sensitivity}{the posterior distribution
+#'   of the Sensitivity computed over the predicted number of positives
+#'   according to the surrogate model.}
 #'
 estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRUE,
 																 quants = getOption('baysren.probs'),
@@ -276,18 +275,18 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
 
 #' Extract the importance of features in the Document Term Matrix
 #'
-#' Inside \code{\link{enrich_annotation_file()}}, the feature relevance for the
+#' Inside \code{\link{enrich_annotation_file}()}, the feature relevance for the
 #' classification model is estimated from the Document Term Matrix (DTM) and
 #' stored in the Annotation file. In the case of the default BART model, the
 #' feature importance is the rate of posterior trees in which a term was used,
 #' plus its Z score if an ensemble of models is used.
 #'
 #' In addition to the model derived scores, the variable importance according to
-#' a Poisson regression is used to estimate the association (as log linear
-#' regressor and Z score) of a term with relevant records. This is useful to
-#' distinguish between terms being relevant by themselves (both the model
-#' related and the linear Z scores are high) or in association with other terms
-#' (only the model Z score is high).
+#' a Poisson regression is used to estimate the association (as log-linear
+#' regressor and Z score) of a term with relevant records. This approach is
+#' helpful to distinguish between terms being relevant by themselves (both the
+#' model related and the linear Z scores are high) or in association with other
+#' terms (only the model Z score is high).
 #'
 #' @param session_name The name of a session.
 #' @param num_vars The number of best features to report, according to model
@@ -346,7 +345,7 @@ extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, rec
 #' Analyse the results of a parameter grid search
 #'
 #' Takes as input a folder with multiple session data produced by
-#' \code{\link{perform_grid_evaluation()}}, each session representing a
+#' \code{\link{perform_grid_evaluation}()}, each session representing a
 #' combination of parameters and computes the best combinations in terms of a
 #' perfomance score.
 #'
@@ -356,11 +355,11 @@ extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, rec
 #' over the total}. The statistics are computed on a subset of fully labeled
 #' records.
 #'
-#' The analysis is performed on the "Results" files in each session.
+#' The analysis is performed on each session's "Results" files.
 #'
 #' A partition tree algorithm is used to group parameter combinations by average
-#' scores, identifying "performance clusters". For each cluster is then shown
-#' the combination with the best sensitivity followed by the best efficiency.
+#' scores, identifying "performance clusters". The combination with the best
+#' sensitivity followed by the best efficiency is then shown for each cluster.
 #' Optionally, a plot can be generated with the marginal impact of each
 #' parameter.
 #'
@@ -368,25 +367,25 @@ extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, rec
 #'   \code{\link{perform_grid_evaluation()}}.
 #' @param tot_pos Total number of positive matches among records. If \code{NULL}
 #'   it will be inferred by the Annotation files in \code{session_folder} which
-#'   then need to be fully labeled.
+#'   then need to be fully labelled.
 #' @param tot_records Total number of records. If \code{NULL} it will be
 #'   inferred by the Annotation files in \code{session_folder} which then need
-#'   to be fully labeled.
+#'   to be fully labelled.
 #' @param plot Whether to plot the marginal impact of each parameter.
-#' @param score Which score to use to measure classification performance. Can be
-#'   \code{Sens_adj_eff}: sensitivity by efficacy, \code{Pos_rate}: the ratio of
-#'   positive labels found over the total record (positive rate),
-#'   \code{Pos_rate_adj_sens}: sensitivity by positive rate.
+#' @param score Which one of the scores to use to measure classification
+#'   performance. Can be \code{Sens_adj_eff}: sensitivity by efficacy,
+#'   \code{Pos_rate}: the ratio of positive labels found over the total record
+#'   (positive rate), \code{Pos_rate_adj_sens}: sensitivity by positive rate.
 #'
-#' @return A list with: \item{iterations}{A dataframe describing each
+#' @return A list with: \item{iterations}{A data frame describing each
 #'   classification/review iteration for each session, reporting the parameter
 #'   values used and the performance score.}\item{best_parms}{The highest
-#'   performance parameter set in the best parameter cluster. First the
+#'   performance parameter set in the best parameter cluster. First, the
 #'   parameter clusters are ordered by average performance score, then parameter
 #'   combinations inside the cluster are ordered by sensitivity followed by
 #'   efficiency. A data frame with the score, the ratio of positive matches over
 #'   the total records, the ratio of reviewed records, the sensitivity and the
-#'   efficiency is reported.}\item{best_by_rule}{A data frame with performance
+#'   efficiency, is reported.}\item{best_by_rule}{A data frame with performance
 #'   info (like for \code{best_parms}) for the best parameter set for each
 #'   performance cluster.}\item{plot}{A plot with the marginal impact of each
 #'   parameter if the \code{plot} argument is \code{TRUE}, otherwise
@@ -406,6 +405,7 @@ extract_var_imp <- function(session_name, num_vars = 15, score_filter = 1.5, rec
 #'   # plot parameter marginal impact is the plot argument is TRUE
 #'   out$plot
 #' }
+#'
 analyse_grid_search <- function(session_folder = 'Grid_Search', tot_pos = NULL,
 																tot_records = NULL,  plot = TRUE,
 																score = c('Sens_adj_eff', 'Pos_rate', 'Pos_rate_adj_sens')) {
