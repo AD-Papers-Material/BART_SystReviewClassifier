@@ -1,24 +1,28 @@
 ---
 title: An open-source integrated framework for the automation of citation collection and screening in systematic reviews. 
 authors:
-  - name: David S. Hippocampus
-    thanks: Use footnote for providing further information about author (webpage, alternative address)---*not* for acknowledging funding agencies. Optional.
-    department: Department of Computer Science
-    affiliation: Cranberry-Lemon University
-    location: Pittsburgh, PA 15213
-    email: hippo@cs.cranberry-lemon.edu
-  - name: Elias D. Striatum
-    department: Department of Electrical Engineering
-    affiliation: Mount-Sheikh University
-    location: Santa Narimana, Levand
-    email: stariate@ee.mount-sheikh.edu
+  - name: Angelo D'Ambrosio
+    department: Institute for Infection Prevention and Hospital Hygiene
+    affiliation: Freiburg University Hospital
+    location: Freiburg, Germany
+    email: angelo.d.ambrosio@uniklinik-freiburg.de; a.dambrosioMD@gmail.com
+  - name: Tjibbe Donker
+    department: Institute for Infection Prevention and Hospital Hygiene
+    affiliation: Freiburg University Hospital
+    location: Freiburg, Germany
+    email: tjibbe.donker@uniklinik-freiburg.de
+  - name: Hajo Grundmann
+    department: Institute for Infection Prevention and Hospital Hygiene
+    affiliation: Freiburg University Hospital
+    location: Freiburg, Germany
+    email: hajo.grundmann@uniklinik-freiburg.de
 abstract: |
   The exponential growth in scientific production makes its summarisation through secondary literature exceedingly demanding in terms of time and human resources.
   We introduce a new open-source framework that significantly increases efficiency during the citation collection and screening phases of systematic reviews.\
   The framework introduces three main tools:
-  an automatic citation search engine and manager that allows collecting records from multiple citation databases (PUBMED, WOS, SCOPUS, EMBASE, IEEE) with a unified query syntax;
-  a citation screening tool based on Bayesian active machine learning and natural language processing, which requires users feedback only on uncertain classifications to increase predictive accuracy iteratively;
-  a semi-automatic data-driven query generator to create new search queries from existing reviewed citation data sets.\
+  1) an automatic citation search engine and manager that allows collecting records from multiple citation databases (PUBMED, WOS, SCOPUS, EMBASE, IEEE) with a unified query syntax;
+  2) a citation screening tool based on Bayesian active machine learning and natural language processing, which requires users feedback only on uncertain classifications to increase predictive accuracy iteratively;
+  3) a semi-automatic data-driven query generator to create new search queries from existing reviewed citation data sets.\
   The framework was applied on an example topic performing citation collection and screening.
   We estimated median posterior Sensitivity and Efficiency [90% Credible Intervals] using Bayesian simulation to predict the distribution of possibly missed relevant matches in the unreviewed records.\
   17755 unique records were collected through the framework citation manager;
