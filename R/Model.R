@@ -37,7 +37,6 @@ coalesce_labels <- function(data, label_cols = c('Rev_prediction_new','Rev_predi
 #'
 #' @return An enriched DTM which is the merge of the title, abstract, authors,
 #'   keywords and MESH terms DTMs plus the record ID and label if present.
-#' @export
 #'
 #' @examples
 #'

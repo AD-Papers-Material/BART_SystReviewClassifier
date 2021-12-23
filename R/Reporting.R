@@ -678,7 +678,7 @@ plot_predictive_densities <- function(session_name,
 #' @param step_size The interval with which the cumulative numbers are plotted.
 #' @param limit How many records to display.
 #'
-#' @return A `ggplot2` object.
+#' @return A \code{ggplot2} object.
 #'
 #'\dontrun{
 #'data <- get_session_files('Session1')$Annotations %>% last() %>%

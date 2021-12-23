@@ -18,7 +18,7 @@ excluding labels imported using \code{import_classification()}.}
 \item{limit}{How many records to display.}
 }
 \value{
-A `ggplot2` object.
+A \code{ggplot2} object.
 
 \dontrun{
 data <- get_session_files('Session1')$Annotations %>% last() %>%
