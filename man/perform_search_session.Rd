@@ -23,14 +23,14 @@ grouping and quotation marks for n-grams.}
 \item{year_query}{A year based filtering query. See
 \code{\link{clean_date_filter_arg}} for more info.}
 
-\item{actions}{Whether to acquire records through automatic search, parsing
-of manually downloaded data, or both.}
+\item{actions}{Whether to acquire records through automatic search, parsing of
+manually downloaded data, or both.}
 
 \item{sources}{The sources for which records should be collected}
 
-\item{session_name}{How to name the current search session and will be used
-to create a folder to collect search results. Should be the same as the
-name used for classification session of the same records.}
+\item{session_name}{How to name the current search session and will be used to
+create a folder to collect search results. It should be the same as the name
+used for classification session of the same records.}
 
 \item{query_name}{A label for the current query. It will be used to name a
 folder inside the \code{session_name} folder. It is useful to separate
@@ -43,41 +43,42 @@ records acquired with different queries in the same search session.}
 repeated and a result file already exists.}
 
 \item{journal}{A path to a file (Excel or CSV) to store a summary of the
-search results. If the file already exists the summary of the new
+search results. If the file already exists, the summary of the new
 \code{session_name}/\code{query_name}/\code{sources} will be added to the
 file.}
 }
 \value{
 A "Journal" data frame containing a summary of the search results
-  grouped by
-  \code{session_name}/\code{query_name}/\code{sources}/\code{actions}.
+ grouped by
+ \code{session_name}/\code{query_name}/\code{sources}/\code{actions}.
 }
 \description{
-It is better to use this function instead of the individual search_* tools,
-since it also automatically acquires manually downloaded record (e.g., for
-EMBASE and SCOPUS for which automatic search is not available).
+It is better to use this function instead of the individual \code{search_*}
+tools, since it also automatically acquires manually downloaded records (e.g.,
+for EMBASE and SCOPUS for which automatic search is not available).
 }
 \details{
-The function will organize search results into folder defined by the pattern
+The function organizes search results into folder defined by the pattern
 \code{records_folder}/\code{session_name}/\code{query_name}, which allows to
 have different search sessions (and classification sessions) and multiple
 queries per session (useful when it is too complex to convey all information
-into a single query). These folder can be created manually and manually
+into a single query). These folders can be created manually and manually
 downloaded citation data must be put into these folders to be acquired by the
 functions.
 
-To acquire the manually downloaded files, they must given a name containing
+To acquire the manually downloaded files, they must be given a name containing
 the source as in \code{sources}. There could be more files for the same
-sources, since all research database have download limits and users may need
+sources, since all research databases have download limits and users may need
 to download results in batches. The function acquires these files and parse
 them into a standard format, creating a new file for each source.
 
-The output is a "journal" file which store all information about the queries,
-the sources used, the number or results, etc... which allow to keep track of
-all search sessions. If a journal file is already present, the new results
-will be added.
+The output is a "journal" file storing all information about the queries, the
+sources used, the number of results, etc... which allow keeping track of all
+search sessions. If a journal file is already present, the new results will be
+added.
 }
 \examples{
+
 \dontrun{
 # Initial query to be built on domain knowledge. It accepts OR, AND, NOT
 # boolean operators and round brackets to group terms.

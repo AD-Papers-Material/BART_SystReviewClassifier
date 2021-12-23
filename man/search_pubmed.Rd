@@ -19,22 +19,25 @@ grouping and quotation marks for n-grams.}
 \item{year_query}{A year based filtering query. See
 \code{\link{clean_date_filter_arg}} for more info.}
 
-\item{additional_fields}{Additional fields to add to the query. Won't be
-normalized so it must already follow Pubmed specific syntax.}
+\item{additional_fields}{Additional fields to add to the query. Will not be
+normalized, so it must already follow Pubmed specific syntax.}
 
 \item{api_key}{Not mandatory but is helpful when performing searches with a
 large number of results to avoid quota limitations.}
 
-\item{record_limit}{A limit on the number or records collected.}
+\item{record_limit}{A limit on the number of records collected.}
 }
 \value{
 A data frame of records.
 }
 \description{
 Perform an API search using Pubmed E-utilities
-\url{https://www.ncbi.nlm.nih.gov/books/NBK25501/}. An API key is not
-mandatory but may avoid quota limitation for searches that return a large
-number of results. Large results sets are obtained by iterative querying.
+\url{https://www.ncbi.nlm.nih.gov/books/NBK25501/}.
+}
+\details{
+An API key is not mandatory but may avoid quota limitation for searches that
+return a large number of results. Large results sets are obtained by
+iterative querying.
 }
 \examples{
 

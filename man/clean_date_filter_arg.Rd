@@ -12,12 +12,12 @@ clean_date_filter_arg(
 )
 }
 \arguments{
-\item{year_query}{A string identifying a year or a range o years.}
+\item{year_query}{A string identifying a search period (see Details).}
 
 \item{cases}{The search engine syntax specification into which convert the
 year query It needs to be a list with the following items: gt (greater
-than), ge (greater then or equal to), lt (lower then), le (lower then or
-equal to), ep (equal to), range (range of years). Inside the specification,
+than), ge (greater than or equal to), lt (lower than), le (lower than or
+equal to), eq (equal to), range (range of years). Inside the specification,
 the year in the query can be retrieved with the \code{year_piece}
 placeholder, which in the case of a closed range is a vector of two
 elements (see examples).}
@@ -32,18 +32,23 @@ present. If \code{query} is set, also the \code{arg_in_query_test} argument
 must be set.}
 }
 \value{
-The formatted, search engine specific, year filter.
+The formatted, search engine specific, period filter.
 }
 \description{
-Take a year range in the form of:
+Take a period definition and transform it into a specific format passed
+through the \code{cases} argument.
 }
 \details{
-greater than: > Year; greater then or equal to: >= Year; lower than: < Year;
-lower then or equal to: <= Year; equal to: Year; range: Year1 - Year2.
+The input period specified in \code{year_query} must follow this format:
+\itemize{\item{\code{> Year}: }{greater than \code{Year}.}\item{\code{>=
+Year}: }{greater then or equal to \code{Year}.}\item{\code{< Year}: }{lower
+than \code{Year}.}\item{\code{<= Year}: }{lower then or equal to
+\code{Year}.}\item{\code{Year}: }{equal to
+\code{Year}.}\item{\code{Year1-Year2}: }{range from \code{Year1} to
+\code{Year2}.}}
 
-and transform it into a specific format passed through the \code{cases}
-argument. Some checks are performed to evaluate if \code{year_query} is
-clearly in an invalid format.
+The input is checked to evaluate if \code{year_query} the format is clearly
+invalid.
 }
 \examples{
 

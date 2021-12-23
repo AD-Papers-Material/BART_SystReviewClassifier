@@ -21,8 +21,8 @@ grouping and quotation marks for n-grams.}
 \item{year_query}{A year based filtering query. See
 \code{\link{clean_date_filter_arg}} for more info.}
 
-\item{additional_fields}{Additional fields to add to the query. Won't be
-normalized so it must already follow WOS specific syntax.}
+\item{additional_fields}{Additional fields to add to the query. Will not be
+normalized, so it must already follow WOS specific syntax.}
 
 \item{api_key}{Necessary to use IEEE APIs. See details.}
 
@@ -31,20 +31,23 @@ be attempted to collect the records. This approach is not suggested in
 production and may fail with a large number of results. See Details.}
 
 \item{wait_for}{If web scraping is used, a certain amount of time is needed
-to let the IEEE page to fully load before collecting the results. This
+to let the IEEE page load completely before collecting the results. This
 delay depends on the user network and browser speed, thus the default 20
 seconds may not be sufficient.}
 
-\item{record_limit}{A limit on the number or records collected.}
+\item{record_limit}{A limit on the number of records collected.}
 }
 \value{
 A data frame of records.
 }
 \description{
-Perform a search on \url{https://ieeexplore.ieee.org/Xplore/home.jsp}. If an
-API key is available, IEEE API will be used, otherwise Google Chrome APIs
-will be used to scrape records simulating a manual user search. This second
-method is not ensured to work and IEEE may blacklist your IP if abused.
+Perform a search on \url{https://ieeexplore.ieee.org/Xplore/home.jsp}.
+}
+\details{
+If an API key is available, the IEEE API will be used, otherwise Google
+Chrome APIs will be used to scrape records simulating a manual user search.
+This second method is not ensured to work and IEEE may blacklist your IP if
+abused.
 }
 \examples{
 \dontrun{

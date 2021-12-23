@@ -1,5 +1,44 @@
+#' Extract screening rules from an Annotation data set
+#'
+#' Starting from a Document Term Matrix (DTM) and a posterior predictive
+#' distribution (PPD) matrix produced by the Bayesian classification engine, a
+#' decision tree algorithm is used to extract rules that partition a subset of
+#' draws from the PPD. Beware that the generation of the rules may take a long
+#' time.
+#'
+#' The algorithm allows to use only a subset of the terms in the DTM and of the
+#' samples in the PPD matrix to cut on computation time. In the first case, a
+#' threshold is used to filter only the most relevant features in the DTM.
+#' Before being used, terms in the DTM are aggregated if they appear in multiple
+#' fields of the citation records and only their general presence in the record
+#' will be stored.
+#'
+#' @param session_name A session identifier corresponding to folders into the
+#'   \code{sessions_folder} folder.
+#' @param rebuild_dtm Whether to use the last DTM stored in the
+#'   \code{session_name} folder (\code{FALSE}) or rebuild it from the last
+#'   Annotation file (\code{TRUE}).
+#' @param vimp.threshold A threshold in the standardized variable importance
+#'   score to filter out less relevant terms in the DTM.
+#' @param n.trees How many draws to use from the PPD matrix to build decision
+#'   trees. This parameter strongly impacts computational time but increases
+#'   sensitivity of the rules found.
+#' @param sessions_folder Where to find the \code{sessions} folders.
+#' @param save_path Since generating the rules is a computation intense process
+#'   it's advisable to save the output in a .rds file placed inside the
+#'   \code{session_name} folder. User need only to provide the name of the file.
+#' @param ... Additional arguments passed to
+#'   \code{\link[rpart:rpart.control]{rpart::rpart.control()}}.
+#'
+#' @return A list with: \item{SpecificDTM}{The DTM with the less relevant terms
+#'   being filtered out and terms in multiple record fields being
+#'   aggregated.}\item{DTM}{The full DTM with the predicted
+#'   classification.}\item{rules}{A data frame reporting the selected rules with
+#'   the average PPD.}
+#'
 extract_rules <- function(session_name, rebuild_dtm = FALSE, vimp.threshold = 1.25,
-													n.trees = 800, sessions_folder = getOption("baysren.sessions_folder"), ...) {
+													n.trees = 800, sessions_folder = getOption("baysren.sessions_folder"),
+													save_path = file.path(sessions_folder, session_name, "rule_data.rds"), ...) {
 
 	message('Preparing the data')
 
@@ -67,13 +106,33 @@ extract_rules <- function(session_name, rebuild_dtm = FALSE, vimp.threshold = 1.
 			tidytrees::tidy_tree(eval_ready = TRUE, simplify_rules = TRUE)
 	}) %>% bind_rows()
 
-	list(
+	out <- list(
 		SpecificDTM = SpecificDTM,
 		DTM = DTM,
 		rules = trees$rule
 	)
+
+	if (!is.null(save_path)) {
+		write_rds(file.path(sessions_folder, session_name, file_name))
+	}
+
+	out
 }
 
+#' Add cumulative numbers of positive and negative matches to a list of rules
+#'
+#' Given a Rules data frame, arranges it by a score and rule length and computes
+#' the cumulative number of positive and negative matches identified by the
+#' rules.
+#'
+#' @param data A Rules data frame.
+#' @param order_by A column in \code{data} according to which order rules in
+#'   descending order.
+#' @param rule_var The name of the column in \code{data} which stores the rules.
+#'
+#' @return The Rules data frame with two more columns for the cumulative numbers
+#'   of positive and negative matches.
+#'
 add_cumulative <- function(data, order_by = 'score', rule_var = 'rule') {
 
 	arrange(data, desc(get(order_by)), str_count(get(rule_var), ' & ')) %>%
@@ -84,12 +143,59 @@ add_cumulative <- function(data, order_by = 'score', rule_var = 'rule') {
 		)
 }
 
-
+#' Generate a rule selection set for user review
+#'
+#' The rules extracted by \code{\link{extract_rules}} rules are grouped by
+#' similar sensitivity and presented to the user who will need to select a
+#' subset of them (ideally one per sensitivity group).
+#'
+#' Only rules with at least one positive component are selected and (optionally)
+#' negative terms are added to them from the Document Term Matrix (DTM) to
+#' increase specificity. Rules are then arranged by \emph{positive - negative}
+#' records matched and grouped by the cumulative number of records identified.
+#'
+#' The first column of the output shows which rule is the suggested one for each
+#' performance group. The user can edit this column, adding/removing rules by
+#' setting them \code{TRUE} or \code{FALSE}. Once the rules are reviewed, it's
+#' advisable to change the file name, e.g., "Selected_rules.xlsx".
+#'
+#' @param rules A vector of rules as produced by \code{\link{extract_rules()}}.
+#' @param target_vec A vector of labels.
+#' @param target_data A DTM with a number of rows as the elements in
+#'   \code{rules}.
+#' @param add_negative_terms Whether to increase specificity by adding negative
+#'   terms to the rules. Adding the negative terms in computationally heavy.
+#' @param save_path Where to save the Excel file in which users will need to
+#'   select the final rules. A best practice is to save the output in the
+#'   session folder used to generate the rules and call it
+#'   "Selected_rules.xlsx".
+#'
+#' @return A data frame with groups of rules characterized by equal cumulative
+#'   sensitivity. The first column marks the suggested rule for each group. The
+#'   data frame gets saved to the file in \code{save_path} if not \code{NULL}.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' candidate_queries <- readRDS(file.path('Sessions', 'Session1', 'rule_data.rds'))
+#'
+#' Target <- candidate_queries$DTM$Target
+#' SpecificDTM <- candidate_queries$SpecificDTM
+#'
+#' selection_set_file <- file.path('Sessions', 'Session1', 'Selected_rules_reviewed.xlsx')
+#'
+#' selection_set <- generate_rule_selection_set(
+#'     candidate_queries$rule,
+#'     target_vec = Target,
+#'     target_data = SpecificDTM,
+#'     save_path = selection_set_file)
+#' }
 generate_rule_selection_set <- function(rules, target_vec, target_data, add_negative_terms = TRUE,
-																				simplify = TRUE, save_path = NULL) {
+																				save_path = NULL) {
 
-	rules <- rules[str_detect(rules, '"1"')] %>%
-		tidytrees::simplify_rules() %>% unique()
+	rules <- rules[str_detect(rules, '"1"')] %>% # Only rules with a least one positive component
+		tidytrees::simplify_rules() %>% # Remove redundant rule components
+		unique()
 
 	if (add_negative_terms) {
 		rules <- add_negative_terms(rules, target_vec, target_data) %>%
@@ -152,11 +258,28 @@ generate_rule_selection_set <- function(rules, target_vec, target_data, add_nega
 	# }
 
 	if (!is.null(save_path)) {
-		openxlsx::write.xlsx(rules, save_path)
+		openxlsx::write.xlsx(rules, save_path) #TODO: allow csv output as package options
 	}
 
 	rules
 }
+
+#' Add negative terms to rules
+#'
+#' Increases rule specificity by adding negative terms iteratively, selecting
+#' only terms that remove non-relevant records without impacting the number of
+#' positive matches. Usually not used by itself, but inside
+#' \code{\link{generate_rule_selection_set()}}.
+#'
+#' @param rules A vector of rules as produced by \code{\link{extract_rules()}}.
+#' @param target_vec A vector of labels.
+#' @param target_data A DTM with a number of rows as the elements in
+#'   \code{rules}.
+#'
+#' @return A data frame with a column with the negative terms for each
+#'   rule, the number of positive and negative matches identified by the
+#'   negative terms in the \code{target_data} and the ID of these records..
+#'
 
 add_negative_terms <- function(rules, target_vec, target_data) {
 	message('- retrieving negative terms')
@@ -242,8 +365,40 @@ add_negative_terms <- function(rules, target_vec, target_data) {
 	}) %>% bind_rows() %>% select(-id, -selected_term)
 }
 
-
-## update the indexes after the simplifications, remove the old rules
+#' Remove redundant rules and rule components
+#'
+#' Removes whole rules or components of the rules whose removal do not decrease
+#' the total number of positive matches found by applying the rules in the
+#' original data set.
+#'
+#' The suggested approach is apply this function on the output of
+#' \code{\link{generate_rule_selection_set()}} after manual review of the
+#' proposed rules.
+#'
+#' @param ruleset A rule set as generated by
+#'   \code{\link{generate_rule_selection_set}}.
+#' @param target_vec A vector of labels.
+#' @param target_data A DTM with a number of rows as the elements in
+#'   \code{rules}.
+#'
+#' @return A data frame with the preserved rules, the redundant terms removed by
+#'   the rules, the number of positive and negative (absolute and cumulative)
+#'   records identified by the rules in the \code{target_data} and the position
+#'   of these records in the  \code{target_data}.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' candidate_queries <- readRDS(file.path('Sessions', 'Session1', 'rule_data.rds'))
+#'
+#' Target <- candidate_queries$DTM$Target
+#' SpecificDTM <- candidate_queries$SpecificDTM
+#'
+#' simplified_rules <- file.path('Sessions', 'Session1', 'Selected_rules.xlsx') %>%
+#'   import_data() %>%
+#'   simplify_ruleset(target_vec = Target, target_data = SpecificDTM) %>%
+#'   pull(rule)
+#' }
 simplify_ruleset <- function(ruleset, target_vec, target_data) {
 
 	remove_redundant_rules <- function(data) {
@@ -334,6 +489,49 @@ simplify_ruleset <- function(ruleset, target_vec, target_data) {
 		remove_redundant_rules()
 }
 
+#' Transform a rule set in a search query
+#'
+#' The rules produced by \code{\link{extract_rules()}} and modified by the other
+#' tools in the framework are in a format ready for using as boolean filtering
+#' tools in R, for example by using \code{eval(str2expression(rule)))}. To be
+#' used online with citation database they need to be converted in another
+#' format.
+#'
+#' @param rules A vector of rules.
+#'
+#' @return A string with the rules joined and transformed into a format ready
+#'   for online use.
+#'
+#' @examples
+#'
+#' rules <- c('V__network._.patient %in% "1" & V__patient_transport %in% "1" &
+#'   V__transmission %in% "1" & V__personnel %in% "0" & V__therapy %in% "0"',
+#'   'V__Donker_T %in% "1" & V__bacterium_isolate %in% "0" & V__able %in% "0"',
+#'   'V__network._.patient %in% "1" & V__resistant_staphylococcus_aureus %in% "1"
+#'   & V__carlo.monte.carlo._.monte %in% "0"')
+#'
+#' new_query <- rules_to_query(rules)
+#'
+#' writeLines(query, file.path('Sessions', 'Session1', 'Resulting_query.txt'))
+#'
+#'\dontrun{
+#' # Starting from a rule review file:
+#'
+#' candidate_queries <- readRDS(file.path('Sessions', 'Session1', 'rule_data.rds'))
+#'
+#' Target <- candidate_queries$DTM$Target
+#' SpecificDTM <- candidate_queries$SpecificDTM
+#'
+#' simplified_rules <- file.path('Sessions', 'Session1',
+#'   'Selected_rules_reviewed.xlsx') %>%
+#' import_data() %>%
+#' 	simplify_ruleset(target_vec = Target, target_data = SpecificDTM) %>%
+#' 	pull(rule)
+#'
+#' new_query <- rules_to_query(simplified_rules)
+#'
+#' writeLines(query, file.path('Sessions', 'Session1', 'Resulting_query.txt'))
+#'}
 rules_to_query <- function(rules) {
 
 	str_remove_all(rules, '\\bV__') %>% sapply( function(r) {

@@ -1,19 +1,24 @@
 #' Transform a year range into the format required by a specific search engine
 #'
-#' Take a year range in the form of:
+#' Take a period definition and transform it into a specific format passed
+#' through the \code{cases} argument.
 #'
-#' greater than: > Year; greater then or equal to: >= Year; lower than: < Year;
-#' lower then or equal to: <= Year; equal to: Year; range: Year1 - Year2.
+#' The input period specified in \code{year_query} must follow this format:
+#' \itemize{\item{\code{> Year}: }{greater than \code{Year}.}\item{\code{>=
+#' Year}: }{greater then or equal to \code{Year}.}\item{\code{< Year}: }{lower
+#' than \code{Year}.}\item{\code{<= Year}: }{lower then or equal to
+#' \code{Year}.}\item{\code{Year}: }{equal to
+#' \code{Year}.}\item{\code{Year1-Year2}: }{range from \code{Year1} to
+#' \code{Year2}.}}
 #'
-#' and transform it into a specific format passed through the \code{cases}
-#' argument. Some checks are performed to evaluate if \code{year_query} is
-#' clearly in an invalid format.
+#' The input is checked to evaluate if \code{year_query} the format is clearly
+#' invalid.
 #'
-#' @param year_query A string identifying a year or a range o years.
+#' @param year_query A string identifying a search period (see Details).
 #' @param cases The search engine syntax specification into which convert the
 #'   year query It needs to be a list with the following items: gt (greater
-#'   than), ge (greater then or equal to), lt (lower then), le (lower then or
-#'   equal to), ep (equal to), range (range of years). Inside the specification,
+#'   than), ge (greater than or equal to), lt (lower than), le (lower than or
+#'   equal to), eq (equal to), range (range of years). Inside the specification,
 #'   the year in the query can be retrieved with the \code{year_piece}
 #'   placeholder, which in the case of a closed range is a vector of two
 #'   elements (see examples).
@@ -25,7 +30,7 @@
 #'   present. If \code{query} is set, also the \code{arg_in_query_test} argument
 #'   must be set.
 #'
-#' @return The formatted, search engine specific, year filter.
+#' @return The formatted, search engine specific, period filter.
 #'
 #' @examples
 #'
@@ -273,19 +278,21 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 #' Automatic search on Pubmed database
 #'
 #' Perform an API search using Pubmed E-utilities
-#' \url{https://www.ncbi.nlm.nih.gov/books/NBK25501/}. An API key is not
-#' mandatory but may avoid quota limitation for searches that return a large
-#' number of results. Large results sets are obtained by iterative querying.
+#' \url{https://www.ncbi.nlm.nih.gov/books/NBK25501/}.
+#'
+#' An API key is not mandatory but may avoid quota limitation for searches that
+#' return a large number of results. Large results sets are obtained by
+#' iterative querying.
 #'
 #' @param query A boolean query with AND/OR/NOT operators, brackets for term
 #'   grouping and quotation marks for n-grams.
 #' @param year_query A year based filtering query. See
 #'   \code{\link{clean_date_filter_arg}} for more info.
-#' @param additional_fields Additional fields to add to the query. Won't be
-#'   normalized so it must already follow Pubmed specific syntax.
+#' @param additional_fields Additional fields to add to the query. Will not be
+#'   normalized, so it must already follow Pubmed specific syntax.
 #' @param api_key Not mandatory but is helpful when performing searches with a
 #'   large number of results to avoid quota limitations.
-#' @param record_limit A limit on the number or records collected.
+#' @param record_limit A limit on the number of records collected.
 #'
 #' @return A data frame of records.
 #'
@@ -307,7 +314,7 @@ search_wos <- function(query, year_query = NULL, additional_fields = NULL,
 #' year_filter <- '2010-2020'
 #'
 #' records <- search_pubmed(query, year_filter)
-#'}
+#' }
 search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 													api_key = getOption('baysren.ncbi_api_key'),
 													record_limit = numeric()) {
@@ -380,26 +387,28 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 
 #' Automatic search on IEEE database
 #'
-#' Perform a search on \url{https://ieeexplore.ieee.org/Xplore/home.jsp}. If an
-#' API key is available, IEEE API will be used, otherwise Google Chrome APIs
-#' will be used to scrape records simulating a manual user search. This second
-#' method is not ensured to work and IEEE may blacklist your IP if abused.
+#' Perform a search on \url{https://ieeexplore.ieee.org/Xplore/home.jsp}.
+#'
+#' If an API key is available, the IEEE API will be used, otherwise Google
+#' Chrome APIs will be used to scrape records simulating a manual user search.
+#' This second method is not ensured to work and IEEE may blacklist your IP if
+#' abused.
 #'
 #' @param query A boolean query with AND/OR/NOT operators, brackets for term
 #'   grouping and quotation marks for n-grams.
 #' @param year_query A year based filtering query. See
 #'   \code{\link{clean_date_filter_arg}} for more info.
-#' @param additional_fields Additional fields to add to the query. Won't be
-#'   normalized so it must already follow WOS specific syntax.
+#' @param additional_fields Additional fields to add to the query. Will not be
+#'   normalized, so it must already follow WOS specific syntax.
 #' @param api_key Necessary to use IEEE APIs. See details.
 #' @param allow_web_scraping If \code{api_key} is \code{NULL}, web scraping can
 #'   be attempted to collect the records. This approach is not suggested in
 #'   production and may fail with a large number of results. See Details.
 #' @param wait_for If web scraping is used, a certain amount of time is needed
-#'   to let the IEEE page to fully load before collecting the results. This
+#'   to let the IEEE page load completely before collecting the results. This
 #'   delay depends on the user network and browser speed, thus the default 20
 #'   seconds may not be sufficient.
-#' @param record_limit A limit on the number or records collected.
+#' @param record_limit A limit on the number of records collected.
 #'
 #' @return A data frame of records.
 #'
@@ -420,7 +429,7 @@ search_pubmed <- function(query, year_query = NULL, additional_fields = NULL,
 #' year_filter <- '2010-2020'
 #'
 #' records <- search_ieee(query, year_filter)
-#'}
+#' }
 search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 												api_key = getOption('baysren.ieee_api_key'), allow_web_scraping = TRUE,
 												wait_for = 20, record_limit = NULL) {
@@ -673,58 +682,59 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 	records
 }
 
-#' Wrapper function to acquire citation data from multiple sources
+#'Wrapper function to acquire citation data from multiple sources
 #'
-#' It is better to use this function instead of the individual search_* tools,
-#' since it also automatically acquires manually downloaded record (e.g., for
-#' EMBASE and SCOPUS for which automatic search is not available).
+#'It is better to use this function instead of the individual \code{search_*}
+#'tools, since it also automatically acquires manually downloaded records (e.g.,
+#'for EMBASE and SCOPUS for which automatic search is not available).
 #'
-#' The function will organize search results into folder defined by the pattern
-#' \code{records_folder}/\code{session_name}/\code{query_name}, which allows to
-#' have different search sessions (and classification sessions) and multiple
-#' queries per session (useful when it is too complex to convey all information
-#' into a single query). These folder can be created manually and manually
-#' downloaded citation data must be put into these folders to be acquired by the
-#' functions.
+#'The function organizes search results into folder defined by the pattern
+#'\code{records_folder}/\code{session_name}/\code{query_name}, which allows to
+#'have different search sessions (and classification sessions) and multiple
+#'queries per session (useful when it is too complex to convey all information
+#'into a single query). These folders can be created manually and manually
+#'downloaded citation data must be put into these folders to be acquired by the
+#'functions.
 #'
-#' To acquire the manually downloaded files, they must given a name containing
-#' the source as in \code{sources}. There could be more files for the same
-#' sources, since all research database have download limits and users may need
-#' to download results in batches. The function acquires these files and parse
-#' them into a standard format, creating a new file for each source.
+#'To acquire the manually downloaded files, they must be given a name containing
+#'the source as in \code{sources}. There could be more files for the same
+#'sources, since all research databases have download limits and users may need
+#'to download results in batches. The function acquires these files and parse
+#'them into a standard format, creating a new file for each source.
 #'
-#' The output is a "journal" file which store all information about the queries,
-#' the sources used, the number or results, etc... which allow to keep track of
-#' all search sessions. If a journal file is already present, the new results
-#' will be added.
+#'The output is a "journal" file storing all information about the queries, the
+#'sources used, the number of results, etc... which allow keeping track of all
+#'search sessions. If a journal file is already present, the new results will be
+#'added.
 #'
-#' @param query A boolean query with AND/OR/NOT operators, brackets for term
-#'   grouping and quotation marks for n-grams.
-#' @param year_query A year based filtering query. See
-#'   \code{\link{clean_date_filter_arg}} for more info.
-#' @param actions Whether to acquire records through automatic search, parsing
-#'   of manually downloaded data, or both.
-#' @param sources The sources for which records should be collected
-#' @param session_name How to name the current search session and will be used
-#'   to create a folder to collect search results. Should be the same as the
-#'   name used for classification session of the same records.
-#' @param query_name A label for the current query. It will be used to name a
-#'   folder inside the \code{session_name} folder. It is useful to separate
-#'   records acquired with different queries in the same search session.
-#' @param records_folder The path to a folder where to store search results.
-#' @param overwrite Whether to overwrite results for a given
-#'   \code{session_name}/\code{query_name}/\code{sources} if the search is
-#'   repeated and a result file already exists.
-#' @param journal A path to a file (Excel or CSV) to store a summary of the
-#'   search results. If the file already exists the summary of the new
-#'   \code{session_name}/\code{query_name}/\code{sources} will be added to the
-#'   file.
+#'@param query A boolean query with AND/OR/NOT operators, brackets for term
+#'  grouping and quotation marks for n-grams.
+#'@param year_query A year based filtering query. See
+#'  \code{\link{clean_date_filter_arg}} for more info.
+#'@param actions Whether to acquire records through automatic search, parsing of
+#'  manually downloaded data, or both.
+#'@param sources The sources for which records should be collected
+#'@param session_name How to name the current search session and will be used to
+#'  create a folder to collect search results. It should be the same as the name
+#'  used for classification session of the same records.
+#'@param query_name A label for the current query. It will be used to name a
+#'  folder inside the \code{session_name} folder. It is useful to separate
+#'  records acquired with different queries in the same search session.
+#'@param records_folder The path to a folder where to store search results.
+#'@param overwrite Whether to overwrite results for a given
+#'  \code{session_name}/\code{query_name}/\code{sources} if the search is
+#'  repeated and a result file already exists.
+#'@param journal A path to a file (Excel or CSV) to store a summary of the
+#'  search results. If the file already exists, the summary of the new
+#'  \code{session_name}/\code{query_name}/\code{sources} will be added to the
+#'  file.
 #'
-#' @return A "Journal" data frame containing a summary of the search results
-#'   grouped by
-#'   \code{session_name}/\code{query_name}/\code{sources}/\code{actions}.
+#'@return A "Journal" data frame containing a summary of the search results
+#'  grouped by
+#'  \code{session_name}/\code{query_name}/\code{sources}/\code{actions}.
 #'
 #' @examples
+#'
 #' \dontrun{
 #' # Initial query to be built on domain knowledge. It accepts OR, AND, NOT
 #' # boolean operators and round brackets to group terms.
@@ -745,7 +755,7 @@ search_ieee <- function(query, year_query = NULL, additional_fields = NULL,
 #' 	session_name = 'Session1', query_name = 'Query1',
 #' 	records_folder = 'Records',
 #'	journal = 'Session_journal.csv')
-#'}
+#' }
 perform_search_session <- function(query, year_query = NULL, actions = c('API', 'parsed'),
 																	 sources = c('IEEE', 'WOS', 'Pubmed', 'Scopus', 'Embase'),
 																	 session_name = 'Session1', query_name = 'Query1',
