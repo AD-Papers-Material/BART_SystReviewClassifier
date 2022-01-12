@@ -450,8 +450,7 @@ join_records <- function(record_list) {
 #' records and join them. Some fields like the record keywords and source are
 #' joined between copies.
 #'
-#' @param record_list A list of data frames as created by
-#'   \code{\link{read_bib_files}()}.
+#' @param records A record data frame.
 #'
 #' @return A record data frame with no duplicated records.
 #'
