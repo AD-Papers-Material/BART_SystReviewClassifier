@@ -72,27 +72,27 @@ tokenize_text <- function(corpus) {
 #'
 #' @return The tokenized author list.
 #'
-tokenize_authors <- function(corpus) {
+tokenize_authors <- function(authors) {
 
 	message('- tokenizing authors')
 	tictoc::tic()
 
-	ids = 1:length(corpus)
+	ids = 1:length(authors)
 
-	with.comma <- str_detect(corpus, ',')
+	with.comma <- str_detect(authors, ',')
 
-	corpus <- corpus %>% str_squish()
+	authors <- authors %>% str_squish()
 
-	output <- mclapply(1:length(corpus), function(i) {
+	output <- mclapply(1:length(authors), function(i) {
 		if (is.na(with.comma[i])) NA # No authors listed
 		else if (with.comma[i] == TRUE) { # Pubmed or WOS style author list
-			corpus[i] %>%
+			authors[i] %>%
 				str_remove_all('[^\\w ,;]') %>%
 				str_replace_all('(?<=,)[ \\-\\w]+?(?:(?=;)|$)', function(x) {
 					paste0(str_extract_all(x, '\\b\\w')[[1]], collapse = '')
 				}) %>% str_replace_all(',', '_') %>% str_remove_all(' +')
 		} else { # IEEE style author list
-			corpus[i] %>%
+			authors[i] %>%
 				str_remove_all('[^\\w\\.;]') %>% # remove non letters and other characters
 				str_replace_all('[^;]+(?:(?=;)|$)', function(x) { # extract names between ;
 					str_replace(x, '([\\w \\.]+)\\.([\\w ]+)', '\\2_\\1') #use the rightmost dot to separate first and last names
@@ -110,7 +110,7 @@ tokenize_authors <- function(corpus) {
 #'
 #' Clean up the keyword fields in the records.
 #'
-#' @param corpus A vector of keywords fields from an annotation data set.
+#' @param keywords A vector of keywords fields from an annotation data set.
 #'
 #' @return The tokenized keyword list.
 #'
@@ -128,7 +128,7 @@ tokenize_keywords <- function(keywords) {
 #'
 #' Clean up the keyword fields in the records.
 #'
-#' @param corpus A vector of MESH keywords fields from an annotation data set.
+#' @param mesh A vector of MESH keywords fields from an annotation data set.
 #'
 #' @return The tokenized MESH keyword list.
 #'

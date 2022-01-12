@@ -113,7 +113,7 @@ extract_rules <- function(session_name, rebuild_dtm = FALSE, vimp.threshold = 1.
 	)
 
 	if (!is.null(save_path)) {
-		write_rds(file.path(sessions_folder, session_name, file_name))
+		write_rds(save_path)
 	}
 
 	out
