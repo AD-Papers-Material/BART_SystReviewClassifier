@@ -31,7 +31,7 @@ This document will guide the reader along the steps to utilise the framework and
 
 Add installation and setup info here.
 
-## Acquisition of the records
+## Acquisition of the citaion data
 
 Once the framework is loaded, the user defines an initial search query which needs to be as specific as possible while still generating a sufficient number of positive matches:
 
