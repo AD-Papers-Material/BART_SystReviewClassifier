@@ -44,7 +44,7 @@ pkg.require(
   ),
   only_install = c(
     "purrr", "openxlsx", "tictoc", "tidyr", "arm", "english",
-    "parallel", "jsonlite", "rentrez", "wosr", "brms", "ggridges",
+    "parallel", "jsonlite", "rentrez", "wosr", "brms", "cmdstanr", "ggridges",
     "knitr", "kableExtra", "extraDistr", "broom", "viridis", "lexicon"
   )
 )

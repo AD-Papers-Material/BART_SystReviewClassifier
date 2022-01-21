@@ -96,14 +96,14 @@ estimate_positivity_rate_model <- function(train_data, seed = 14129189) {
   train_data$Target <- factor(coalesce_labels(train_data))
 
   # TODO: switch to rstanarm to skip compilation
-  brm(bf(Target ~ Pred_Low),
-    family = bernoulli,
+  brms::brm(brms::bf(Target ~ Pred_Low),
+    family = brms::bernoulli,
     data = train_data,
     cores = 8, chains = 8, refresh = 0, iter = 8000, control = list(adapt_delta = .95),
     backend = "cmdstan", seed = seed,
     prior = c(
-      prior(student_t(3, 0, 2.5), class = "Intercept"),
-      prior(student_t(3, 0, 1.5), class = "b")
+    	brms::prior(student_t(3, 0, 2.5), class = "Intercept"),
+    	brms::prior(student_t(3, 0, 1.5), class = "b")
     )
   )
 }
@@ -188,6 +188,7 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
                                  seed = 23797297,
                                  save_preds = FALSE, save_model = FALSE) {
   records <- import_data(records)
+  records$Target <- coalesce_labels(records)
 
   if (is.null(model)) {
     message("- build model...")
@@ -204,7 +205,7 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
   if (is.null(preds)) {
     message("- computing predictions...")
     set.seed(seed)
-    preds <- posterior_predict(model, newdata = records, nsamples = nsamples)
+    preds <- brms::posterior_predict(model, newdata = records, nsamples = nsamples)
   }
 
   message("- integrate with observed data...")
@@ -228,7 +229,7 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
   res <- list(
     obs_positives = obs_pos,
     pred_positives = quantile(tot_pos, quants),
-    mod_r2 = bayes_R2(model, probs = quants)[3:5],
+    mod_r2 = brms::bayes_R2(model, probs = quants)[3:5],
     n_reviewed = tot_reviewed,
     total_records = tot_records,
     used_prop = quantile(tot_reviewed / n_needed, quants),
@@ -274,13 +275,15 @@ estimate_performance <- function(records, model = NULL, preds = NULL, plot = TRU
         max = coalesce(Target, L, M, U),
         Order = 1:n()
       ) %>%
-      filter(!is.na(max)) %>%
-      mutate(
-        across(c(L, M, U), ~ sapply(1:length(.x), function(i) {
-          if (is.na(.x[i])) max(.x[1:i], na.rm = T) else .x[i]
-        }))
-      ) %>%
-      ggplot(aes(Order)) +
+    	filter(!is.na(max)) %>%
+    	mutate(
+    		across(c(L, M, U), function(.x) {
+    			sapply(1:length(.x), function(i) {
+    				if (is.na(.x[i])) max(.x[1:i], na.rm = T) else .x[i]
+    			})
+    		})
+    	) %>%
+    	ggplot(aes(Order)) +
       geom_ribbon(aes(ymin = L, ymax = U, color = glue("{diff(range(quants)) * 100}% Predictive Interval")), alpha = .1) +
       geom_line(aes(y = M, color = "Predictive Median")) +
       geom_point(aes(y = Target), color = "darkred") +
