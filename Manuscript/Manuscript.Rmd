@@ -6,21 +6,21 @@ authors:
     affiliation: Freiburg University Hospital
     location: Freiburg, Germany
     email: angelo.d.ambrosio@uniklinik-freiburg.de; a.dambrosioMD@gmail.com
-  - name: Tjibbe Donker
-    department: Institute for Infection Prevention and Hospital Hygiene
-    affiliation: Freiburg University Hospital
-    location: Freiburg, Germany
-    email: tjibbe.donker@uniklinik-freiburg.de
   - name: Hajo Grundmann
     department: Institute for Infection Prevention and Hospital Hygiene
     affiliation: Freiburg University Hospital
     location: Freiburg, Germany
     email: hajo.grundmann@uniklinik-freiburg.de
+  - name: Tjibbe Donker
+    department: Institute for Infection Prevention and Hospital Hygiene
+    affiliation: Freiburg University Hospital
+    location: Freiburg, Germany
+    email: tjibbe.donker@uniklinik-freiburg.de
 abstract: |
   The exponential growth in scientific production makes its summarisation through secondary literature exceedingly demanding in terms of time and human resources.
   We introduce a new open-source framework that significantly increases efficiency during the citation collection and screening phases of systematic reviews.\
   The framework introduces three main tools:
-  1) an automatic citation search engine and manager that allows collecting records from multiple citation databases (PUBMED, WOS, SCOPUS, EMBASE, IEEE) with a unified query syntax;
+  1) an automatic citation search engine and manager that allows collecting records from multiple citation databases (Pubmed, WOS, SCOPUS, EMBASE, IEEE) with a unified query syntax;
   2) a citation screening tool based on Bayesian active machine learning and natural language processing, which requires users feedback only on uncertain classifications to increase predictive accuracy iteratively;
   3) a semi-automatic data-driven query generator to create new search queries from existing reviewed citation data sets.\
   The framework was applied on an example topic performing citation collection and screening.
