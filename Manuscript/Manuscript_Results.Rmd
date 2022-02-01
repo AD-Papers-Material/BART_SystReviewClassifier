@@ -10,38 +10,37 @@ output:
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE, error = FALSE}
 
-wd <- ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd())
+wd <- ifelse(basename(getwd()) == "Manuscript", dirname(getwd()), getwd())
 
 knitr::opts_knit$set(root.dir = wd)
 
-options(knitr.kable.NA = '')
+options(knitr.kable.NA = "")
 
 knitr::opts_chunk$set(
-	echo = FALSE,
-	error = FALSE,
-	message = FALSE,
-	warning = FALSE,
-	dpi = 400,
-	cache = TRUE,
-	cache.rebuild = FALSE
+  echo = FALSE,
+  error = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  dpi = 400,
+  cache = TRUE,
+  cache.rebuild = FALSE
 )
-
 ```
 
 ```{r load framework, cache.rebuild=TRUE, include=FALSE}
-source(file.path('R', 'Setup.R'), local = knitr::knit_global())
+source(file.path("R", "Setup.R"), local = knitr::knit_global())
 
 # The following are already the default, but better be explicit
 options(baysren.probs = c(.05, .5, .95))
-options(baysren.sessions_folder = 'Sessions')
+options(baysren.sessions_folder = "Sessions")
 ```
 
 # Results
 
 ```{r results}
 
-session1_files <- get_session_files('Session1')
-session2_files <- get_session_files('Session2')
+session1_files <- get_session_files("Session1")
+session2_files <- get_session_files("Session2")
 
 search_results <- summarise_sources_by_session(keep_session_label = TRUE)
 
@@ -50,32 +49,32 @@ source_list <- source_session_summary_to_list(search_results)
 search_results$Session_label <- NULL
 
 annotation_results <- summarise_annotations_by_session(remove_raw_data = TRUE)
-
 ```
 
 ## First session
 
 ```{r session 1}
 
-first_query <- import_data('Session_journal.csv') %>% 
-    filter(Session_ID == 'Session1') %>% 
-    with(Query[1])
+first_query <- import_data("Session_journal.csv") %>%
+  filter(Session_ID == "Session1") %>%
+  with(Query[1])
 
 records_s1 <- import_data(session1_files$Records)
 
 source_summary <- source_list$Session1
 
-all_records <- source_summary[names(source_summary) != 'Total'] %>%
-	sapply('[[', 'Records') %>% sum()
+all_records <- source_summary[names(source_summary) != "Total"] %>%
+  sapply("[[", "Records") %>%
+  sum()
 
 source_distr <- get_source_distribution(records_s1, format_fun = identity)
 
-session_summary <- summarise_annotations('Session1', remove_raw_data = FALSE)
+session_summary <- summarise_annotations("Session1", remove_raw_data = FALSE)
 
-num_first_labeling <- session_summary[1,]$tot_reviewed_
+num_first_labeling <- session_summary[1, ]$tot_reviewed_
 
-num_first_positives <- session_summary[1,]$Positives
-num_first_negatives <- session_summary[1,]$Negatives
+num_first_positives <- session_summary[1, ]$Positives
+num_first_negatives <- session_summary[1, ]$Negatives
 
 num_last_positives <- session_summary$Positives %>% last()
 num_last_negatives <- session_summary$Negatives %>% last()
@@ -83,10 +82,9 @@ tot_reviewed <- session_summary$tot_reviewed_ %>% last()
 
 n_review_rounds <- nrow(session_summary) - 1
 
-var_importance <- extract_var_imp('Session1') %>%
-	format_var_imp(as_data_frame = FALSE) %>%
-	paste(collapse = ', ')
-	
+var_importance <- extract_var_imp("Session1") %>%
+  format_var_imp(as_data_frame = FALSE) %>%
+  paste(collapse = ", ")
 ```
 
 The initial search query for the example topic was:\
@@ -125,24 +123,25 @@ A more extensive set of terms is presented in Table 1 of Supplemental Material S
 ## Second session
 
 ```{r session 2}
-new_query <- import_data('Session_journal.csv') %>% 
-    filter(Session_ID == 'Session2') %>% 
-    with(Query[1])
+new_query <- import_data("Session_journal.csv") %>%
+  filter(Session_ID == "Session2") %>%
+  with(Query[1])
 
 records_s2 <- import_data(session2_files$Records)
 
 source_summary <- source_list$Session2
 
-all_records <- source_summary[names(source_summary) != 'Total'] %>%
-	sapply('[[', 'Records') %>% sum()
+all_records <- source_summary[names(source_summary) != "Total"] %>%
+  sapply("[[", "Records") %>%
+  sum()
 
 session_diff <- (
-	source_list$Session1$Total$Records + source_list$Session2$Total$Records
-	) - source_list$`All Sessions`$Total$Records
+  source_list$Session1$Total$Records + source_list$Session2$Total$Records
+) - source_list$`All Sessions`$Total$Records
 
 source_distr <- get_source_distribution(records_s2, format_fun = identity)
 
-session_summary <- summarise_annotations('Session2', remove_raw_data = FALSE)
+session_summary <- summarise_annotations("Session2", remove_raw_data = FALSE)
 
 num_last_positives <- session_summary$Positives %>% last()
 
@@ -183,7 +182,7 @@ A subsample of the relevant terms used by the model in the second session is rep
 ```{r hyperparameters}
 
 grid_search <- analyse_grid_search()$best_parms %>%
-	tidyr::pivot_wider(values_from = value, names_from = Parameter)
+  tidyr::pivot_wider(values_from = value, names_from = Parameter)
 ```
 
 
@@ -199,20 +198,19 @@ Figure 2 in Supplemental Material S2 demonstrates that the positive record overs
 
 # Creating these summaries is quite demanding, so it's better to cache them
 # explicitly
-perf_file <- file.path('Manuscript', 'Performance_summary.rds')
+perf_file <- file.path("Manuscript", "Performance_summary.rds")
 
 if (!file.exists(perf_file)) {
-	Performance <- list(
-		s1 = get_session_files('Session1')$Annotations %>% last() %>%
-			import_data() %>% estimate_performance(),
-		s2 = get_session_files('Session2')$Annotations %>% last() %>%
-			import_data() %>% estimate_performance()
-	)
-	
-	write_rds(Performance, perf_file)
-	
+  Performance <- list(
+    s1 = get_session_files("Session1")$Annotations %>% last() %>%
+      import_data() %>% estimate_performance(),
+    s2 = get_session_files("Session2")$Annotations %>% last() %>%
+      import_data() %>% estimate_performance()
+  )
+
+  write_rds(Performance, perf_file)
 } else {
-	Performance <- read_rds(perf_file)
+  Performance <- read_rds(perf_file)
 }
 
 perf_table <- format_performance(Performance$s1, Performance$s2)
@@ -236,15 +234,15 @@ To ascertain that no evident positives were missed, we evaluated 100 more record
 ```{r performance plot, cache = FALSE, fig.width=7.5, fig.height=4.5, fig.cap="**Figure 2**. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the logistic Bayesian model is shown as shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). The median of the PrI is represented by a darker blue line."}
 
 Performance$s1$plot +
-	guides(color = 'none', fill = 'none') +
-	ggtitle('Session 1') +
-	Performance$s2$plot +
-	ggtitle('Session 2') +
-	theme(
-		axis.title.y = element_blank()
-	) &
-	theme(
-		legend.position = 'bottom'
-	) &
-	plot_layout(guides = 'collect')
+  guides(color = "none", fill = "none") +
+  ggtitle("Session 1") +
+  Performance$s2$plot +
+  ggtitle("Session 2") +
+  theme(
+    axis.title.y = element_blank()
+  ) &
+  theme(
+    legend.position = "bottom"
+  ) &
+  plot_layout(guides = "collect")
 ```

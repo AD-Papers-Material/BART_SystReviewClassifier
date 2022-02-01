@@ -14,30 +14,29 @@ output:
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE, error = FALSE}
 
-wd <- ifelse(basename(getwd()) == 'Manuscript', dirname(getwd()), getwd())
+wd <- ifelse(basename(getwd()) == "Manuscript", dirname(getwd()), getwd())
 
 knitr::opts_knit$set(root.dir = wd)
 
-options(knitr.kable.NA = '')
+options(knitr.kable.NA = "")
 
 knitr::opts_chunk$set(
-	echo = FALSE,
-	error = FALSE,
-	message = FALSE,
-	warning = FALSE,
-	dpi = 400,
-	cache = TRUE,
-	cache.rebuild = FALSE
+  echo = FALSE,
+  error = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  dpi = 400,
+  cache = TRUE,
+  cache.rebuild = FALSE
 )
-
 ```
 
 ```{r load framework, cache.rebuild=TRUE}
-source(file.path('R', 'Setup.R'))
+source(file.path("R", "Setup.R"))
 
 # The following are already the default, but better be explicit
 options(baysren.probs = c(.05, .5, .95))
-options(baysren.sessions_folder = 'Sessions')
+options(baysren.sessions_folder = "Sessions")
 ```
 
 
@@ -56,22 +55,22 @@ this is due to the baseline positivity rate decreasing as the number of negative
 
 ```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="**Figure 1**. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
 
-s1_plot <- plot_predictive_densities('Session1')
+s1_plot <- plot_predictive_densities("Session1")
 
-s2_plot <- plot_predictive_densities('Session2')
+s2_plot <- plot_predictive_densities("Session2")
 
 s1_plot +
-    guides(color = 'none', fill = 'none') +
-    ggtitle('Session 1') +
-    s2_plot +
-    ggtitle('Session 2') +
-    theme(
-        axis.title.y = element_blank()
-        ) &
-    theme(
-        legend.position = 'bottom'
-    ) &
-    plot_layout(guides = 'collect')
+  guides(color = "none", fill = "none") +
+  ggtitle("Session 1") +
+  s2_plot +
+  ggtitle("Session 2") +
+  theme(
+    axis.title.y = element_blank()
+  ) &
+  theme(
+    legend.position = "bottom"
+  ) &
+  plot_layout(guides = "collect")
 ```
 
 # List of terms relevant for prediction
@@ -80,11 +79,11 @@ s1_plot +
 
 n_terms <- 50
 
-var_importance_s1 <- extract_var_imp('Session1', num_vars = n_terms, score_filter = 0) %>%
-	format_var_imp(as_data_frame = TRUE)
+var_importance_s1 <- extract_var_imp("Session1", num_vars = n_terms, score_filter = 0) %>%
+  format_var_imp(as_data_frame = TRUE)
 
-var_importance_s2 <- extract_var_imp('Session1', num_vars = n_terms, score_filter = 0) %>%
-	format_var_imp(as_data_frame = TRUE)
+var_importance_s2 <- extract_var_imp("Session1", num_vars = n_terms, score_filter = 0) %>%
+  format_var_imp(as_data_frame = TRUE)
 ```
 
 In table 1 and 2 are listed the `r n_terms` more relevant terms used by the BART algorithm to discriminate between positive and negative records, for Session 1 and 2 (see Methods).
@@ -107,25 +106,24 @@ The most influential parameters were the number of models in the ensemble, the o
 
 ```{r hyperparameters, fig.width=17, fig.height=10, fig.cap="**Figure 2**. Score clusters and impact of single hyperparameters on engine performance. The performance is measured as Sensitivity x Efficiency. Each cluster is color coded. Mods: number of models in the ensemble; Quant: PrI quantiles for the uncertainty zone; Resamp: bootstrap resampling between models; Init: size of initial training set; Multi: oversampling rate of positive records"}
 
-grid_out <- analyse_grid_search() 
+grid_out <- analyse_grid_search()
 
-grid_out_params <- grid_out$best_by_rule %>% 
-	mutate(Score = str_remove(Score, ' .+')) %>% 
-	rename(
-		`Cluster (mean score)` = Cluster,
-		`Num. iterations` = Iter,
-		`Positive matches` = Pos_labels,
-		`Reviewed records` = Tot_labeled,
-		`Score (Sens. x Eff.)` = Score,
-		`Num. ensemble models` = Mods,
-		`Uncertainty interval` = Quant,
-		`Resampling` = Resamp,
-		`Num. initial training records` = Init,
-		`Positives oversampling multiplier` = Mult
-	)
+grid_out_params <- grid_out$best_by_rule %>%
+  mutate(Score = str_remove(Score, " .+")) %>%
+  rename(
+    `Cluster (mean score)` = Cluster,
+    `Num. iterations` = Iter,
+    `Positive matches` = Pos_labels,
+    `Reviewed records` = Tot_labeled,
+    `Score (Sens. x Eff.)` = Score,
+    `Num. ensemble models` = Mods,
+    `Uncertainty interval` = Quant,
+    `Resampling` = Resamp,
+    `Num. initial training records` = Init,
+    `Positives oversampling multiplier` = Mult
+  )
 
-print(grid_out$plot & labs(y = 'Sens. x. Eff.'))
-
+print(grid_out$plot & labs(y = "Sens. x. Eff."))
 ```
 
 

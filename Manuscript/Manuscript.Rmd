@@ -51,14 +51,13 @@ output:
 ```{r, echo=FALSE, results='asis', message = FALSE, warning = FALSE, error = FALSE, dpi = 400, fig.width=12, fig.height=5}
 
 out <- unlist(lapply(c(
-	'Manuscript_Introduction.Rmd',
-	'Manuscript_Methods.Rmd',
-	'Manuscript_Results.Rmd',
-	'Manuscript_Discussion.Rmd'
+  "Manuscript_Introduction.Rmd",
+  "Manuscript_Methods.Rmd",
+  "Manuscript_Results.Rmd",
+  "Manuscript_Discussion.Rmd"
 ), knitr::knit_child, quiet = TRUE))
 
-cat(out, sep = '\n')
-
+cat(out, sep = "\n")
 ```
 
 \newpage
