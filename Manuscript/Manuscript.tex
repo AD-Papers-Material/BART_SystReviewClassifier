@@ -99,38 +99,41 @@ citation collection and screening in systematic reviews.}
 
 
 \begin{abstract}
-The exponential growth in scientific production makes its summarisation
-through secondary literature exceedingly demanding in terms of time and
-human resources. We introduce a new open-source framework that
-significantly increases efficiency during the citation collection and
-screening phases of systematic reviews.\\
+The exponential and prolific growth of published original scientific
+contributions makes secondary literature abridgements increasingly
+demanding. We introduce a new open-source framework for systematic
+reviews that significantly reduces time and human resource allocation
+for text identification, collection, and screening of scientific
+literature.\\
 The framework introduces three main tools: 1) an automatic citation
 search engine and manager that allows collecting records from multiple
 citation databases (Pubmed, WOS, SCOPUS, EMBASE, IEEE) with a unified
 query syntax; 2) a citation screening tool based on Bayesian active
 machine learning and natural language processing, which requires users
-feedback only on uncertain classifications to increase predictive
-accuracy iteratively; 3) a semi-automatic data-driven query generator to
+feedback only on uncertain classifications to iteratively increase
+predictive accuracy; 3) a semi-automatic data-driven query generator to
 create new search queries from existing reviewed citation data sets.\\
-The framework was applied on an example topic performing citation
-collection and screening. We estimated median posterior Sensitivity and
-Efficiency {[}90\% Credible Intervals{]} using Bayesian simulation to
-predict the distribution of possibly missed relevant matches in the
-unreviewed records.\\
+The framework was tested on an example topic to perform citation
+collection and screening of related scientific production. To evaluate
+the performance of the active machine learning classifier, we estimated
+the median posterior Sensitivity and Efficiency {[}90\% Credible
+Intervals{]} using Bayesian simulation to predict the distribution of
+potentially relevant matches among the records not manually reviewed.\\
 17755 unique records were collected through the framework citation
 manager; 101 over 766 records were found to be relevant after manual
-evaluation, while the rest were excluded by the automatic
-classification; the expected Efficiency was 95.7\% {[}95.3\%, 95.7\%{]}
-for a Sensitivity of 100\% {[}93.5\%, 100\%{]}. A new search query was
-generated from the labelled dataset, and 82579 more records were
-collected. Only 567 records required human review after the automatic
-screening, and six additional positive matches were found. Including the
-additional records, the overall expected Sensitivity dropped to 97.3\%
-{[}73.8\%, 100\%{]} while the Efficiency raised to 98.6\% {[}98.2\%,
-98.7\%{]}.\\
-The framework can significantly reduce human resources requirements for
-systematic reviews by simplifying citation collection and screening
-while demonstrating exceptional sensitivity even on large data sets.
+evaluation, while the rest were excluded by automatic classification;
+the expected Efficiency was 95.7\% {[}95.3\%, 95.7\%{]} with a
+Sensitivity of 100\% {[}93.5\%, 100\%{]}.\\
+An additional search query generated from the labelled dataset,
+retrieved 82579 additional records of which only 567 records required
+human review and six additional positive matches were retrieved.
+Including the additional records, the overall expected Sensitivity
+decreased to 97.3\% {[}73.8\%, 100\%{]} while the Efficiency achieved
+was 98.6\% {[}98.2\%, 98.7\%{]}.\\
+For large studies, the developed framework significantly reduces
+workload, human effort and error, simplifying citation collection and
+screening with exceptional sensitivity, hence improving the
+standardization and repeatability of systematic reviews.
 \end{abstract}
 
 \keywords{
