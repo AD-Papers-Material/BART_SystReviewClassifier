@@ -48,8 +48,6 @@ lemmatize <- function(text_vec, dict = lexicon::hash_lemmas) {
 tokenize_text <- function(corpus) {
   message("- tokenizing text...")
 
-  stopwords <- stopwords("english")
-
   tictoc::tic()
   corpus <- tolower(corpus)
   corpus <- gsub("-", "_", corpus, fixed = TRUE)
