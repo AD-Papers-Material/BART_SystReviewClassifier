@@ -13,9 +13,9 @@ output:
 
 ## General description
 
-We built an R [@rstat] based framework to simplify two aspects of systematic reviews:
+We built an R [@rstat] based framework to simplify two aspects of systematic literature review:
 record acquisition and classification.
-The code used to generate the results in the manuscript is available at X while an update version of the framework is distributed as an R package at Y.
+The code used to generate the results in the manuscript is available at https://github.com/AD-Papers-Material/BART_SystReviewClassifier, while an updated and ready to use version of the framework is distributed as an R package at https://github.com/bakaburg1/BaySREn.
 The framework includes several modules that communicate through intermediate outputs stored in standard formats, which make it possible for users to extend the framework or easily integrate it with other tools in their pipeline.
 See Supplemental Material S1 for an in-depth description of the framework and how to use it.\
 The tasks carried out by the framework are grouped into "sessions", which comprise obtaining scientific citation data (records) using a search query and then labelling them as relevant ("positive" in the rest of the text) or not ("negative") for the topic of interest with the help of a machine learning engine (Fig. 1).
@@ -28,54 +28,54 @@ knitr::include_graphics("methods_diagram.png", auto_pdf = T)
 
 <!-- ![Figure 1. Framework visual depiction.](methods_diagram.png) -->
 
-## Record's acquisition and initial labelling
+## Record acquisition and initial labelling
 
-We built a set of tools to let users automatically search and download citation data from three major scientific databases ("sources"):
+We built a set of tools to allow users to automatically search and download citation data from three major scientific databases ("sources"):
 Pubmed (<https://pubmed.ncbi.nlm.nih.gov/>), Web Of Science (WOS, <https://apps.webofknowledge.com/>) and the Institute of Electrical and Electronics Engineers (IEEE, <https://ieeexplore.ieee.org/Xplore/home.jsp>).
 The framework takes care of authorization management for non-open databases like WOS and IEEE.
 It is also possible to download and import records in the framework manually;
 this is particularly useful to acquire records from the SCOPUS (<https://www.scopus.com/>) and EMBASE databases (<https://www.embase.com/>), for which a comprehensive API interface was not easy to build.
-An extra manual search was necessary also for Pubmed, since the API and the web interface have different rule expansion algorithms and return slightly different results [@pubmedUpdate].
-A short guide on how to set up the framework for each supported database is available in Supplemental Material S3.\
-The acquired records are merged into a single database, resolving duplicates and different formatting between sources.
-The records are ordered according to the frequency of the positive query terms (e.g., not preceded by a $NOT$ modifier) in the title and abstract ("simple query ordering").\
+An extra manual search was also necessary for Pubmed, since the API and the web interface have different rule expansion algorithms and return slightly different results [@pubmedUpdate].
+A short guide on how to set up the framework for each database supported is available in Supplemental Material S3.\
+The collected records are merged into a single database, resolving duplicates and different formatting between sources.
+The records are ordered according to the frequency of the positive query terms (e.g., not preceded by a _NOT_ modifier) in the title and abstract ("simple query ordering").\
 The researcher is then asked to label a number of records to create the "initial training set" needed to start the automatic classification.
-We suggest manually labelling the first 250 records (see "hyperparameter optimization" later).
-The simple query ordering increases the positivity rate in the initial training set [@wallace2010active], which provide higher sensitivity during automatic classification [@chawla2004special].
+We recommend manually labelling the first 250 records (see "hyperparameter optimization" later).
+Simple query ordering increases the positivity rate in the initial training set [@wallace2010active], leading to higher sensitivity during automatic classification [@chawla2004special].
 
 ## Text feature extraction
 
-The collected citation data have a number of fields characterising a scientific publication.
+The collected citation data contain a number of fields characterising a scientific publication.
 The framework models the relevance of a record based on the following fields:
 title, abstract, authors, keywords, MESH terms [@lipscomb2000medical].
-A series of Natural Language Processing (NLP) techniques [@baeza1999modern; @marshall2015systematic; @ananiadou2006text] are employed to transform the textual information in these fields into features for machine learning through a bag-of-words approach [@marshall2015systematic].
-The processing of free text fields (title, abstract) includes: tokenization (i.e., extracting the terms), common stopwords (i.e., sentence components bringing no meaning) removal, part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatization of the terms (i.e., reduction to their base grammar form).
-Text processing for authors, keywords and MESH terms identifies logical units (e.g., author's full names, composite keywords) and extracts them.\
+A range of Natural Language Processing (NLP) techniques [@baeza1999modern; @marshall2015systematic; @ananiadou2006text] are employed to convert the textual information in these fields into features for machine learning through a bag-of-words approach [@marshall2015systematic].
+Processing of free text fields (title, abstract) includes: tokenization (i.e., extracting the terms), removal of common stopwords (i.e., sentence components having no semantic value), part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatisation of terms (i.e., reduction to their base grammatical form).
+Text processing for authors, keywords and MESH terms identifies logical units (e.g., authors' full names, composite keywords) and extracts them.\
 Terms appearing in less than 5% of the labelled documents are removed from negative records.
 All terms in the positive set are kept to increase sensitivity at the cost of specificity.\
-Some terms tend to co-appear in records (non-consecutive ngrams, nc-ngrams), often carrying a particular meaning when copresent.
-To detect nc-ngrams, we generated a word network representation [@rousseau2015graph] posing edges between terms with a cosine similarity in terms of record co-occurrence > 0.5.
+Some terms tend to co-appear in records (non-consecutive ngrams, nc-ngrams), often carrying a particular meaning when they do co-occur.
+To detect nc-ngrams, we generated a word network representation [@rousseau2015graph] with edges occurring between terms with a cosine similarity in terms of docuement co-occurrence > 0.5.
 We extracted the maximal cliques in the network [@eppstein2010listing] representing highly correlated groups of terms;
-These groups of terms are added to the data set as individual features.
+these groups are added to the dataset as individual features.
 Only nc-ngrams comprising a maximum of ten terms are kept.\
 A second network is built using a co-occurrence threshold of 0.9.
-In this case, the cliques represent terms that always appear together and therefore can be considered redundant (i.e., they do not need to be considered separately).
-These terms are merged to increase computation efficiency and reduce overfitting.\
+In this case, the cliques represent terms that always appear together and can therefore be considered redundant (i.e., they do not need to be considered separately).
+These terms are merged to increase computational efficiency and reduce overfitting.\
 The output is a Document-Term Matrix (DTM), with $N_d$ rows representing the records ($D_i$), $N_t$ terms column for the $t_{field}$ terms (divided by record field) and ${0,1}$ values whether $t_{field} \in D_i$.
 We also enriched the DTM with features referencing the number of terms in each field to help the model scale term importance based on the field length.
 
 ## Label prediction
 
-We used a Bayesian Additive Regression Trees (BART) machine learning "classification model" [@chipman2010bart] [in the implementation of @kapelner2013bartmachine] to predict the probability of a record of being relevant, given the information coded into the enriched DTM and the initial training set.
-We set up the BART model to use 2000 MCMC iterations (after 250 burn-in iterations) and 50 trees;
+We used a Bayesian Additive Regression Trees (BART) machine learning "classification model" [@chipman2010bart] [in the implementation of @kapelner2013bartmachine] to predict the probability of a record being relevant, given the information coded into the enriched DTM and the initial training set.
+We set up the BART model to use 2,000 MCMC iterations (after 250 burn-in iterations) and 50 trees;
 we used a $k$ value of 2 to regularize extreme prediction and let the model use missing fields in the DTM as features [@kapelner2015prediction].
 Positive records are oversampled ten times to increase sensitivity [@batista2004study].\
-The output is a posterior predictive distribution (PPD) for each record describing its probability of being relevant (i.e., a positive match).
+The output is a posterior predictive distribution (PPD) for each record describing the probability of it being relevant (i.e., a positive match).
 An ensemble of ten models was fitted to improve prediction stability by averaging the PPD between models [@zhou2021ensemble; @dietterich2000ensemble].\
 
-To assign the labels, we employed an "active learning" [@settles2009active, @miwa2014reducing] approach, where a human reviews a specific subset of predictions made from the machine, which is then retrained on the manually reviewed data set.
-This process proceeds iteratively, decreasing prediction uncertainty.\
-Label assignment is done through the identification of an "uncertainty zone" whose construction is possible thanks to the Bayesian nature of BART, which provides full PPDs instead of point-wise predictions for each record.\
+To assign the labels, we employed an "active learning" approach [@settles2009active; @miwa2014reducing], where a human reviews a specific subset of predictions made by the machine, which is then retrained on the manually reviewed dataset.
+This process is carried out iteratively to reduce prediction uncertainty.\
+Label assignment is done through identification of an "uncertainty zone" the construction of which is possible thanks to the Bayesian nature of BART, which provides full PPDs instead of point-wise predictions for each record.\
 To describe the process formally, we define
 
 $$\pi_i = \frac{1}{M}\sum_{j=1}^M Pr(L_i = \text{1}|DTM,m_j)$$
@@ -89,7 +89,7 @@ $$
 \end{aligned}
 $$
 
-as respectively the lower and upper boundaries of the 98% quantile interval of $\pi_i$ (98% Predictive Interval, 98% PrI).\
+respectively as the lower and upper boundaries of the 98% quantile interval of $\pi_i$ (98% Predictive Interval, 98% PrI).\
 Then we identify the "uncertainty zone" as
 
 $$U_\pi=[\max\vec{\pi}_{u}^-, \min\vec{\pi}_{l}^+]$$
@@ -100,61 +100,61 @@ Consequently, a record $D_i$ will be labelled as positive if
 $$\pi_{i,l} > \max_{\pi \in U_\pi} \pi$$
 
 that is, the record lower 98% PrI boundary should be higher than every value in the uncertainty zone.
-In other words, for a record to be labelled positive, its PPD should be within the range of the mixture of PPD of the previously labelled positive records and not cross the distributions of the negative records.\
+In other words, for a record to be labelled positive, its PPD should be within the range of the mixture of PPD of the records previously labelled positive, and should not cross the distributions of the negative records.\
 Conversely, a record is labelled as negative if
 
 $$\pi_{i,u} < \min_{\pi \in U_\pi} \pi$$
 
 All other records are labelled as "uncertain".
 
-Manual review is then necessary for: 1) uncertain records, 2) positive records (to avoid false positives), 3) records whose predicted label differs from the existing manual one.
+Manual review is then necessary for: 1) uncertain records, 2) positive records (to avoid false positives), and 3) records whose predicted label differs from the existing manual one.
 The last case helps identify human errors or inconsistent labelling criteria.
 
-The automatic classification and the manual review steps alternate in a loop (CR iterations) until no new positive matches are found in four consecutive iterations.
+The automatic classification and manual review steps alternate in a loop (CR iterations) until no new positive matches are found in four consecutive iterations.
 
 ## Relevant term extraction
 
-BART model it is possible to extract the proportion of times a term was used in a posterior tree over the sum of total inclusions of all variables [@kapelner2013bartmachine], as a measure of feature importance for the model.
-We extracted the terms, the part of the citation data they were used in, the average "inclusion rate" among the ensemble models (over 10,000 inclusions) and its ratio over the standard deviation of this inclusion (inclusion stability, IS).
-For each term we ran a Poisson regression to get its linear association with a positive label and reported it as Relative Risk (RR) with the number of standard errors as significance index (Statistic);
+With the BART model, it is possible to extract the proportion of times a term is used in a posterior tree over the sum of total inclusions of all variables [@kapelner2013bartmachine], as a measure of importance of the features in the model.
+We extracted the terms, the portion of the citation data in which they were used, the average "inclusion rate" among the ensemble models (over 10,000 inclusions) and its ratio over the standard deviation of this inclusion (inclusion stability, IS).
+For each term we ran a Poisson regression to get the linear association with a positive label and reported it as Relative Risk (RR) with the number of standard errors as significance index (Statistic);
 the comparison between the inclusion rate in the BART models and the linear association allows to spot relevant non-linear effects (i.e, the feature is relevant only in association with others).
-We reported in the Results only the first (in order of inclusion rate) 15 terms with IS > 1.5 while the first fifty terms regardless of inclusion stability are reported in Supplemental Material S2.
+In the Results, we only listed the first  15 terms with IS > 1.5, (in order of inclusion rate), while the first fifty terms regardless of inclusion stability are listed in Supplemental Material S2.
 
 ## New search query generation
 
-We created an algorithm that generates a new search query to acquire further relevant publications missed during the first search, possibly at a reasonable cost in specificity (i.e., a higher number of negative results).\
+We developed an algorithm that generates a new search query to find further relevant publications missed in the initial search, possibly at a reasonable cost to specificity (i.e., a higher number of negative results).\
 The algorithm encompasses a number of steps:
 
-- We fit a partition tree [@rpart] between the DTM and 800 samples from the PPD;
-if a term is present multiple times in the DTM (e.g., both title and abstract), they are counted just one, and field term count features are removed.
-This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
-- For each rule, negative conditions (i.e., $NOT$ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
+- A partition tree [@rpart] is built between the DTM and 800 samples from the PPD;
+if a term is present multiple times in the DTM (e.g., both in the title and abstract), it is counted just once, and field term count features are removed.
+This step generates a list of rules composed by _AND_/_NOT_ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
+- For each rule, negative conditions (i.e., _NOT_ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
 - The extended set of rules is sorted by positive-negative record difference in descending order.
 The cumulative number of unique positive records is computed and used to group the rules.
 Rules inside each group are ordered by specificity.
-- The researcher is then asked to review the rule groups, selecting one or more rules (useful if they convey different meaning) from each, or edit them (in case too specific positive or negative conditions were included).
-It is possible to exclude a group of rules altogether, especially those with the worse sensitivity/specificity ratio.
-- The selected rules are joined together by $OR$ statements, defining a subset of records with a sensibly higher proportion of positive records than the original one.
-- Redundant rules (i.e., rules whose positive records are already included in more specific ones) and conditions (i.e., conditions that once removed do not decrease the total number of positive or do not increase the negative records) are removed.
-- Finally, the rules are re-elaborated in a query usable on the major scientific databases.
+- The researcher is then asked to review the rule groups and select one or more rules from each group (useful if they convey different meaning), or edit them if overly too specific positive or negative conditions were included.
+It is possible to exclude a group of rules altogether, especially those with the poorest sensitivity/specificity ratio.
+- The selected rules are joined together by _OR_ statements, defining a subset of records with a sensibly higher proportion of positive records than the original set
+- Redundant (i.e., rules whose positive records are already included in more specific ones) and non-relevant rules (i.e., conditions that when removed do not impact sensitivity and specificity) are removed.
+- Finally, the rules are re-elaborated in a query that can be used in the major scientific databases.
 
-Since the algorithm is data-driven, it creates queries that effectively select positive records from the input data set but may be not specific enough once applied to actual research databases.
-Therefore we appended an extra subquery in $AND$, which specifies the general topics of our search and delimitates the search domain.\
+Because the algorithm is data-driven, it creates queries that effectively select positive records from the input dataset, but may be not specific enough when applied to actual research databases.
+Therefore we added an extra subquery in _AND_, that specifies the general topics of our search and narrows the search domain.\
 The new query was used to initiate a second search session.
 
 ## Performance evaluation
 
-We trained a simple Bayesian logistic regression (surrogate model) on the reviewed records to evaluate the classification model consistency (see Discussion for the theoretical justification).
-The surrogate model uses as predictor the lower bound of the 98% PrI of the records' PPD with weakly regularizing, robust priors for the intercept (Student T with $\nu=3,\mu=0,\sigma=2.5$) and the linear coefficient (Student T with $\nu=3,\mu=0,\sigma=1.5$).\
-The quality of the model was evaluated through Bayesian $R^2$ [@gelman2019r], of which we reported the posterior median and 90% Credible Interval [90% CrI].
+We trained a simple Bayesian logistic regression (surrogate model) on the reviewed records to evaluate the consistency of classification model (see Discussion for the theoretical justification).
+The surrogate model uses as predictor the lower boundary of the 98% PrI of the PPD of the records with weakly regularizing, robust priors for the intercept (Student T with $\nu=3,\mu=0,\sigma=2.5$) and the linear coefficient (Student T with $\nu=3,\mu=0,\sigma=1.5$).\
+The quality of the model was evaluated through the Bayesian $R^2$ [@gelman2019r], of which we reported the posterior median and 90% Credible Interval [90% CrI].
 The $R^2$ also provides an evaluation of the consistency of the original classification model.
 Given that this model is conditional only on the BART predictions and not on the DTM, it is characterized by more uncertainty, providing plausible worst-case scenarios.\
-The surrogate model is then used to generate the predictive cumulative distribution of the number of total positive records in the whole data set.
-This distribution allows estimating the expected total posterior "Sensitivity" and "Efficiency" of the classification model in the full (unreviewed) data set.
+The surrogate model is then used to generate the predictive cumulative distribution of the number of total positive records in the whole dataset.
+This distribution allows to estimate the expected total posterior "Sensitivity" and "Efficiency" of the classification model in the full (unreviewed) dataset.
 Efficiency is summarised by the "Work saved over random" (WSoR) statistic:
-one minus the ratio between the number of record manually reviewed and those that would be required to find the same number of positives if classification was performed choosing records randomly;
-this last quantity is estimated through a negative hypergeometric distribution [@chae1993presenting] over the predicted amount of positive records.\
-For the number of predicted positive records, the sensitivity and the efficiency, we reported the "truncated 90% PrI" [trunc. 90% PrI], which is the uncertainty interval bounded at the number of observed total positive records (i.e., there cannot be less predicted positive records than observed).
+one minus the ratio between the number of record manually reviewed and those that would be required to find the same number of positives if classification were performed choosing records randomly;
+this last quantity is estimated through a negative hypergeometric distribution [@chae1993presenting] over the predicted number of positive records.\
+For the number of predicted positive records, sensitivity and efficiency, we reported the "truncated 90% PrI" [trunc. 90% PrI], i.e., the uncertainty interval bounded by the number of observed total positive records (i.e., there cannot be fewer predicted positive records than observed).
 
 ## Hyperparameter evaluation
 
@@ -166,8 +166,8 @@ Our classification algorithm has a number of hyperparameters:
 - PrI quantiles for building the uncertainty zone: 80%, 90%, 98%;
 - Source of randomness between models in the ensemble: MCMC sampling only [@robert2004monte], MCMC plus data bootstrapping [@breiman1996bagging] of the training set.
 
-To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled "validation set" made of the first 1200 records from the first session data set.
-The framework tested each hyperparameter combination until four CR iterations with no positive records were returned or the whole data set got labelled.\
-For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required review over the total) and "Sensitivity" (number of positive records found over the total of positives).
-We then identified homogeneous "performance clusters" of scores given hyperparameter values using a partition tree [@rpart].
+To evaluate the hyperparameter effect of performance, we set up a "grid search" [@claesen2015hyperparameter; @yang2020hyperparameter] on a prelabelled "validation set" derived from the first 1,200 records of the first session dataset.
+Each hyperparameter combination was tested until four CR iterations were completed with no positive records or the whole dataset was labelled.\
+For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required reviewing over the total number of records) and "Sensitivity" (number of positive records found over the total number of positive records).
+We then used a partition tree [@rpart] to identify homogeneous "performance clusters" of scores given hyperparameter values.
 For the rest of the study, we used the best hyperparameter set in terms of Sensitivity followed by Efficiency from the cluster with the highest average score.\

@@ -13,31 +13,34 @@ output:
 # Introduction
 
 Scientific production has experienced continuous exponential growth in the last decades [@larsen2010rate; @bornmann2015growth].
-This is especially true for biomedical research, a trend further increased by the COVID-19 pandemic, thanks to faster article' processing time by publishers and the diffusion of preprint databases' usage [@aviv2021publication; @horbach2020pandemic; @hoy2020rise].
-Consequently, it gets harder for researchers and practitioners to stay up-to-date on the latest findings in their field.
-Secondary research is of paramount relevance in this scenario, providing valuable summaries of the latest research results, but is getting ever more demanding in terms of time and human resources [@allen1999estimating; @borah2017analysis; @cohen2010evidence; @bastian2010seventy].\
+This is especially true for biomedical research, a trend further accelerated by the COVID-19 pandemic, thanks to faster article' processing time by publishers and the greater use of preprint databases [@aviv2021publication; @horbach2020pandemic; @hoy2020rise].
+Consequently, it has become harder for researchers and practitioners to stay up to date on the latest findings in their field.
+Secondary research is of paramount importance in this scenario in that it provides valuable summaries of the latest research results;
+however, it is becoming ever more challenging in terms of time and human resources required [@allen1999estimating; @borah2017analysis; @cohen2010evidence; @bastian2010seventy].\
 The article collection and screening phases of a systematic review are particularly demanding [@babar2009systematic].
-First, relevant published research needs to be collected from scientific databases through appropriately built search queries (retrieval phase); secondly, the acquired scientific citations need to be screened, selecting only those relevant to the topic (appraisal phase) [@bannach2019machine; @tsafnat2014systematic; @higgins2019cochrane].\
-The construction of search queries is a complex task [@lefebvre2011searching; @hammerstrom2010searching], requiring both domain and some knowledge of the databases' query languages;
-the goal is to produce a set of results containing all relevant articles (high sensitivity) while keeping the total number low (high specificity), focusing on the first aspect at the cost of the second [@hammerstrom2010searching].
+First, relevant published research must be collected from scientific databases using appropriately built search queries (retrieval phase); secondly, the scientific citations collected must be screened, selecting only those that are relevant to the topic (appraisal phase) [@bannach2019machine; @tsafnat2014systematic; @higgins2019cochrane].\
+Search queries construction is a complex task [@lefebvre2011searching; @hammerstrom2010searching], requiring both expertise in the scientific field of interest and some knowledge of the database query languages.
+The goal is to obtain a set of results that contains all relevant articles (high sensitivity) while keeping the total number of records low (high specificity),
+possibly focusing on the first at the expense of the second [@hammerstrom2010searching].\
 If an integrated search tool is not used, manual work is required to download, store and organise the publication data;
-this approach is complicated by limits in the number of records that can be downloaded at once and the necessity to harmonise different formats and resolve record duplication [@marshall2015systematic].\
-The citation screening phase is usually the more resource-demanding task of a systematic review:
-even with appropriately built search queries, the returned results easily range in the tens of thousands of which just a small fraction is actually relevant [@lefebvre2011searching].
-It was estimated that labelling 10,000 publications may take as much as 40 weeks of work and that the average clinical systematic review takes 63 weeks to be completed [@bannach2019machine; @borah2017analysis; @allen1999estimating].
-A consequence is that often systematic reviews are already outdated once they are published [@beller2013systematic].\
+this approach is complicated by limits to the number of records that can be downloaded at any one time and the need to harmonise different formats and resolve record duplication [@marshall2015systematic].\
+The citation screening phase is usually the more resource-demanding task in a systematic review:
+even with appropriately built search queries, the results may easily range in the tens of thousands, of which just a small fraction are actually relevant [@lefebvre2011searching].
+It has been estimated that labelling 10,000 publications can take up to 40 weeks of work and that the average clinical systematic review takes 63 weeks to complete [@bannach2019machine; @borah2017analysis; @allen1999estimating].
+A consequence of this is systematic reviews are often already out-of-date by the time they are published [@beller2013systematic].\
 The field of Data Science applied to evidence synthesis and acquisition has greatly maturated in the last years [@marshall2015systematic; @beller2018making; @tsafnat2014systematic].
-Through the application of natural language processing (NLP), it is possible to transform free text into quantitative features, with various levels of abstraction and generalisation [@ananiadou2006text; @cohen2008getting];
-with machine learning, such text-derived data can be used to map and reproduce human judgment, automating the citation screening [@ikonomakis2005text].\
-The automation of systematic reviews has been ripe with improvements in the last years [@ananiadou2009supporting; @o2015using; @tsafnat2013automation; @jonnalagadda2015automating], and it is possible to foresee that it is going to become the standard approach in the field [@beller2018making], with many solutions already being turned into commercial and free-to-use tools [see @marshall2015systematic, table 1].\
-In this manuscript we present an open source, production-ready framework which further contributes to the state-of-the-art in systematic review automation (SRA) and helpers (SRH) tools.
-We improve the "retrieval phase" by providing a unified framework for the automatic collection and management of scientific literature from multiple online sources.
-For the citation screening (appraisal) phase, we built an active machine learning-based [@settles2009active, @miwa2014reducing; @miwa2014reducing] protocol, which exploits a Bayesian framework to efficiently identify potentially relevant documents that require human review while automatically screening-out the large majority of clearly non-relevant ones;
-the algorithm then uses human reviews to iteratively increase classification accuracy.
-Finally, we included a tool to generate new search queries given an already labelled citation data set, in order to identify relevant research possibly missed by human-made queries.\
-We tested the framework in the retrieval and appraisal phases of an example topic of interest for our group:
+By applying natural language processing (NLP), it is possible to transform free text into quantitative features, with various levels of abstraction and generalisation [@ananiadou2006text; @cohen2008getting];
+using machine learning, such text-derived data can be used to map and reproduce human judgment, automating the screening of citations [@ikonomakis2005text].\
+Automation of systematic reviews has made significant improvements in the last years [@ananiadou2009supporting; @o2015using; @tsafnat2013automation; @jonnalagadda2015automating], and it is possible foreseeable that it will become the standard approach in the field [@beller2018making], with many solutions already being implemented into commercial or free-to-use tools [see @marshall2015systematic, table 1].\
+In this manuscript, we present an open source, production-ready framework that further contributes to the state-of-the-art in systematic review automation (SRA) and helpers (SRH) tools.
+We improve the "retrieval phase" by providing a unified framework for the automated collection and management of scientific literature from multiple online sources.
+For the citation screening (appraisal) phase, we built an active machine learning-based protocol [@settles2009active; @miwa2014reducing],
+which utilises a Bayesian framework to efficiently identify potentially relevant documents that require human review, while automatically screening-out the vast majority of clearly non-relevant ones;
+the algorithm then requires human review to iteratively increase classification accuracy.
+Finally, we included a tool to generate new search queries based on an already labelled citation data set, to identify relevant research that may possibly have been missed by manually-made queries.\
+We tested the framework in the retrieval and appraisal phases of an example topic of interest to our group:
 the evaluation of the mathematical modelling of patient referral networks among hospitals and their impact on the diffusion of healthcare-associated pathogenic microorganisms;
 the protocol is published in [@newis].\
-We give an overview of the framework in the Methods section;
-in the Result section, we show the framework outputs and performance once applied to the example topic;
-in the Discussion, we lay out the methodological justification behind the different components and features of the framework.\
+In the Methods, we give an overview of the framework,
+in the Result, we show the outputs and performance of the framework applied to the example topic,
+and in the Discussion, we explain the methodological rationale for the different components and features of the framework.\
