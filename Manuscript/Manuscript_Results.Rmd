@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r load framework, cache.rebuild=TRUE, include=FALSE}
+```{r load_framework, cache.rebuild=TRUE, include=FALSE}
 source(file.path("R", "Setup.R"), local = knitr::knit_global())
 
 # The following are already the default, but better be explicit
@@ -56,7 +56,7 @@ annotation_results <- summarise_annotations_by_session(remove_raw_data = TRUE)
 
 ## First session
 
-```{r session 1}
+```{r session_1}
 
 first_query <- import_data("Session_journal.csv") %>%
   filter(Session_ID == "Session1") %>%
@@ -126,7 +126,7 @@ A more extensive set of terms is presented in Table 1 of the Supplemental Materi
 
 ## Second session
 
-```{r session 2}
+```{r session_2}
 new_query <- import_data("Session_journal.csv") %>%
   filter(Session_ID == "Session2") %>%
   with(Query[1])
@@ -239,7 +239,7 @@ To ensure that no obvious positive matches were missed, we evaluated 100 additio
 
 `r print_table(perf_table, caption = '**Table 3**. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, "Sensitivity" and "Efficiency" (as WSoR) are reported, with their 90% PrI truncated to the observed realization in the dataset [trunc. PrI] (see. methods). Finally the median Bayesian $R^2$ [90% CrI] of the logistic models is reported. PrI: Predictive Intervals; CrI: Credibility Intervals.', allow_math = TRUE, label = "Table 3")`
 
-```{r performance plot, cache = FALSE, fig.width=7.5, fig.height=4.5, fig.cap="**Figure 2**. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the logistic Bayesian model is shown as a shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). The median of the PrI is represented by a darker blue line."}
+```{r performance_plot, cache = FALSE, fig.width=7.5, fig.height=4.5, fig.cap="**Figure 2**. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the logistic Bayesian model is shown as a shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). The median of the PrI is represented by a darker blue line."}
 
 Performance$s1$plot +
   guides(color = "none", fill = "none") +

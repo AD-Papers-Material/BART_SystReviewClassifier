@@ -1,0 +1,177 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{Databases' search guide}
+\author{}
+\date{\vspace{-2.5em}2022-02-19}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Databases' search guide},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+\hypertarget{wos}{%
+\subsection{WOS}\label{wos}}
+
+\begin{itemize}
+\tightlist
+\item
+  activate your institution proxy or log in in some way (it is only
+  needed to get the API key, then you can log off the proxy)
+\item
+  go to \url{https://apps.webofknowledge.com/}
+\item
+  extract the API key from the URL, is denominated by SID
+\item
+  put the key in the secrets.R file and source it or source Setup.R
+\item
+  perform the search using the API
+\end{itemize}
+
+\hypertarget{ieee}{%
+\subsection{IEEE}\label{ieee}}
+
+\begin{itemize}
+\tightlist
+\item
+  get your API key and put it into the secrets.R
+\item
+  source the file source Setup.R
+\item
+  perform the search using the API
+\end{itemize}
+
+\hypertarget{scopus}{%
+\subsection{Scopus}\label{scopus}}
+
+\begin{itemize}
+\tightlist
+\item
+  change the NOT in the query to AND NOT
+\item
+  go to
+  \url{https://www.scopus.com/search/form.uri?display=basic\#basic}
+\item
+  log in with your institution credential
+\item
+  set up the year range
+\item
+  search within: title, abstract, keywords, authors
+\item
+  select years in order to have just less than 2000 records
+\item
+  download csv (Excel). Choose ``Citation information'' and ``Abstract
+  \& keywords''
+\item
+  call the files Scopus\#.csv with \# being a sequential number
+\item
+  perform\_search\_session() will find and parse the files
+\end{itemize}
+
+\hypertarget{pubmed}{%
+\subsection{Pubmed}\label{pubmed}}
+
+\begin{itemize}
+\tightlist
+\item
+  put your API key in the secrets.R file and source it or source Setup.R
+\item
+  perform the search using the API
+\item
+  put the same query into pubmed and download records in the Pubmed
+  format.
+\item
+  only 10k records can be downloaded at once, so use the year filter to
+  partition the records
+\item
+  call the file Pubmed\#.nbib with \# being a sequential number
+\item
+  perform\_search\_session() will find and parse the files
+\end{itemize}
+
+\hypertarget{embase}{%
+\subsection{Embase}\label{embase}}
+
+\begin{itemize}
+\tightlist
+\item
+  Login from within the institution or activate remote access
+\item
+  go to \url{https://www.embase.com/\#advancedSearch/default}
+\item
+  set your date range
+\item
+  in the mapping field select all apart from ``Limit to terms indexed in
+  article as `major focus'\,''
+\item
+  in ``Sources'' select Embase
+\item
+  select records in blocks of 10K
+\item
+  chose format: Csv - fields by column, output: Full record (may take a
+  while to prepare the download and you can download only one batch at
+  time)
+\item
+  call the files Embase\#.csv with \# being a sequential number
+\end{itemize}
+
+\end{document}

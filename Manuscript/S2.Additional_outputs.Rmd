@@ -4,6 +4,7 @@ date: "`r lubridate::today()`"
 output:
   pdf_document:
     toc: yes
+    keep_tex: true
     includes:
       in_header: header.tex
   github_document:
@@ -53,7 +54,7 @@ meanwhile the distribution of the records to be reviewed shrinks and shifts towa
 In Session 2, as the number of negative records reviewed increased, also already positively labelled records re-entered the uncertainty zone;
 this is due to the baseline positivity rate decreasing as the number of negatives in the training data increased, forcing to review dubious records that may have been mislabelled.
 
-```{r posterior distributions, fig.width=10, fig.height=10, fig.cap="**Figure 1**. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
+```{r posterior_distributions, fig.width=10, fig.height=10, fig.cap="**Figure 1**. Mixture predictive distribution of the probability of a positive match, grouped by labelling status."}
 
 s1_plot <- plot_predictive_densities("Session1")
 

@@ -713,7 +713,7 @@ plot_predictive_densities <- function(session_name,
 				}) %>%
 				bind_rows() %>%
 				ggplot(aes(y = Iteration)) +
-				geom_ridgeline(aes(x = Prob, height = Dens, fill = Label, color = Label), alpha = .5, scale = 1) +
+				ggridges::geom_ridgeline(aes(x = Prob, height = Dens, fill = Label, color = Label), alpha = .5, scale = 1) +
 				geom_segment(data = unc_range_df, aes(yend = as.numeric(Iteration) + .1, x = Neg_lim, xend = Neg_lim, color = "Negative")) +
 				geom_segment(data = unc_range_df, aes(yend = as.numeric(Iteration) + .1, x = Pos_lim, xend = Pos_lim, color = "Positive")) +
 				geom_label(data = unc_range_df, aes(y = as.numeric(Iteration) - .1, x = Pos_lim, label = Pos_lim)) +

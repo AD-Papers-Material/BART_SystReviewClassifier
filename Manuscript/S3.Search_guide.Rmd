@@ -2,7 +2,8 @@
 title: "Databases' search guide"
 date: "`r lubridate::today()`"
 output:
-  pdf_document: default
+  pdf_document:
+    keep_tex: true
   github_document: default
 ---
 

@@ -1,0 +1,869 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{Study protocol}
+\author{}
+\date{\vspace{-2.5em}2022-02-19}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Study protocol},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\newpage
+
+\hypertarget{research-protocol}{%
+\section{Research Protocol}\label{research-protocol}}
+
+This document will guide the reader along the steps to utilise the
+framework and reproduce our results.
+
+Add installation and setup info here.
+
+\hypertarget{acquisition-of-the-citaion-data}{%
+\subsection{Acquisition of the citaion
+data}\label{acquisition-of-the-citaion-data}}
+
+Once the framework is loaded, the user defines an initial search query
+which needs to be as specific as possible while still generating a
+sufficient number of positive matches:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{source}\NormalTok{(}\StringTok{"R/Setup.R"}\NormalTok{) }\CommentTok{\# Load the framework}
+
+\CommentTok{\# Initial query to be built on domain knowledge. It accepts OR, AND, NOT boolean}
+\CommentTok{\# operators and round brackets to group terms.}
+\NormalTok{query }\OtherTok{\textless{}{-}} \StringTok{\textquotesingle{}((model OR models OR modeling OR network OR networks) AND}
+\StringTok{(dissemination OR transmission OR spread OR diffusion) AND (nosocomial OR}
+\StringTok{hospital OR "long{-}term{-}care" OR "long term care" OR "longterm care" OR}
+\StringTok{"long{-}term care" OR "healthcare associated") AND (infection OR resistance OR}
+\StringTok{resistant))\textquotesingle{}}
+
+\CommentTok{\# Year filter. The framework converts it to the API{-}specific format seamlessly.}
+\CommentTok{\# common logical comparators can be used, i.e. \textless{}, \textless{}=, \textgreater{}, \textgreater{}=, while dashes}
+\CommentTok{\# denotes inclusive date intervals. A single year restricts results to one year}
+\CommentTok{\# period.}
+\NormalTok{year\_filter }\OtherTok{\textless{}{-}} \StringTok{"2010{-}2020"}
+\end{Highlighting}
+\end{Shaded}
+
+The query is passed to the \texttt{perform\_search\_session()} function,
+together with an unique identifier for the \textbf{search session} and
+\textbf{search query}. A session identifies a homogeneous group of
+complementary or alternative queries (e.g.~sometimes it is easier to
+create two different simpler queries than a complex and long one that
+returns the same results).\\
+In our implementation, we define as sessions the group of actions that
+includes the utilisation of a search query and the subsequent iterations
+of manual review and automatic classification of its results.\\
+
+\texttt{perform\_search\_session()} will use common scientific research
+database APIs (at the moment Pubmed/Medline, Web of Science and IEEE) to
+acquire records related to the query. The records will be stored as CSV
+files in folders with the following structure:
+\texttt{Records/session\_id/query\_id}, created automatically. The
+function also creates or updates a \textbf{journal} (a CSV or Microsoft
+Excel file) with all the information about sessions, queries and search
+results.\\
+Some services (IEEE, WOS) requires an API key to access the data; the
+API key is not mandatory for Pubmed but can help avoid quota limitations
+in case of a large number of results. IEEE can also be searched without
+API: the framework will utilise a web scraping approach if the API key
+is missing, but the success of this method is not guaranteed. See
+Supplemental Material S3 for detailed instruction on preliminary steps
+and tips for each supported search engine. These keys can be stored in
+the \texttt{secrets.R} file in the working directory, with the following
+example code (the ``\emph{baysren}'' prefix identifies the package
+specific options):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{options}\NormalTok{(}\AttributeTok{baysren.ieee\_api\_key =} \StringTok{"your{-}ieee{-}api{-}key"}\NormalTok{)}
+\FunctionTok{options}\NormalTok{(}\AttributeTok{baysren.ncbi\_api\_key =} \StringTok{"your{-}ncbi{-}api{-}key"}\NormalTok{)}
+\FunctionTok{options}\NormalTok{(}\AttributeTok{baysren.wos\_api\_key =} \StringTok{"your{-}wos{-}api{-}key"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+This file will be automatically parsed from the framework.
+
+If previously downloaded results are already available, users can create
+the \texttt{Record} folder manually and put the data there (the file
+names need to contain the source name as written in the \texttt{sources}
+argument of \texttt{perform\_search\_session()}). The function will
+acquire and parse them into a standard format, even if split into
+multiple files due to download limits (e.g.~\texttt{Pubmed1.nbib},
+\texttt{Pubmed2.nib}, etc.). In addition to Pubmed, WOS and IEEE, this
+method permits to import also EMBASE and SCOPUS records, for which an
+API search was not yet implemented.\\
+Using the \texttt{actions} argument, users can choose whether to perform
+an API search, parse already downloaded results, or both.
+
+Note that for Pubmed, the API search may return slightly fewer records
+than a manual one due to a different query expansion algorithm (this
+divergence should be solved in April 2022) between the two services,
+therefore is advisable to perform also a manual search and put the
+resulting .nbib files in the \texttt{Session/Query} folder.
+\texttt{perform\_search\_session()} will acquire them seamlessly.
+
+If a user wants to perform the API searches and results parsing manually
+for each source, the framework exposes the individual functions to
+search for records using the APIs and parsing bibliography files.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This call will perform an API search on Pubmed, WOS and IEEE services and/or}
+\CommentTok{\# (based on the \textasciigrave{}actions\textasciigrave{} argument) parse already downloaded data (in our case,}
+\CommentTok{\# additional Pubmed results and Embase and Scopus results) manually added to the}
+\CommentTok{\# Session1/Query1 folder.}
+
+\NormalTok{journal }\OtherTok{\textless{}{-}} \FunctionTok{perform\_search\_session}\NormalTok{(}
+  \AttributeTok{query =}\NormalTok{ query, }\AttributeTok{year\_query =}\NormalTok{ year\_filter,}
+  \AttributeTok{session\_name =} \StringTok{"Session1"}\NormalTok{, }\AttributeTok{query\_name =} \StringTok{"Query1"}\NormalTok{,}
+  \AttributeTok{records\_folder =} \StringTok{"Records"}\NormalTok{,}
+  \AttributeTok{journal =} \StringTok{"Session\_journal.csv"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Once the records are stored, they must be read and merged into an
+\textbf{annotation file}, where the initial manual review will be
+performed.\\
+A series of functions are available to prepare the data for manual
+evaluation:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extract the file paths of records. Arguments can be used to filter by session}
+\CommentTok{\# query, source. Only parsed files will be returned, not the raw ones downloaded}
+\CommentTok{\# manually.}
+\NormalTok{Annotation\_data }\OtherTok{\textless{}{-}} \FunctionTok{extract\_source\_file\_paths}\NormalTok{(journal) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# Read record files. Will parse them if raw data is downloaded manually (not}
+  \CommentTok{\# necessary in this case). Return a list of records, one per file.}
+  \FunctionTok{read\_bib\_files}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# Join a list of records into one dataframe, solving duplicated records}
+  \FunctionTok{join\_records}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# Order records by the relative frequency of the query terms in the title +}
+  \CommentTok{\# abstract text. Increases the chance of encountering relevant records at the}
+  \CommentTok{\# beginning of the manual classification.}
+  \FunctionTok{order\_by\_query\_match}\NormalTok{(query) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# Add fields for the manual classification}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Rev\_manual =} \ConstantTok{NA}\NormalTok{, }\CommentTok{\# Where the first manual classification will be made}
+    \AttributeTok{Rev\_prediction =} \ConstantTok{NA}\NormalTok{, }\CommentTok{\# Column for the evaluation of the predicted classes}
+    \AttributeTok{.before =}\NormalTok{ DOI}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+All these steps are joined into the \texttt{create\_annotation\_file()}
+function. This function can take as input either the path to record
+files, or the parsed records (one data frame or a list of data frames)
+or a group of folders where to look for files into./ In addition, it
+also allows adding the new records to a previous annotation file (arg
+\texttt{prev\_records}). This is useful when performing consecutive
+search sessions with different queries; previous manual classifications
+can be imported using \texttt{prev\_classification}.\\
+If the original query is passed to the \texttt{reorder\_query} argument,
+the records are reordered according to the frequency of query terms in
+the title and abstract (\textbf{simple query ordering}); this approach
+lets increase the rate of relevant matches at the beginning of the
+dataset.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This function extracts the appropriate file paths from a session journal. By}
+\CommentTok{\# default it passes all stored files, otherwise it can be filtered by session,}
+\CommentTok{\# query, and source (i.e. Pubmed, WOS, IEEE)}
+\NormalTok{record\_files }\OtherTok{\textless{}{-}} \FunctionTok{extract\_source\_file\_paths}\NormalTok{(journal)}
+
+\CommentTok{\# create\_annotation\_file() accept a great variety of inputs:}
+
+\CommentTok{\# either record file paths}
+\NormalTok{input }\OtherTok{\textless{}{-}}\NormalTok{ record\_files}
+
+\CommentTok{\# or specific record file folders}
+\NormalTok{input }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\StringTok{"Records"}\NormalTok{, }\StringTok{"Session1"}\NormalTok{, }\StringTok{"Query1"}\NormalTok{)}
+
+\CommentTok{\# or parent folders, since it searches for files recursively}
+\NormalTok{input }\OtherTok{\textless{}{-}} \StringTok{"Records"}
+
+\CommentTok{\# or the already parsed files}
+\NormalTok{input }\OtherTok{\textless{}{-}} \FunctionTok{read\_bib\_files}\NormalTok{(record\_files)}
+
+\CommentTok{\# We can then call create\_annotation\_file() with one of the above input}
+\NormalTok{Annotation\_data }\OtherTok{\textless{}{-}} \FunctionTok{create\_annotation\_file}\NormalTok{(input, }\AttributeTok{reorder\_query =}\NormalTok{ query)}
+\end{Highlighting}
+\end{Shaded}
+
+Once created, the annotations need to be stored in an \textbf{Annotation
+Session} folder, which will contain all information necessary for the
+automatic classification. This operation is streamlined by the
+\texttt{create\_session()} function, which also helps manage duplicated
+sessions.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create the first session}
+\FunctionTok{create\_session}\NormalTok{(Annotation\_data, }\AttributeTok{session\_name =} \StringTok{"Session1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The file annotation file is called \texttt{Records\_\{date\}}, situated
+in the folder \texttt{Sessions/\{session\_name\}}; \texttt{date} here
+represents the session creation timestamp, and \texttt{session\_name}
+the name passed by the user.
+
+Notice that the framework is ``pipe'' friendly, and the precedent steps
+can be all performed in one call:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# First, create the Records/Session1/Query1 folder and put the manually}
+\CommentTok{\# downloaded records there if there are any. Otherwise, the folders will be}
+\CommentTok{\# created automatically during the API search}
+
+\CommentTok{\# perform searches and parse files; save and return the journal}
+\NormalTok{Records }\OtherTok{\textless{}{-}} \FunctionTok{perform\_search\_session}\NormalTok{(}
+  \AttributeTok{query =}\NormalTok{ query, }\AttributeTok{year\_query =}\NormalTok{ year\_filter,}
+  \AttributeTok{session\_name =} \StringTok{"Session1"}\NormalTok{, }\AttributeTok{query\_name =} \StringTok{"Query1"}\NormalTok{,}
+  \AttributeTok{journal =} \StringTok{"Session\_journal.csv"}
+\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# return the record file paths}
+  \FunctionTok{extract\_source\_file\_paths}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# read, join, reorder records and save them in the Sessions folder}
+  \FunctionTok{create\_annotation\_file}\NormalTok{(}\AttributeTok{reorder\_query =}\NormalTok{ query) }\SpecialCharTok{\%\textgreater{}\%}
+  \CommentTok{\# Create a new session with the records}
+  \FunctionTok{create\_session}\NormalTok{(}\AttributeTok{session\_name =} \StringTok{"Session1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{manual-classification-and-prediction}{%
+\subsection{Manual classification and
+prediction}\label{manual-classification-and-prediction}}
+
+Now the annotation file is ready for the manual classification of
+records. The annotation file has a column called \texttt{Rev\_manual},
+where records need to be classified as ``positive'' (y) or ``negative''
+(n) matches by the user. We suggest manually labelling an
+\textbf{initial training set} of 250 records, which should be sufficient
+if a minimum \textasciitilde20\% positivity rate is present (see the
+section about model hyperparameter optimisation)./ The function
+\texttt{plot\_classification\_trends()} can help visualise the trend of
+the positives/negatives as the number of classified records increases./
+
+Once the initial training set is prepared, the function
+\texttt{enrich\_annotation\_file()} will use a Bayesian Additive
+Regression Trees (BART) machine learning model to learn the labelling
+pattern given the record data and predict the positive match probability
+for the unlabelled records.\\
+\texttt{enrich\_annotation\_file()} comprises two steps. The first step
+is the creation of a \textbf{Document Term Matrix} (DTM):
+
+\begin{itemize}
+\tightlist
+\item
+  The framework extracts \textbf{features} from text data (i.e., title
+  and abstract) of the records, authors, keywords and MESH terms (see
+  Methods for more info). Before features extraction, text data terms
+  are lemmatised, stop-words are removed, and only nouns, adjectives,
+  verbs and untagged terms are retained. Authors, keywords, and MESH are
+  kept unmodified. Co-occurrent features (non-consecutive ngrams,
+  \textbf{nc-grams}) are identified and \textbf{redundant features}
+  (i.e.~terms always appearing together) are joined to decrease the
+  feature space noise.
+\item
+  For each term, a 0/1 label specifies if it is present in each record.
+\item
+  Positive records are oversampled \textbf{10x} to improve sensitivity;
+\item
+  An extra feature is added for each record field (title, abstract,
+  authors, keywords, MESH terms), reporting the number of terms in each.
+\end{itemize}
+
+The second step is the modelling of the labelling pattern and the
+predictions of the relevancy/positivity probability:
+
+\begin{itemize}
+\tightlist
+\item
+  The function models the labelling pattern using the manually labelled
+  records (**learning phaseéé);
+\item
+  After the model is created, it assigns a \textbf{posterior predictive
+  distribution} (PPD) of the probability of positivity to each record
+  (\textbf{prediction phase}). If the number of records is large, the
+  prediction step is broken into chunks of \textbf{5000 records}, to
+  avoid memory saturation; the users can set up this parameter according
+  to their machine capabilities;
+\item
+  This process is repeated \textbf{10 times}, and the predictive
+  distributions are averaged to induce shrinkage of the estimates (i.e.,
+  decrease the chance of outliers), creating a prediction
+  \textbf{ensemble};
+\item
+  The resulting distributions are summarised by the \textbf{98\%
+  interval} {[}98\% PrI{]} and the median; the {[}98\% PrI{]} identifies
+  the \textbf{uncertainty zone};
+\item
+  The unlabelled records will receive a positive/negative predicted
+  label; the label is positive if its lower {[}98\% PrI{]} bound is
+  higher than the uncertainty zone upper bound and negative if the upper
+  {[}98\% PrI{]} bound is lower than the uncertainty zone lower bound.
+  All other records are labelled as \textbf{uncertain} (unk);
+\item
+  If a predicted label does not match an existing one, the record will
+  be labelled as \textbf{check}.
+\end{itemize}
+
+The user can define parameters like the positives' oversampling rate,
+the number of models to average in the ensemble, whether to apply
+bootstrap resampling before each repetition, the prediction chunk size,
+and the PPD quantiles used to build the uncertainty zone. To use the
+function, the only input needed is the session name; the function will
+automatically identify the relevant file to make predictions on.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{New\_annotations }\OtherTok{\textless{}{-}} \FunctionTok{enrich\_annotation\_file}\NormalTok{(}\StringTok{"Session1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+This function will produce a new file which is stored in the Annotations
+folder of the session; the file will contain a column called
+\texttt{Rev\_prediction\_new} where the user will find records that
+require manual review marked by ``*``. These are records with uncertain
+labelling (''unk''), but also positive predictions and ``y''/``n''
+predictions that contradict previous manually input labels (labelled as
+``check''). This approach increases the accuracy of the predictions
+since the machine learning system is set up to favour sensitivity at the
+expense of specificity. If the function finds prelabelled records
+(\texttt{Rev\_previous} column) added when the Annotation file was
+created or passed as a further input to
+\texttt{enrich\_annotation\_file()} (\texttt{prev\_classification}
+argument), they will be used to label the records marked in the
+\texttt{Rev\_prediction\_new} column.
+
+The function adds a number of diagnostic pages to the annotation file:
+
+\begin{itemize}
+\tightlist
+\item
+  A results summary page reporting the number of records in need of
+  manual review (which includes ``unk'', ``check'', and unreviewed ``y''
+  records), the changes, and the final distribution of the labels. It
+  also shows other information like the number of features in the DTM,
+  the path to the parent file from which the annotation file was
+  created, the replication number (see later). The content of this
+  summary is also saved as a CSV file in the Results folder.
+\item
+  A variable importance page that lists the used terms in order of the
+  fraction of BART trees in which they were used. If an ensemble of
+  models is used, a more robust score is computed, taking the ratio of
+  the mean of the term tree fraction among models and its standard
+  deviation.
+\item
+  The arguments passed to the function if different from the default,
+  useful for reproducibility.
+\item
+  A classification performance summary. The procedure may take some time
+  and requires \texttt{cmdstan} installed on the machine. Therefore the
+  \texttt{compute\_performance} argument is set to \texttt{FALSE} by
+  default.
+\end{itemize}
+
+Finally, the PPD ensemble produced by the Bayesian engine is stored on
+the disk. This feature can be turned off to save disk space, but at
+least the samples of the last annotation are necessary to build a new
+search query (see next section).
+
+The process of predicting labels and manually reviewing them is what
+defines a ``classification-review (CR) iteration''.
+
+Once the manual review of the generated annotation file is completed,
+the user can \textbf{rerun exactly the same function}. The last reviewed
+annotation file will be automatically picked up and used for a new CR
+iteration. If the number of records requiring manual review is
+excessively high (e.g.~\textgreater{} 250), the function needs to be
+called with the \texttt{stop\_on\_unreviewed} argument set to
+\texttt{FALSE} to allow the classification to proceed even in the
+presence of unreviewed records in the \texttt{Rev\_prediction\_new}
+column.
+
+If there are no positive results (after manual review) in a CR
+iteration, the framework records the next iteration as a
+\textbf{replication}. After four replications with no new positive
+matches, the function will prevent another iteration and send a warning
+message, indicating that the session is complete. The user can change
+the replication limit; furthermore, it is possible to prevent the
+function from starting if either a specified number (or a fraction) of
+the total records has been manually reviewed or if a certain number of
+positive matches have been found. These three parameters are passed to
+the \texttt{limits} argument, which has the following structure and
+defaults:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{list}\NormalTok{(}
+  \AttributeTok{stop\_after =} \DecValTok{4}\NormalTok{,}
+  \AttributeTok{pos\_target =} \ConstantTok{NULL}\NormalTok{,}
+  \AttributeTok{labeling\_limit =} \ConstantTok{NULL}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The result files in the Results folder are generated after the
+Classification step but before the Review one, and therefore show
+preliminary results with still unreviewed records. The function
+\texttt{consolidate\_results(session\_name)} will update the results
+files to show the results after the manual review. The original result
+data is stored anyway in the respective annotations files.
+
+\hypertarget{new-search-query-generation}{%
+\subsection{New search query
+generation}\label{new-search-query-generation}}
+
+It is not uncommon for the first query used in a systematic review not
+to be the most effective one, especially in terms of sensitivity. We
+tried to address the problem by creating an automatic query generation
+system.\\
+The solution is experimental and greatly favours sensitivity at the
+expense of specificity. The general query generation mechanism is the
+following:
+
+\begin{itemize}
+\tightlist
+\item
+  We fit a partition tree between the DTM and 800 samples from the PPD;
+  if a term is present multiple times in the DTM (e.g., both title and
+  abstract), they are counted just one, and field term count features
+  are removed. This step generates a list of rules composed by
+  \(AND\)/\(NOT\) ``conditions'' made of terms/authors/keywords/MESH
+  tokens, which together identify a group of records.
+\item
+  For each rule, negative conditions (i.e., \(NOT\) statements) are
+  added iteratively, starting from the most specific one, until no
+  conditions are found that would not also remove positive records.
+\item
+  The extended set of rules is sorted by positive-negative record
+  difference in descending order. The cumulative number of unique
+  positive records is computed and used to group the rules. Rules inside
+  each group are ordered by specificity.
+\item
+  The researcher is then asked to review the rule groups, selecting one
+  or more rules (useful if they convey different meaning) from each, or
+  edit them (in case too specific positive or negative conditions were
+  included). It is possible to exclude a group of rules altogether,
+  especially those with the worse sensitivity/specificity ratio.
+\item
+  The selected rules are joined together by \(OR\) statements, defining
+  a subset of records with a sensibly higher proportion of positive
+  records than the original one.
+\item
+  Redundant rules (i.e., rules whose positive records are already
+  included in more specific ones) and conditions (i.e., conditions that
+  once removed do not decrease the total number of positive or do not
+  increase the negative records) are removed.
+\item
+  Finally, the rules are re-elaborated in a query usable on the major
+  scientific databases.
+\end{itemize}
+
+The steps for generating a query are the following:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# The last annotation file and posterior sample matrix in the session are found;}
+\CommentTok{\# the most predictive terms (based on the importance score) are chosen and}
+\CommentTok{\# simple prediction trees are used to map the terms to a random subset of the}
+\CommentTok{\# posterior probabilities (extracted from the posterior sample matrix saved}
+\CommentTok{\# during the last CR iteration). The score threshold and the number of trees can}
+\CommentTok{\# be chosen by the user; less stringent values can significantly increase}
+\CommentTok{\# computation time. By default results will be saved in a file called}
+\CommentTok{\# rule\_data.rds in the session folder.}
+
+\NormalTok{candidate\_queries }\OtherTok{\textless{}{-}} \FunctionTok{extract\_rules}\NormalTok{(}\StringTok{"Session1"}\NormalTok{)}
+
+\CommentTok{\# The \textquotesingle{}candidate\_queries\textquotesingle{} contains the rules, the DMT and the labels on which}
+\CommentTok{\# the rules were built, which must be passed to generate\_rule\_selection\_set().}
+\CommentTok{\# This function selects the most effective (higher positive/negative matches}
+\CommentTok{\# delta) rules; also adds negative terms to increase specificity. A data frame}
+\CommentTok{\# is generated (or automatically saved if save\_path is set). The output proposes}
+\CommentTok{\# groups of equivalent (in terms of the number of positive matches found) groups}
+\CommentTok{\# of query, ordered by specificity; for each group, the user needs to select the}
+\CommentTok{\# best rule by setting the selected\_rule column to TRUE. The groups are in order}
+\CommentTok{\# of growing sensitivity/decreasing specificity, so it may make sense to exclude}
+\CommentTok{\# the last groups totally in order to avoid too many search results.}
+
+\NormalTok{Target }\OtherTok{\textless{}{-}}\NormalTok{ candidate\_queries}\SpecialCharTok{$}\NormalTok{DTM}\SpecialCharTok{$}\NormalTok{Target}
+\NormalTok{SpecificDTM }\OtherTok{\textless{}{-}}\NormalTok{ candidate\_queries}\SpecialCharTok{$}\NormalTok{SpecificDTM}
+
+\CommentTok{\# No default is given for the save file, since generate\_rule\_selection\_set()}
+\CommentTok{\# have no info about the session it\textquotesingle{}s working on.}
+\NormalTok{selection\_set\_file }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\StringTok{"Sessions"}\NormalTok{, }\StringTok{"Session1"}\NormalTok{, }\StringTok{"Selected\_rules.xlsx"}\NormalTok{)}
+
+\NormalTok{selection\_set }\OtherTok{\textless{}{-}} \FunctionTok{generate\_rule\_selection\_set}\NormalTok{(}
+\NormalTok{  candidate\_queries}\SpecialCharTok{$}\NormalTok{rule,}
+  \AttributeTok{target\_vec =}\NormalTok{ Target,}
+  \AttributeTok{target\_data =}\NormalTok{ SpecificDTM,}
+  \AttributeTok{save\_path =}\NormalTok{ selection\_set\_file}
+\NormalTok{)}
+
+\CommentTok{\# Once the manual selection is performed the selected rules can be further}
+\CommentTok{\# simplified in order to remove redundant rules and terms. The aim is to provide}
+\CommentTok{\# the shortest rule without loss of sensitivity.}
+
+\NormalTok{simplified\_rules }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\StringTok{"Sessions"}\NormalTok{, }\StringTok{"Session1"}\NormalTok{, }\StringTok{"Selected\_rules.xlsx"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{import\_data}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{simplify\_ruleset}\NormalTok{(}\AttributeTok{target\_vec =}\NormalTok{ Target, }\AttributeTok{target\_data =}\NormalTok{ SpecificDTM) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pull}\NormalTok{(rule)}
+
+\CommentTok{\# Finally, the selected rules need to be joined in a query that scientific}
+\CommentTok{\# search engines can understand}
+
+\NormalTok{new\_query }\OtherTok{\textless{}{-}} \FunctionTok{rules\_to\_query}\NormalTok{(simplified\_rules)}
+\end{Highlighting}
+\end{Shaded}
+
+One last thing to keep in mind is that the query generation algorithm is
+only aware of the literature collected inside the annotation file. So it
+will only be able to pick term combinations that identify positive
+matches inside the already specific set of documents while not
+necessarily being discriminant from the rest of the global literature.\\
+Once the final query is generated, it is advisable to add a constraining
+subquery with an AND logic to restrict the results to the scope of the
+topic of interest.\\
+In our case, we added ``AND ((antimicrobial resistance) OR (healthcare
+infection))'' since, being the global topic of our research, those terms
+were understandably not selected by the query generation algorithm as
+discriminant.\\
+
+The final query was the following:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{query }\OtherTok{\textless{}{-}} \StringTok{"(((Donker T) NOT (bacterium isolate)) OR ((network patient) AND}
+\StringTok{(resistant staphylococcus aureus) NOT (monte carlo) NOT isolation) OR}
+\StringTok{(facility AND (network patient) AND regional NOT hospitals NOT increase NOT}
+\StringTok{(patient transport) NOT (control infection use)) OR ((patient transport) NOT}
+\StringTok{(Donker T) NOT worker) OR (hospitals AND (network patient) NOT}
+\StringTok{(patient transport) NOT regional NOT clinical) OR (facility AND}
+\StringTok{(network patient) NOT hospitals NOT (patient transport) NOT regional NOT}
+\StringTok{prevention NOT medical) OR ((healthcare facility) NOT (Donker T) NOT}
+\StringTok{worker NOT positive) OR (hospitals NOT (network patient) NOT medical NOT}
+\StringTok{environmental NOT outcome NOT global) OR ((network patient) NOT facility NOT}
+\StringTok{hospitals NOT (patient transport) NOT therapy NOT global)) AND}
+\StringTok{((antimicrobial resistance) OR (healthcare infection))"}
+\end{Highlighting}
+\end{Shaded}
+
+Another advantage of this technique is an at-glance view of relevant
+concepts for the topic of interest.
+
+\hypertarget{new-search-session}{%
+\subsection{New search session}\label{new-search-session}}
+
+Once the new query was generated, a second search session can be
+created, using the strategy described in the protocol. Due to the lower
+specificity of the second query, particular care may be needed in
+managing the far larger amount of records: multiple record files may
+need to be downloaded from Pubmed, EMBASE, and SCOPUS since they have
+limits on the number of records one can download at once; also, the
+machine learning classification processing time increases proportionally
+with the number of records to label.\\
+It is advisable to consider removing the less specific rules iteratively
+from the new query until a manageable number of records is obtained,
+considering that the probability of finding new positive matches not
+already found by more specific queries drops exponentially.\\
+
+Once the new records are collected are manually collected for databases
+without an API access, a new search can be performed. The following code
+describe how to create a new session. Keep in mind to give the session a
+new name and to import the annotated records from the last session when
+generating the new annotation file.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Repeat the search with the new query, giving a different Session name not to}
+\CommentTok{\# override previous records}
+\NormalTok{journal }\OtherTok{\textless{}{-}} \FunctionTok{perform\_search\_session}\NormalTok{(}
+  \AttributeTok{query =}\NormalTok{ query, }\AttributeTok{year\_query =}\NormalTok{ year\_filter,}
+  \AttributeTok{session\_name =} \StringTok{"Session2"}\NormalTok{, }\AttributeTok{query\_name =} \StringTok{"Query1"}\NormalTok{,}
+  \AttributeTok{records\_folder =} \StringTok{"Records"}\NormalTok{,}
+  \AttributeTok{journal =} \StringTok{"Session\_journal.csv"}
+\NormalTok{)}
+
+\CommentTok{\# Get the path to the annotated data in the previous session}
+\NormalTok{previousAnnotations }\OtherTok{\textless{}{-}} \FunctionTok{get\_session\_files}\NormalTok{(}\StringTok{"Session1"}\NormalTok{)}\SpecialCharTok{$}\NormalTok{Annotations }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{last}\NormalTok{()}
+
+\CommentTok{\# Create the new annotation file passing the folder with the new records}
+\NormalTok{Annotation\_data }\OtherTok{\textless{}{-}} \FunctionTok{create\_annotation\_file}\NormalTok{(}
+  \FunctionTok{file.path}\NormalTok{(}\StringTok{"Records"}\NormalTok{, }\StringTok{"Session2"}\NormalTok{),}
+  \AttributeTok{reorder\_query =}\NormalTok{ query,}
+  \AttributeTok{prev\_records =}\NormalTok{ previousAnnotations}
+\NormalTok{)}
+
+\CommentTok{\# Create the new annotation session}
+\FunctionTok{create\_session}\NormalTok{(Annotation\_data, }\AttributeTok{session\_name =} \StringTok{"Session2"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Once the new annotation session data is created,
+\texttt{enrich\_annotation\_file(\textquotesingle{}Session2\textquotesingle{})}
+can be used to perform the CR iterations. It may be possible that during
+the first CR iteration, the number of records requiring manual review is
+very large: we suggest evaluating still not more than 250, setting the
+\texttt{stop\_on\_unreviewed} argument to \texttt{FALSE} to proceed in
+the automatic classification even if some uncertain records from the
+precedent iteration are still unreviewed.
+
+\hypertarget{result-analysis-and-reporting}{%
+\subsection{Result analysis and
+reporting}\label{result-analysis-and-reporting}}
+
+Several tools are available to evaluate the classification
+performance.\\
+As said before, a result file is stored in the session folder for each
+CR iteration with information on the classification status; remember to
+run \texttt{consolidate\_results(session\_name)} if you want these
+results to account for the manual review of the predicted labels.\\
+\texttt{compute\_changes()} is a simple function that take an annotation
+data frame and computes the changes from the last annotation
+iteration.\\
+The primary function for result analysis is
+\texttt{estimate\_performance()}. The function uses a Bayesian model to
+estimate how the probability of a positive match drops as records' lower
+boundary of the posterior predictive interval decreases. This model
+computes the cumulative distribution of possibly missed positive
+records, which permits extraction of the engine's theoretical
+sensitivity and efficiency to lower 90\% credibility boundaries (i.e.,
+the indicators are better than these values with 95\% probability).
+These boundaries depict worse case scenarios since it is impossible to
+know the actual number of missed positive records.\\
+The function returns the Bayesian \(R^2\) of the model (values below
+85-90\% would invalidate the model analysis), the posterior sensitivity,
+the observed and theoretical number positives, the expected efficiency
+given the theoretical number of positives (that is 1 - the number of
+reviewed records above the number of records to review to find the
+predicted number of positives according to a negative hypergeometrical
+distribution). Also, the function plots the cumulative distribution of
+the observed and theoretical number of positive records.\\
+\texttt{extract\_var\_imp()} extract the most relevant terms used by the
+BART model and summarises their relevancy for the machine learning model
+and their statistical relevancy in a simple generalised linear model. A
+discrepancy between these two scores indicates a non-linear
+effect/interaction between terms.
+
+Finally, several functions are available (check \texttt{R/Reporting.R})
+to summarise and format the results.\\
+For example, \texttt{summarise\_by\_source()} and
+\texttt{summarise\_sources\_by\_session()}, respectively for one session
+or a group of sessions, report the scientific databases the records are
+collected from, while \texttt{get\_source\_distribution()} describes the
+distribution of the number of common sources per record.\\
+\texttt{summarise\_annotations()} and
+\texttt{summarise\_annotations\_by\_session()} describe the results of
+the CR iterations, again for one or multiple sessions, reporting the
+number of positive and negative matches, the number of terms (features)
+used by the machine learning model, and how the labels change between
+iterations. \texttt{format\_performance()} and
+\texttt{format\_var\_imp()} format the output of the similarly named
+analyses. \texttt{plot\_predictive\_densities()} plots how the mixture
+of posterior predictive distributions of records, divided into positive,
+negative and to-review records, change between iterations.
+
+\hypertarget{model-parameters-optimisation}{%
+\section{Model parameters'
+optimisation}\label{model-parameters-optimisation}}
+
+As with many complex machine learning models, the choice of
+hyperparameters can significantly influence the framework performance.
+For a systematic review helper algorithm, we define the performance as
+the ability to find as many positive matches by manually
+labelling/reviewing as few records as possible:\\
+
+\[
+Sensitivity \times Efficiency = \\
+\frac{Pos.\ found}{Tot.\ pos.} \times \bigg(1 - \frac{Records\ reviewed}{Tot.\ records}\bigg)
+\]
+
+We utilise a ``grid search'' algorithm to find the best set of
+hyperparameters. We tested these tools on our dataset, manually
+labelling the first 1200 records, ordered by simple query match.\\
+The first step is to create a folder to store the file required for the
+search, for example, \emph{Grid Search}. Then a fully reviewed record
+file in the format generated by \texttt{create\_annotation\_file()} is
+necessary; this file can be put in the \emph{Grid Search}, but it is not
+mandatory.\\
+
+Once the folder and the file are ready, run:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Grid\_search }\OtherTok{\textless{}{-}} \FunctionTok{perform\_grid\_evaluation}\NormalTok{(}
+\NormalTok{  records,}
+  \AttributeTok{sessions\_folder =} \StringTok{"Grid\_Search"}\NormalTok{,}
+  \AttributeTok{prev\_classification =}\NormalTok{ records,}
+  \DocumentationTok{\#\# Model parameters (can be changed by users)}
+  \AttributeTok{resample =} \FunctionTok{c}\NormalTok{(}\ConstantTok{FALSE}\NormalTok{, }\ConstantTok{TRUE}\NormalTok{),}
+  \AttributeTok{n\_init =} \FunctionTok{c}\NormalTok{(}\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{250}\NormalTok{, }\DecValTok{500}\NormalTok{),}
+  \AttributeTok{n\_models =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DecValTok{40}\NormalTok{, }\DecValTok{60}\NormalTok{),}
+  \AttributeTok{pos\_mult =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{20}\NormalTok{),}
+  \AttributeTok{pred\_quants =} \FunctionTok{list}\NormalTok{(}
+    \FunctionTok{c}\NormalTok{(.}\DecValTok{1}\NormalTok{, .}\DecValTok{5}\NormalTok{, .}\DecValTok{9}\NormalTok{),}
+    \FunctionTok{c}\NormalTok{(.}\DecValTok{05}\NormalTok{, .}\DecValTok{5}\NormalTok{, .}\DecValTok{95}\NormalTok{),}
+    \FunctionTok{c}\NormalTok{(.}\DecValTok{01}\NormalTok{, .}\DecValTok{5}\NormalTok{, .}\DecValTok{99}\NormalTok{)}
+\NormalTok{  )}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+with \texttt{records} being the fully annotated data frame or a file
+path. \texttt{prev\_classification} can be used to import a different
+classification file with prelabeled records.
+
+The hyperparameters are the following:
+
+\begin{itemize}
+\tightlist
+\item
+  resample: whether to use bootstrapping to increase variability between
+  the ensemble models;
+\item
+  n\_init: number of initially labelled records to train the machine
+  learning model on;
+\item
+  n\_models: the number of models to fit and then average to decrease
+  the variance due to random sampling in the MCMC algorithm. It reduces
+  the likelihood of extreme predictions;
+\item
+  pos\_mult: the oversampling rate of positive records. Useful to
+  improve sensitivity;
+\item
+  pred\_quants: the distribution quantiles of each PPD, used to define
+  the uncertainty zone and identify records to review.
+\end{itemize}
+
+Once the grid search is performed, the function
+\texttt{analyse\_grid\_search()} can be used to analyse its results.
+This function uses a partition tree analysis to identify hyperparameter
+sets (\textbf{performance clusters}) with different mean performance
+scores. As said before, the default score is Sensitivity x Efficiency;
+alternatives are the Positive Rate (i.e., positive records found over
+total records) or Positive Rate x Sensitivity.\\
+The function produces a data frame with the score and the cluster of
+reference of each combination of parameters, the best hyperparameter set
+(i.e., the most efficient set among the most sensitive in the best
+cluster) and the best set for each cluster. Also, the function creates a
+plot to visualise each hyperparameter's impact on performance.
+
+Once chosen, the hyperparameters can be passed to
+\texttt{enrich\_annotation\_file()}.\\
+Mind that the grid search process may take many days, even on powerful
+computers, so we suggest sticking to the default set of parameters when
+using \texttt{enrich\_annotation\_file()}.\\
+
+\end{document}

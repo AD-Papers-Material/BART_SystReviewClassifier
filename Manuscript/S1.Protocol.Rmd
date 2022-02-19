@@ -3,6 +3,7 @@ title: "Study protocol"
 date: "`r lubridate::today()`"
 output:
   pdf_document:
+    keep_tex: true
     toc: yes
   github_document:
     toc: yes
@@ -34,7 +35,7 @@ Add installation and setup info here.
 
 Once the framework is loaded, the user defines an initial search query which needs to be as specific as possible while still generating a sufficient number of positive matches:
 
-```{r query creation}
+```{r query_creation}
 
 source("R/Setup.R") # Load the framework
 
@@ -83,7 +84,7 @@ Note that for Pubmed, the API search may return slightly fewer records than a ma
 
 If a user wants to perform the API searches and results parsing manually for each source, the framework exposes the individual functions to search for records using the APIs and parsing bibliography files.
 
-```{r perform searches}
+```{r perform_searches}
 # This call will perform an API search on Pubmed, WOS and IEEE services and/or
 # (based on the `actions` argument) parse already downloaded data (in our case,
 # additional Pubmed results and Embase and Scopus results) manually added to the
@@ -100,7 +101,7 @@ journal <- perform_search_session(
 Once the records are stored, they must be read and merged into an **annotation file**, where the initial manual review will be performed.\
 A series of functions are available to prepare the data for manual evaluation:
 
-```{r managing records}
+```{r managing_records}
 # Extract the file paths of records. Arguments can be used to filter by session
 # query, source. Only parsed files will be returned, not the raw ones downloaded
 # manually.
@@ -130,7 +131,7 @@ previous manual classifications can be imported using `prev_classification`.\
 If the original query is passed to the `reorder_query` argument, the records are reordered according to the frequency of query terms in the title and abstract (**simple query ordering**);
 this approach lets increase the rate of relevant matches at the beginning of the dataset.
 
-```{r save annotation file}
+```{r save_annotation file}
 # This function extracts the appropriate file paths from a session journal. By
 # default it passes all stored files, otherwise it can be filtered by session,
 # query, and source (i.e. Pubmed, WOS, IEEE)
@@ -157,7 +158,7 @@ Annotation_data <- create_annotation_file(input, reorder_query = query)
 Once created, the annotations need to be stored in an **Annotation Session** folder, which will contain all information necessary for the automatic classification.
 This operation is streamlined by the `create_session()` function, which also helps manage duplicated sessions.
 
-```{r create session}
+```{r create_session}
 # Create the first session
 create_session(Annotation_data, session_name = "Session1")
 ```
@@ -167,7 +168,7 @@ The file annotation file is called `Records_{date}`, situated in the folder `Ses
 
 Notice that the framework is "pipe" friendly, and the precedent steps can be all performed in one call:
 
-```{r one call}
+```{r one_call}
 # First, create the Records/Session1/Query1 folder and put the manually
 # downloaded records there if there are any. Otherwise, the folders will be
 # created automatically during the API search
@@ -223,7 +224,7 @@ The user can define parameters like the positives' oversampling rate, the number
 To use the function, the only input needed is the session name;
 the function will automatically identify the relevant file to make predictions on.
 
-```{r automatic annotation}
+```{r automatic_annotation}
 New_annotations <- enrich_annotation_file("Session1")
 ```
 
@@ -256,7 +257,7 @@ The user can change the replication limit;
 furthermore, it is possible to prevent the function from starting if either a specified number (or a fraction) of the total records has been manually reviewed or if a certain number of positive matches have been found.
 These three parameters are passed to the `limits` argument, which has the following structure and defaults:
 
-```{r replication limits}
+```{r replication_limits}
 list(
   stop_after = 4,
   pos_target = NULL,
@@ -289,7 +290,7 @@ It is possible to exclude a group of rules altogether, especially those with the
 
 The steps for generating a query are the following:
 
-```{r new query generation}
+```{r new_query_generation}
 
 # The last annotation file and posterior sample matrix in the session are found;
 # the most predictive terms (based on the importance score) are chosen and
@@ -350,7 +351,7 @@ In our case, we added "AND ((antimicrobial resistance) OR (healthcare infection)
 
 The final query was the following:
 
-```{r second session query}
+```{r second_session_query}
 query <- "(((Donker T) NOT (bacterium isolate)) OR ((network patient) AND
 (resistant staphylococcus aureus) NOT (monte carlo) NOT isolation) OR
 (facility AND (network patient) AND regional NOT hospitals NOT increase NOT
@@ -377,7 +378,7 @@ It is advisable to consider removing the less specific rules iteratively from th
 
 Once the new records are collected are manually collected for databases without an API access, a new search can be performed. The following code describe how to create a new session. Keep in mind to give the session a new name and to import the annotated records from the last session when generating the new annotation file.
 
-```{r new annotation session}
+```{r new_annotation_session}
 
 # Repeat the search with the new query, giving a different Session name not to
 # override previous records
@@ -446,7 +447,7 @@ this file can be put in the *Grid Search*, but it is not mandatory.\
 
 Once the folder and the file are ready, run:
 
-```{r grid search}
+```{r grid_search}
 Grid_search <- perform_grid_evaluation(
   records,
   sessions_folder = "Grid_Search",
