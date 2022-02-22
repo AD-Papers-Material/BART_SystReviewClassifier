@@ -9,6 +9,9 @@ systematic reviews” published as preprint at
 <https://arxiv.org/abs/2202.10033>. The following instructions are taken
 from the Supplemental Material S1.
 
+The R package inspired by the manuscript is available at
+<https://github.com/bakaburg1/BaySREn>.
+
 # Research Protocol
 
 This document will guide the reader along the steps to utilise the
