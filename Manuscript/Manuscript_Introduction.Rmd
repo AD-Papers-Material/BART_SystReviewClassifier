@@ -13,7 +13,7 @@ output:
 # Introduction
 
 Scientific production has experienced continuous exponential growth in the last decades [@larsen2010rate; @bornmann2015growth].
-This is especially true for biomedical research, a trend further accelerated by the COVID-19 pandemic, thanks to faster article' processing time by publishers and the greater use of preprint databases [@aviv2021publication; @horbach2020pandemic; @hoy2020rise].
+This is especially true for biomedical research, a trend further accelerated by the COVID-19 pandemic, thanks to faster article processing time by publishers and the greater use of preprint databases [@aviv2021publication; @horbach2020pandemic; @hoy2020rise].
 Consequently, it has become harder for researchers and practitioners to stay up to date on the latest findings in their field.
 Secondary research is of paramount importance in this scenario in that it provides valuable summaries of the latest research results;
 however, it is becoming ever more challenging in terms of time and human resources required [@allen1999estimating; @borah2017analysis; @cohen2010evidence; @bastian2010seventy].\
@@ -27,17 +27,17 @@ this approach is complicated by limits to the number of records that can be down
 The citation screening phase is usually the more resource-demanding task in a systematic review:
 even with appropriately built search queries, the results may easily range in the tens of thousands, of which just a small fraction are actually relevant [@lefebvre2011searching].
 It has been estimated that labelling 10,000 publications can take up to 40 weeks of work and that the average clinical systematic review takes 63 weeks to complete [@bannach2019machine; @borah2017analysis; @allen1999estimating].
-A consequence of this is systematic reviews are often already out-of-date by the time they are published [@beller2013systematic].\
+A consequence of this is that systematic reviews are often already out-of-date by the time they are published [@beller2013systematic].\
 The field of Data Science applied to evidence synthesis and acquisition has greatly maturated in the last years [@marshall2015systematic; @beller2018making; @tsafnat2014systematic].
 By applying natural language processing (NLP), it is possible to transform free text into quantitative features, with various levels of abstraction and generalisation [@ananiadou2006text; @cohen2008getting];
 using machine learning, such text-derived data can be used to map and reproduce human judgment, automating the screening of citations [@ikonomakis2005text].\
 Automation of systematic reviews has made significant improvements in the last years [@ananiadou2009supporting; @o2015using; @tsafnat2013automation; @jonnalagadda2015automating], and it is possible foreseeable that it will become the standard approach in the field [@beller2018making], with many solutions already being implemented into commercial or free-to-use tools [see @marshall2015systematic, table 1].\
-In this manuscript, we present an open source, production-ready framework that further contributes to the state-of-the-art in systematic review automation (SRA) and helpers (SRH) tools.
+This manuscript introduces an open-source, production-ready framework that further contributes to the state-of-the-art in systematic review automation (SRA) and helpers (SRH) tools.
 We improve the "retrieval phase" by providing a unified framework for the automated collection and management of scientific literature from multiple online sources.
 For the citation screening (appraisal) phase, we built an active machine learning-based protocol [@settles2009active; @miwa2014reducing],
-which utilises a Bayesian framework to efficiently identify potentially relevant documents that require human review, while automatically screening-out the vast majority of clearly non-relevant ones;
-the algorithm then requires human review to iteratively increase classification accuracy.
-Finally, we included a tool to generate new search queries based on an already labelled citation data set, to identify relevant research that may possibly have been missed by manually-made queries.\
+which utilises a Bayesian framework to efficiently identify potentially relevant documents that require human review while automatically screening-out the vast majority of clearly non-relevant ones;
+the algorithm then requires human review to increase classification accuracy iteratively.
+Finally, we included a tool to generate new search queries based on an already categorised citation data set, to identify relevant research that manually-made queries may have possibly missed.\
 We tested the framework in the retrieval and appraisal phases of an example topic of interest to our group:
 the evaluation of the mathematical modelling of patient referral networks among hospitals and their impact on the diffusion of healthcare-associated pathogenic microorganisms;
 the protocol is published in [@newis].\

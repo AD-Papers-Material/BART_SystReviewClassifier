@@ -12,74 +12,74 @@ output:
 
 # Discussion
 
-We propose a new integrated framework to help researchers collect and screen scientific publications that is characterised by high performance and versatility.
+We propose a new integrated framework to help researchers collect and screen scientific publications characterised by high performance and versatility.
 This framework joins the joining the growing field of systematic review automation (SRA) and helpers (SRH) tools [@cohen2006reducing; @cohen2010evidence; @ananiadou2009supporting; @o2015using].
-This framework implements standard approaches and uses ad-hoc solutions to deal with common SRA issues.
+This framework implements standard approaches and uses ad-hoc solutions to common SRA issues.
 By freely sharing the tool as an open-source R package and by following a modular design, we sought to adopt some of the so-called Vienna Principles advocated by the International Collaboration for the Automation of Systematic Reviews (ICASR) [@beller2018making].\
 The framework consists of four main components: 1) an integrated query-based citation search and management engine, 2) a Bayesian active machine learning-based citation classifier, and 3) a data-driven search query generation algorithm.\
 
-The search engine module used by the framework is able to  automatically collect citation data from three well-known scientific databases (i.e., Pubmed, Web of Science, and the database of the Institute of Electrical and Electronics Engineers) asand to process manually downloaded results from both the two more databases (SCOPUS, EMBASE).
-In comparison, most commercial or free SRH tools, rely on internal databases (e.g., Mendeley https://www.mendeley.com/) sometimes focusing only on a particular topic [@visser2010performing] or on a single external data source [@thomas2007eppi; @poulter2008mscanner; @soto2019thalia].\
-Mixing different databases is essential to obstain a more comprehensive view of the literature [@bajpai2011search; @wilkins2005embase; @woods1998medline]:
+The search engine module used by the framework can automatically collect citation data from three well-known scientific databases (i.e., Pubmed, Web of Science, and the Institute of Electrical and Electronics Engineers) and process manually downloaded results from two more sources (SCOPUS, EMBASE).
+In comparison, most commercial or free SRH tools rely on internal databases (e.g., Mendeley https://www.mendeley.com/) sometimes focusing only on a particular topic [@visser2010performing] or a single external data source [@thomas2007eppi; @poulter2008mscanner; @soto2019thalia].\
+Mixing different databases is essential to obtain a more comprehensive view of the literature [@bajpai2011search; @wilkins2005embase; @woods1998medline]:
 in our results, 18.7% of the positive matches were found in only one of the different data sources, and no positive record was present in all the sources (data not shown).\
 The framework online search algorithms are efficient enough to manage tens of thousands of search results, using various solutions to overcome the limitations of citation databases in terms of traffic and download quotas.
-The results are then automatically organized, deduplicated and arranged by "simple query ordering" in a uniform corpus.
-The preliminary ordering allows to increase the positivity rate in the initial training set [@wallace2010active].\
+The results are then automatically organised, deduplicated and arranged by "simple query ordering" in a uniform corpus.
+The preliminary ordering increases the positivity rate in the initial training set [@wallace2010active].\
 
-For the framework's record classification module, we developed an active machine learning approach [@settles2009active; @miwa2014reducing] which is based on the best practices from other SRA studies but also brings further improvements at various levels.\
-The feature extractor module uses modern NLP techniques [@ananiadou2006text; @cohen2008getting] to transform text into input data for machine learning.
+For the framework's record screening module, we developed an active machine learning protocol [@settles2009active; @miwa2014reducing] based on the best practices from other SRA studies, bringing further improvements at various levels.\
+The feature extractor module uses modern NLP techniques [@ananiadou2006text; @cohen2008getting] to transform free text into input data for machine learning.
 We did not include classical n-grams [@schonlau2017text];
-rather we used network analysis to find non-consecutive, frequently associated terms, a generalisation of n-grams that relaxes the term adjacency assumption.
-This approach can also be used to find term connections across parts of the records, e.g., whether a term has a different relevance when associated with a particular author.
-The same technique, albeit with different parameters, was used to merge redundant terms to make the model estimation more efficient and reduce noise.\
-The use of concurrency network-driven modelling of text is not new [@rousseau2015graph; @violos2016sentiment; @rousseau2015text; @ohsawa1998keygraph] and is a valuable tool to extract semantic information that is not evident in one-word or consecutive n-gram models.\
+rather, we used network analysis to find non-consecutive, frequently associated terms, a generalisation of n-grams that relaxes the term adjacency assumption.
+This approach can also incorporate term connections across different parts of the records, e.g., terms having a different relevance when associated with a particular author.
+The same technique was used with different parameters to merge redundant terms, increasing estimation efficiency and reducing noise.\
+The use of concurrency network-driven text modelling is not new [@rousseau2015graph; @violos2016sentiment; @rousseau2015text; @ohsawa1998keygraph] and is a valuable tool to extract semantic information that is not evident in one-word or consecutive n-gram models.\
 
 The automatic classification algorithm is based on Bayesian Additive Regression Trees (BART) [@chipman2010bart; @kapelner2013bartmachine].
 Like other boosted trees algorithms [@hastie2009boosting], the BART method can explore complex non-linearities, perform variable selection, manage missing data while maintaining high predictive power.\
 However, the Bayesian foundation of the method provides further benefits:
-lower sensitivity to the choice of hyperparameters, natural regularisation through priors, and, most imporantly, predictive distributions as output instead of point-wise predictions [@soria2011belm; @joo2020being; @jospin2020hands].
-By selecting relatively tight prior distributions, we discouraged overly deep trees, long tree sequences, and extreme predicted probabilities, this reducing the risk of overfitting.\
+lower sensitivity to the choice of hyperparameters, natural regularisation through priors, and, most importantly, predictive distributions as output instead of point-wise predictions [@soria2011belm; @joo2020being; @jospin2020hands].
+By selecting relatively tight prior distributions, we discouraged overly deep trees, long tree sequences, and extreme predicted probabilities, thus reducing the risk of overfitting.\
 The algorithm runs multiple replications of the model and averages their predictive distributions creating an "ensemble";
-this technique has been shown to improve out-of-sample predictive performance [@zhou2021ensemble; @dietterich2000ensemble], as we were able to confirm during the hyperparameter evaluation (Supplemental Material S2).
+this technique has been shown to improve out-of-sample predictive performance [@zhou2021ensemble; @dietterich2000ensemble], as confirmed during the hyperparameter evaluation (Supplemental Material S2).
 Ensembling reduces the uncertainty in the predictive distribution tails related to the randomness in the MCMC fit [@robert2004monte], generating a shift in the probability mass towards the distribution centre and stabilising it (i.e., reducing variance without impacting bias).
 On the other hand, simply imposing more robust uninformative priors against extreme predictions would have reduced variance but also shifted the distribution towards a non-decision zone, increasing bias [@hansen2000bayesian].\
 Since the number of model replications has a significant impact on computation times, we decided to use ten replicas, the lower value after which performance stabilised, as resulted from the evaluation of the hyperparameters (Supplemental Material S2, Fig. 2).\
 We also investigated whether bootstrapping between replications [@breiman1996bagging] would improve performance;
 however, contrary to theory [@diez2015diversity], it appeared to be slightly detrimental in our case (Supplemental Material S2, Fig. 2) compared to simple ensembling.\
 
-A low rate of relevant matches (class imbalance) is typical for literature reviews [@sampson2011precision; @wallace2010semi; @o2015using], and a strong imbalance between positive and negative records can affect sensitivity [@khoshgoftaar2010comparing; @chawla2004special].\
+A low proportion of relevant matches (class imbalance) is typical for literature reviews [@sampson2011precision; @wallace2010semi; @o2015using], and a strong imbalance between positive and negative records can affect sensitivity [@khoshgoftaar2010comparing; @chawla2004special].\
 To overcome this problem, we oversampled [@batista2004study] the positive records ten times before model fitting.
-The hyperparameter analysis showed that the oversampling rate, together with model ensembling, was the parameter with the greatest impact on performance.\
+The hyperparameter analysis showed that the oversampling rate, together with model ensembling, was the parameter with the most significant impact on performance.\
 A known risk with positive oversampling is the misclassification of negative records [@ramezankhani2016impact].
 However, since all predicted positives in our approach are reviewed manually, we are always guaranteed to achieve 100% specificity/positive predictive value:
 the only price for the increased sensitivity due to oversampling is a larger number of records to be reviewed.\
 An alternative to oversampling would be to apply different weights and/or costs to the classes [@abd2013review; @diez2015diversity], but the BART implementation we used did not have this feature;
-furthermore, using simple oversampling allows for broader compatibility with different modelling engines [@galar2011review; @roshan2020improvement].\
+furthermore, using simple oversampling allows for a broader compatibility with different modelling engines [@galar2011review; @roshan2020improvement].\
 Finally, sorting the records by query term frequency (simple query ordering) produces a much higher rate of relevant records in the initial training set (17.2%) compared to the overall data (0.11%), which boosts the sensitivity of the model.\
 
-One of the key innovations we have introduced is the concept of "uncertainty zone", thie implementation of which is possible thanks to the Bayesian foundation of the classification model.\
-This construct guides the selection of records to be manually review and gets dynamically updated and reduced after each CR iteration, as more uncertain predictions are evaluated (Supplemental Material S2 Fig. 1).\
-This approach overcomes the usual requirement of dataset-specific hard thresholds in active machine learning, and also allows to review multiple items at once between iterations [@laws2008stopping; @miwa2014reducing; @zhu2010confidence].
-The parameters required by our algorithm are general and non task-specific, like the PPD intervals based on which the uncertainty zone is built, and the maximum number of iterations without positive matches after which a session is concluded;
-evaluation of the hyperparameters shows that the algorithm is robust against variations in these parameters and we expect the default values to perform well on most datasets.\
-Since researchers are asked to review both records with a positive predicted label and those inside the uncertainty zone, this method can be considered as a unifying synthesis of the "certainty" and "uncertainty" paradigms of active learning [@miwa2014reducing].\
+One of the key innovations we have introduced is the concept of "uncertainty zone", the implementation of which is possible thanks to the Bayesian foundation of the classification model.\
+This construct guides the selection of records to be manually reviewed and gets dynamically updated and reduced after each CR iteration, as more uncertain predictions are evaluated (Supplemental Material S2 Fig. 1).\
+The use of a dynamic uncertainty zone overcomes the usual requirement of dataset-specific hard thresholds in active machine learning and allows to review multiple items at once between iterations [@laws2008stopping; @miwa2014reducing; @zhu2010confidence].
+The hyperparameters required by our algorithm are general and non-task-specific, like the PPD intervals underlying the uncertainty zone and the maximum number of iterations without positive matches after which a session is concluded;
+the evaluation of the classification model hyperparameters shows that the algorithm is robust against variations in these parameters, and we expect the default values to perform well on most datasets.\
+Since researchers are asked to review both records predicted as surely relevant and those inside the uncertainty zone, this method can be considered as a unifying synthesis of the "certainty" and "uncertainty" paradigms of active learning [@miwa2014reducing].\
 
 We assessed performance as the ability of the screening procedure (automatic classification plus manual review) to find the largest number of relevant records while requiring manual reviewing for as few of them as possible (i.e., sensitivity $\times$ efficiency).\
 We avoided the classical out-of-sample approaches such as train-test sampling, out-of-bag bootstrapping or cross-validation [@kohavi1995study; @james2013introduction].
 Such methods primarily assume that the rate of positivity is the same on average in every possible random subset of the data [@tashman2000out];
 this uniformity is broken by how the initial training set and the subsequent reviewed records are selected by the query-based ordering and active learning algorithm, resulting in a lower positivity rate in the unlabelled records (Fig. 2).
 Moreover, a literature corpus is unique per search query/database combination, and therefore any out-of-sample performance estimate is not replicable since no new data can be acquired related to the current corpus.\
-To estimate overall sensitivity, we instead applied simple Bayesian regression (surrogate model) to the manually reviewed data to abstract the classification model predictions and achieve a maximum entropy [@harremoes2001maximum] estimate of the number of missed positive matches among the unreviewed records in the whole dataset.
+To estimate overall sensitivity, we instead applied simple Bayesian regression (surrogate model) to the manually reviewed data to abstract the classification model predictions and generate a maximum entropy [@harremoes2001maximum] estimate of the number of missed positive matches among the unreviewed records in the whole dataset.
 This simple surrogate model fitted the data very well ($R^2$ consistently above 97%) using only the lower 98% PrI boundary of the PPDs as predictor, indicating predictive consistency in the classification model.
 The posterior predictive distribution of the surrogate model could be used to explore worse case scenarios in terms of sensitivity.\
 
-By screening only a very small fraction of all records, our framework achieves very high sensitivity, bringing a meaningful reduction in workload.\
+Our framework achieves very high sensitivity by screening only a very small fraction of all records, bringing a meaningful reduction in workload.\
 Based on the surrogate model, we predicted a predicted median sensitivity of 100% [93.5%, 100%] in the first session (screening 4.29% of records) and of 97.3% [73.8%, 100%] in the second (screening 1.34% of records):
 efficiency increased significantly in the second session as only a few new positive matches were found;
-however, given the large number of records, uncertainty about sensitivity also increased, as expected.\
+however, given the large number of records, uncertainty about sensitivity increased, as expected.\
 Both results are above the usual performance in this field [@o2015using] and are in line with the average sensitivity of 92% estimated after human-only screening [@edwards2002identification].
 In one interesting case, the model detected a human-caused misclassification error, demonstrating its robustness and value as a second screener, a role already suggested for SRA tools in previous studies [@frunza2010building; @bekhuis2012screening; @bekhuis2010towards].
-Although "simple query ordering" concentrated most relevant matches in the first 20-25 thousand records, without the tool support the remaining relevant records would have been missed withouth manually screeening almost the entire dataset.\
+Although "simple query ordering" concentrated most relevant matches in the first 20-25 thousand records, without the tool support, the remaining relevant records would have been missed without manually screening almost the entire dataset.\
 
 The model required ~5-20 minutes per iteration to perform the predictions in session 1 (17,755 documents) and 20-40 minutes in session 2 (98,371 documents) on an eight-core, 2.5 GHz, 16 GB RAM, 2014 laptop;
 including manual record review, one session required 1-3 days of work, for a total of 1-2 weeks for the whole process (including record collection).
@@ -91,32 +91,32 @@ Generating an efficient and effective search query is a complex task [@lefebvre2
 it requires building a combination of positive and negative terms to maximise the number of relevant search results while minimising the total number of records to be reviewed.
 Our solution combines a sensitivity-driven subquery proposal engine based on concurrent decision trees [@blanco2019machine; @moore2018transparent] built on the BART ensemble PPD, with a human review step and an efficiency-driven query builder.
 The aim is to generate a new search query to help find records missed in the first search session.
-The generated query did indeed to retrieve a few more relevant records that were not found in session 1, but at the cost of a significant increase in the number of documents.\
+The generated query did indeed retrieve a few more relevant records not found in session 1 but at the cost of significantly increasing the number of documents.\
 An interesting aspect of this feature is that it provides a human-readable overview of the classification rules learned by the classification model, showing which combination of terms was particularly relevant and even spotting authors and geographical locations associated with the study topic.
 The generated query, therefore, served also as a means for machine learning explainability [@bhatt2020machine; @burkart2021survey], useful for understanding and detecting biases in black-box classification algorithms [@malhi2020explainable];
 explainability is often required or even legally mandatory for high-stake machine learning applications [@bibal2021legal; @bibal2020impact].\
 It is important to note that this process is entirely data-driven.
 The algorithm is only aware of the "world" defined by the dataset used as input, which is generated by a specific search query focused on a particular topic.
-Therefore, the new query may not be specific enough when applied to an unbounded search domain, and may return an unmanageable amount of unrelated results.
+Therefore, the new query may not be specific enough when applied to an unbounded search domain and may return an unmanageable amount of irrelevant results.
 The solution we found was to add another component to the query, specifying the general topic (antimicrobial resistance and healthcare-associated infections) of our research.\
 
 As mentioned early, our framework builds on modularity.
-We have designed it in such a way that full independence of the main modules can be easily implemented in future iterations;
+We have designed so that each module can become fully independent in future iterations;
 it will be possible for users to add custom features such as citation search and parsing for other scientific databases, alternative text processing algorithms or machine learning modules.
 We consider such interoperability to be extremely relevant:
-the main strength of our tool lies in the composition of many solutions such as the idea of Bayesian active machine learning and the exploit of the derived uncertainty in defining the records needing human review.\
-However, each components could benefit considerably from the recent improvements in text mining and machine learning.\
-For example, our text processing approach, based on the "boolean bag-of-words" paradigm, is quite simple, and indeed could be improved by more nuanced text representations.
+the main strength of our tool lies in the composition of many independent solutions, such as the idea of Bayesian active machine learning and the exploit of the derived uncertainty in defining the records needing human review.\
+Each component could benefit considerably from the recent improvements in text mining and machine learning.\
+For example, the text processing approach based on the "boolean bag-of-words" paradigm is quite simple and could be improved by more nuanced text representations.
 It might be considered whether feature transformations such as TF-IDF [@baeza1999modern; @ananiadou2006text] could be advantageous, although we hypothesise that tree-based classification algorithms like BART are robust enough not to require such operations.
 Instead, it might be worth exploring the application of word embedding:
-this technique transforms terms into semantic vectors derived from the surrounding text [@turian2010word; @bollegala2015embedding; @minaee2021deep] and could be used to reduce noise by merging different terms that are semantically similar and enhance signal by distinguishing identical terms with different meaning given the context.
-Another option would be to employ unsupervised learning models like Latent Dirichlet Analysis, Latent Semantic Analysis [@pavlinek2017text; @chen2016short; @landauer1998introduction] or graph-of-word techniques [@ohsawa1998keygraph; @rousseau2015graph] to extract topics to expand the feature space.\
+this technique transforms terms into semantic vectors derived from the surrounding text [@turian2010word; @bollegala2015embedding; @minaee2021deep] and could be used to reduce noise by merging different terms that are semantically similar or enhance signal by distinguishing identical terms with different meaning given the context.
+Another option would be to employ unsupervised learning models like Latent Dirichlet Analysis and Latent Semantic Analysis, [@pavlinek2017text; @chen2016short; @landauer1998introduction] or graph-of-word techniques [@ohsawa1998keygraph; @rousseau2015graph] to extract topics that expand the feature space.\
 Our classification algorithm is applicable with any Bayesian supervised machine learning method that provides full PPDs;
-therefore, alternative classification models, such as Gaussian Processes which are known for their flexibility [@jayashree2020evaluation; @chen2015gaussian], could be evaluated.
+therefore, alternative classification models, such as Gaussian Processes, known for their flexibility [@jayashree2020evaluation; @chen2015gaussian], could be evaluated.
 It would be even more interesting to test advanced learning algorithms that go beyond the bag-of-words approach and take into consideration higher-level features in the text such as term context and sequences, long-distance term relationships, semantic structures, etc., [@cheng2019document; @minaee2021deep; @li2020survey; @yang2020survey; @lai2015recurrent; @farkas1995document], provided that a Bayesian implementation of such algorithms is available (for example @chen2018approximate).\
 Finally, a natural improvement would be to provide a graphical user interface to make the framework easy to use also for less technical users.
 
 The field of literature review automation is evolving rapidly, and we anticipate an increasing use of such technologies to address the accelerating pace of scientific production.
-We believe it is encouraging that a wide variety of tools are being made available to allow researchers and policymakers find the approach that best fits their needs.\
-We are contributing to this field with an innovative framework that provides excellent performance and easy integration with existing systematic review pipelines.
-The value of this work lies not only in the framework itself, which we make available as open-source software, but also in the set of methodologies we developed to solve various SRA issues and which can also be used to improve already existing solutions.\
+We believe it is encouraging that a wide variety of tools are being made available to let researchers and policymakers find the approach that best fits their needs.\
+We contribute to this field with an innovative framework that provides excellent performance and easy integration with existing systematic review pipelines.
+The value of this work lies not only in the framework itself, which we make available as open-source software, but also in the set of methodologies we developed to solve various SRA issues and which can also be used to improve existing solutions.\
