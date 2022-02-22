@@ -1,0 +1,20 @@
+---
+title: "BART_SystReviewClassifier"
+output: github_document
+---
+
+```{r readme_setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+## Description
+
+This repo is the companion to the paper "An open-source integrated framework for the automation of citation collection and screening in systematic reviews" published as preprint at https://arxiv.org/abs/2202.10033. The following instructions are taken from the Supplemental Material S1.
+
+```{r child = file.path("Manuscript", "S1.Protocol.Rmd")}
+```

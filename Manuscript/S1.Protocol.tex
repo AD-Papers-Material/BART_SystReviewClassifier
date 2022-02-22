@@ -6,7 +6,7 @@
 ]{article}
 \title{Study protocol}
 \author{}
-\date{\vspace{-2.5em}2022-02-19}
+\date{\vspace{-2.5em}2022-02-22}
 
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
@@ -121,11 +121,21 @@
 This document will guide the reader along the steps to utilise the
 framework and reproduce our results.
 
-Add installation and setup info here.
+To use the framework clone it from
+\url{https://github.com/AD-Papers-Material/BART_SystReviewClassifier}
+and run the R project in the repository.
 
-\hypertarget{acquisition-of-the-citaion-data}{%
-\subsection{Acquisition of the citaion
-data}\label{acquisition-of-the-citaion-data}}
+The first step is loading the code base using:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{source}\NormalTok{(}\StringTok{"R/Setup.R"}\NormalTok{) }\CommentTok{\# Load the framework}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{acquisition-of-the-citation-data}{%
+\subsection{Acquisition of the citation
+data}\label{acquisition-of-the-citation-data}}
 
 Once the framework is loaded, the user defines an initial search query
 which needs to be as specific as possible while still generating a
@@ -133,8 +143,6 @@ sufficient number of positive matches:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{source}\NormalTok{(}\StringTok{"R/Setup.R"}\NormalTok{) }\CommentTok{\# Load the framework}
-
 \CommentTok{\# Initial query to be built on domain knowledge. It accepts OR, AND, NOT boolean}
 \CommentTok{\# operators and round brackets to group terms.}
 \NormalTok{query }\OtherTok{\textless{}{-}} \StringTok{\textquotesingle{}((model OR models OR modeling OR network OR networks) AND}
@@ -786,7 +794,7 @@ the ability to find as many positive matches by manually
 labelling/reviewing as few records as possible:\\
 
 \[
-Sensitivity \times Efficiency = \\
+Sensitivity \times Efficiency =
 \frac{Pos.\ found}{Tot.\ pos.} \times \bigg(1 - \frac{Records\ reviewed}{Tot.\ records}\bigg)
 \]
 

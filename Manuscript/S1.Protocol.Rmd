@@ -29,15 +29,21 @@ knitr::opts_chunk$set(
 
 This document will guide the reader along the steps to utilise the framework and reproduce our results.
 
-Add installation and setup info here.
+To use the framework clone it from https://github.com/AD-Papers-Material/BART_SystReviewClassifier and run the R project in the repository.
 
-## Acquisition of the citaion data
+The first step is loading the code base using:
+
+```{r load_the_code}
+
+source("R/Setup.R") # Load the framework
+
+```
+
+## Acquisition of the citation data
 
 Once the framework is loaded, the user defines an initial search query which needs to be as specific as possible while still generating a sufficient number of positive matches:
 
 ```{r query_creation}
-
-source("R/Setup.R") # Load the framework
 
 # Initial query to be built on domain knowledge. It accepts OR, AND, NOT boolean
 # operators and round brackets to group terms.
@@ -435,7 +441,7 @@ As with many complex machine learning models, the choice of hyperparameters can 
 For a systematic review helper algorithm, we define the performance as the ability to find as many positive matches by manually labelling/reviewing as few records as possible:\
 
 $$
-Sensitivity \times Efficiency = \\
+Sensitivity \times Efficiency =
 \frac{Pos.\ found}{Tot.\ pos.} \times \bigg(1 - \frac{Records\ reviewed}{Tot.\ records}\bigg)
 $$
 
