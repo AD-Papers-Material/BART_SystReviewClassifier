@@ -143,7 +143,6 @@ output:
     template: bmc_template.tex
     md_extensions: -auto_identifiers-autolink_bare_uris
     keep_tex: true
-    keep_md: true
     pandoc_args:
       - --natbib
       - --lua-filter=bmc_filters.lua
