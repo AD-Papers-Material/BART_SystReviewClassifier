@@ -1,38 +1,53 @@
 ---
 title: An open-source integrated framework for the automation of citation collection and screening in systematic reviews. 
 authors:
-  - name: Angelo D'Ambrosio
-    department: Institute for Infection Prevention and Hospital Hygiene
-    affiliation: Freiburg University Hospital
-    location: Freiburg, Germany
-    email: angelo.d.ambrosio@uniklinik-freiburg.de; a.dambrosioMD@gmail.com
-  - name: Hajo Grundmann
-    department: Institute for Infection Prevention and Hospital Hygiene
-    affiliation: Freiburg University Hospital
-    location: Freiburg, Germany
+  - first_name: Angelo
+    second_name: D'Ambrosio
+    initials: A.D.
+    email: [angelo.d.ambrosio@uniklinik-freiburg.de, a.dambrosioMD@gmail.com]
+    affiliation_IDs: aff1
+    corresponding: true
+  - first_name: Hajo
+    second_name: Grundmann
+    initials: H.G.
     email: hajo.grundmann@uniklinik-freiburg.de
-  - name: Tjibbe Donker
-    department: Institute for Infection Prevention and Hospital Hygiene
-    affiliation: Freiburg University Hospital
-    location: Freiburg, Germany
+    affiliation_IDs: aff1
+  - first_name: Tjibbe
+    second_name: Donker
+    initials: T.D.
     email: tjibbe.donker@uniklinik-freiburg.de
-abstract: |
-  The exponential growth of scientific production makes secondary literature abridgements increasingly demanding.
-  We introduce a new open-source framework for systematic reviews that significantly reduces time and workload for collecting and screening scientific literature.\
-  The framework provides three main tools:
-  1) an automatic citation search engine and manager that collects records from multiple online sources with a unified query syntax,
-  2) a Bayesian, active machine learning, citation screening tool based on iterative human-machine interaction to increase predictive accuracy and,
-  3) a semi-automatic, data-driven query generator to create new search queries from existing citation data sets.\
-  To evaluate the automatic screener's performance, we estimated the median posterior sensitivity and efficiency [90% Credible Intervals] using Bayesian simulation to predict the distribution of undetected potentially relevant records.\
-  Tested on an example topic, the framework collected 17,755 unique records through the citation manager;
-  766 records required human evaluation while the rest were excluded by the automatic classifier;
-  the theoretical efficiency was 95.6% [95.3%, 95.7%] with a sensitivity of 100% [93.5%, 100%].\
-  A new search query was generated from the labelled dataset, and 82,579 additional records were collected;
-  only 567 records required human review after automatic screening, and six additional positive matches were found.
-  The overall expected sensitivity decreased to 97.3% [73.8%, 100%] while the efficiency increased to 98.6% [98.2%, 98.7%].\
-  The framework can significantly reduce the workload required to conduct large literature reviews
-  by simplifying citation collection and screening while demonstrating exceptional sensitivity.
-  Such a tool can improve the standardization and repeatability of systematic reviews.
+    affiliation_IDs: aff1
+affiliations:
+  - id: aff1
+    affiliation: Freiburg University Hospital
+    department: Institute for Infection Prevention and Hospital Hygiene
+    city: Freiburg
+    country: Germany
+abstract:
+  - section_title: Background
+    section_text: |
+     The exponential growth of scientific production makes secondary literature abridgements increasingly demanding.
+     We introduce a new open-source framework for systematic reviews that significantly reduces time and workload for collecting and screening scientific literature.
+  - section_title: Methods
+    section_text: |
+     The framework provides three main tools:
+     1) an automatic citation search engine and manager that collects records from multiple online sources with a unified query syntax,
+     2) a Bayesian, active machine learning, citation screening tool based on iterative human-machine interaction to increase predictive accuracy and,
+     3) a semi-automatic, data-driven query generator to create new search queries from existing citation data sets.\
+     To evaluate the automatic screener's performance, we estimated the median posterior sensitivity and efficiency [90% Credible Intervals] using Bayesian simulation to predict the distribution of undetected potentially relevant records.\
+  - section_title: Results
+    section_text: |
+     Tested on an example topic, the framework collected 17,755 unique records through the citation manager;
+     766 records required human evaluation while the rest were excluded by the automatic classifier;
+     the theoretical efficiency was 95.6% [95.3%, 95.7%] with a sensitivity of 100% [93.5%, 100%].\
+     A new search query was generated from the labelled dataset, and 82,579 additional records were collected;
+     only 567 records required human review after automatic screening, and six additional positive matches were found.
+     The overall expected sensitivity decreased to 97.3% [73.8%, 100%] while the efficiency increased to 98.6% [98.2%, 98.7%].\
+  - section_title: Conclusions
+    section_text: |
+     The framework can significantly reduce the workload required to conduct large literature reviews
+     by simplifying citation collection and screening while demonstrating exceptional sensitivity.
+     Such a tool can improve the standardization and repeatability of systematic reviews.
 keywords:
   - Systematic review automation
   - Citation management
@@ -40,28 +55,118 @@ keywords:
   - Active machine learning
   - Natural language processing
   - Bayesian modeling
-bibliography: references.bib
+abbreviations:
+  - abbr: API
+    descr: Application Programming Interface
+  - abbr: BART
+    descr: Bayesian Additive Regression Trees
+  - abbr: COVID-19
+    descr: Coronavirus Disease 2019
+  - abbr: CR
+    descr: Classification & Review
+  - abbr: DTM
+    descr: Document-Term Matrix
+  - abbr: ICASR
+    descr: International Collaboration for the Automation of Systematic Reviews
+  - abbr: IEEE
+    descr: Institute of Electrical and Electronics Engineers
+  - abbr: IS
+    descr: Inclusion Stability
+  - abbr: MCMC
+    descr: Monte Carlo Markov Chain
+  - abbr: MeSH
+    descr: Medical Subject Headings
+  - abbr: MCMC
+    descr: Monte Carlo Markov Chain
+  - abbr: NLP
+    descr: Natural Language Processing
+  - abbr: PPD
+    descr: Expected Value Posterior Predictive Distribution
+  - abbr: RR
+    descr: Relative Risk
+  - abbr: SRA
+    descr: Systematic Review Automation
+  - abbr: SRH
+    descr: Systematic Review Helpers
+  - abbr: TF-IDF
+    descr: Term Frequency - Inverse Document Frequency
+  - abbr: WOS
+    descr: Web Of Science
+  - abbr: WSoR
+    descr: Work Saved over Random
+bibfile: references.bib
+nocite: |
+ @d2022open, @zenododata
+appendix:
+  acknowledgments: |
+   We would like to thank Deborah Lawrie-Blum and Fabian Bürkin respectively for
+   English language proofreading and mathematical formalization proof check.
+  funding: |
+   This project was developed under the Joint Programming Initiative on
+   Antimicrobial Resistance (JPIAMR) through the 7th call, project number
+   01KI1831 funded by BMBF and administrated by DLR Project Management Agency.
+  data_availability: |
+   The code and the instructions necessary to reproduce the results are
+   available at https://github.com/AD-Papers-Material/BART_SystReviewClassifier.
+   An updated, ready-to-use version of the framework is available at
+   https://github.com/bakaburg1/BaySREn. All relevant data necessary to
+   replicate the results is available at:
+   https://doi.org/10.5281/zenodo.6323360.
+  ethic_approval: Not applicable.
+  competing_interest: The authors declare no competing interests.
+  publication_consent: Not applicable.
+  author_contribution: |
+   Conceptualization: AD, TD; Data curation: AD;
+   Formal analysis & Methodology: AD; Project administration: AD, TD;
+   Software development: AD; Supervision: TD, HG;
+   Writing–original draft: AD, TD; Writing–review & editing: AD, TD, HG.
+   All authors have read and approved the manuscript.
+  author_information: false
+  additional_files:
+    - title: S1. Framework description and usage.
+      description: |
+       Instruction on how to use the framework and
+       reproduce the results in the manuscript.
+    - title: S2. Additional outputs.
+      description: Additional analysis outputs described in the manuscript.
+    - title: S3. Online search instructions.
+      description: |
+       Instructions about how to prepare the framework to interact with the
+       online scientific databases to collect records.
 lang: en-GB
+double_spacing: false
+line_numbers: false
+two_columns: false
+remove_fig_numbering: true
 output: 
-  rticles::arxiv_article:
-    number_sections: no
+  pdf_document:
+    template: bmc_template.tex
+    md_extensions: -auto_identifiers-autolink_bare_uris
     keep_tex: true
+    keep_md: true
+    pandoc_args:
+      - --natbib
+      - --lua-filter=bmc_filters.lua
+    number_sections: false
     includes:
       in_header: header.tex
 ---
 
-```{r, echo=FALSE, results='asis', message = FALSE, warning = FALSE, error = FALSE, dpi = 400, fig.width=12, fig.height=5}
-
-out <- unlist(lapply(c(
-  "Manuscript_Introduction.Rmd",
-  "Manuscript_Methods.Rmd",
-  "Manuscript_Results.Rmd",
-  "Manuscript_Discussion.Rmd"
-), knitr::knit_child, quiet = TRUE))
-
-cat(out, sep = "\n")
+<!-- Background -->
+```{r, child=c("Manuscript_Introduction.Rmd")}
 ```
 
-\newpage
+<!-- Methods -->
 
-# References
+```{r, child=c("Manuscript_Methods.Rmd")}
+```
+
+<!-- Results -->
+
+```{r, child=c("Manuscript_Results.Rmd")}
+```
+
+<!-- Discussion -->
+
+```{r, child=c("Manuscript_Discussion.Rmd")}
+```

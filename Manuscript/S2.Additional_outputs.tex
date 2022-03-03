@@ -4,14 +4,10 @@
 %
 \documentclass[
 ]{article}
-\title{S2. Additional figures and table}
-\author{}
-\date{\vspace{-2.5em}2022-02-19}
-
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{iftex}
-\ifPDFTeX
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
@@ -66,7 +62,7 @@
 \usepackage{placeins}
 \usepackage{amsmath}
 \usepackage{lineno}
-\linenumbers
+%\linenumbers
 \captionsetup[table]{labelformat=empty}
 \captionsetup[figure]{labelformat=empty}
 \usepackage{booktabs}
@@ -83,9 +79,13 @@
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{xcolor}
-\ifLuaTeX
+\ifluatex
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
+
+\title{S2. Additional figures and table}
+\author{}
+\date{\vspace{-2.5em}2022-03-03}
 
 \begin{document}
 \maketitle

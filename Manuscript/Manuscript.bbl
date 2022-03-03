@@ -1,0 +1,3275 @@
+%% BioMed_Central_Bib_Style_v1.01
+
+\begin{thebibliography}{108}
+% BibTex style file: bmc-mathphys.bst (version 2.1), 2014-07-24
+\ifx \bisbn   \undefined \def \bisbn  #1{ISBN #1}\fi
+\ifx \binits  \undefined \def \binits#1{#1}\fi
+\ifx \bauthor  \undefined \def \bauthor#1{#1}\fi
+\ifx \batitle  \undefined \def \batitle#1{#1}\fi
+\ifx \bjtitle  \undefined \def \bjtitle#1{#1}\fi
+\ifx \bvolume  \undefined \def \bvolume#1{\textbf{#1}}\fi
+\ifx \byear  \undefined \def \byear#1{#1}\fi
+\ifx \bissue  \undefined \def \bissue#1{#1}\fi
+\ifx \bfpage  \undefined \def \bfpage#1{#1}\fi
+\ifx \blpage  \undefined \def \blpage #1{#1}\fi
+\ifx \burl  \undefined \def \burl#1{\textsf{#1}}\fi
+\ifx \doiurl  \undefined \def \doiurl#1{\textsf{#1}}\fi
+\ifx \betal  \undefined \def \betal{\textit{et al.}}\fi
+\ifx \binstitute  \undefined \def \binstitute#1{#1}\fi
+\ifx \binstitutionaled  \undefined \def \binstitutionaled#1{#1}\fi
+\ifx \bctitle  \undefined \def \bctitle#1{#1}\fi
+\ifx \beditor  \undefined \def \beditor#1{#1}\fi
+\ifx \bpublisher  \undefined \def \bpublisher#1{#1}\fi
+\ifx \bbtitle  \undefined \def \bbtitle#1{#1}\fi
+\ifx \bedition  \undefined \def \bedition#1{#1}\fi
+\ifx \bseriesno  \undefined \def \bseriesno#1{#1}\fi
+\ifx \blocation  \undefined \def \blocation#1{#1}\fi
+\ifx \bsertitle  \undefined \def \bsertitle#1{#1}\fi
+\ifx \bsnm \undefined \def \bsnm#1{#1}\fi
+\ifx \bsuffix \undefined \def \bsuffix#1{#1}\fi
+\ifx \bparticle \undefined \def \bparticle#1{#1}\fi
+\ifx \barticle \undefined \def \barticle#1{#1}\fi
+\ifx \bconfdate \undefined \def \bconfdate #1{#1}\fi
+\ifx \botherref \undefined \def \botherref #1{#1}\fi
+\ifx \url \undefined \def \url#1{\textsf{#1}}\fi
+\ifx \bchapter \undefined \def \bchapter#1{#1}\fi
+\ifx \bbook \undefined \def \bbook#1{#1}\fi
+\ifx \bcomment \undefined \def \bcomment#1{#1}\fi
+\ifx \oauthor \undefined \def \oauthor#1{#1}\fi
+\ifx \citeauthoryear \undefined \def \citeauthoryear#1{#1}\fi
+\ifx \endbibitem  \undefined \def \endbibitem {}\fi
+\ifx \bconflocation  \undefined \def \bconflocation#1{#1}\fi
+\ifx \arxivurl  \undefined \def \arxivurl#1{\textsf{#1}}\fi
+\csname PreBibitemsHook\endcsname
+
+%%% 1
+\bibitem{larsen2010rate}
+\begin{barticle}
+\bauthor{\bsnm{Larsen}, \binits{P.}},
+\bauthor{\bsnm{Von~Ins}, \binits{M.}}:
+\batitle{The rate of growth in scientific publication and the decline in
+  coverage provided by science citation index}.
+\bjtitle{Scientometrics}
+\bvolume{84}(\bissue{3}),
+\bfpage{575}--\blpage{603}
+(\byear{2010})
+\end{barticle}
+\endbibitem
+
+%%% 2
+\bibitem{bornmann2015growth}
+\begin{barticle}
+\bauthor{\bsnm{Bornmann}, \binits{L.}},
+\bauthor{\bsnm{Mutz}, \binits{R.}}:
+\batitle{Growth rates of modern science: A bibliometric analysis based on the
+  number of publications and cited references}.
+\bjtitle{Journal of the Association for Information Science and Technology}
+\bvolume{66}(\bissue{11}),
+\bfpage{2215}--\blpage{2222}
+(\byear{2015})
+\end{barticle}
+\endbibitem
+
+%%% 3
+\bibitem{aviv2021publication}
+\begin{botherref}
+\oauthor{\bsnm{Aviv-Reuven}, \binits{S.}},
+\oauthor{\bsnm{Rosenfeld}, \binits{A.}}:
+Publication patterns’ changes due to the covid-19 pandemic: A longitudinal
+  and short-term scientometric analysis.
+Scientometrics,
+1--24
+(2021)
+\end{botherref}
+\endbibitem
+
+%%% 4
+\bibitem{horbach2020pandemic}
+\begin{barticle}
+\bauthor{\bsnm{Horbach}, \binits{S.P.}}:
+\batitle{Pandemic publishing: Medical journals strongly speed up their
+  publication process for covid-19}.
+\bjtitle{Quantitative Science Studies}
+\bvolume{1}(\bissue{3}),
+\bfpage{1056}--\blpage{1067}
+(\byear{2020})
+\end{barticle}
+\endbibitem
+
+%%% 5
+\bibitem{hoy2020rise}
+\begin{barticle}
+\bauthor{\bsnm{Hoy}, \binits{M.B.}}:
+\batitle{Rise of the rxivs: How preprint servers are changing the publishing
+  process}.
+\bjtitle{Medical reference services quarterly}
+\bvolume{39}(\bissue{1}),
+\bfpage{84}--\blpage{89}
+(\byear{2020})
+\end{barticle}
+\endbibitem
+
+%%% 6
+\bibitem{allen1999estimating}
+\begin{barticle}
+\bauthor{\bsnm{Allen}, \binits{I.E.}},
+\bauthor{\bsnm{Olkin}, \binits{I.}}:
+\batitle{Estimating time to conduct a meta-analysis from number of citations
+  retrieved}.
+\bjtitle{Jama}
+\bvolume{282}(\bissue{7}),
+\bfpage{634}--\blpage{635}
+(\byear{1999})
+\end{barticle}
+\endbibitem
+
+%%% 7
+\bibitem{borah2017analysis}
+\begin{barticle}
+\bauthor{\bsnm{Borah}, \binits{R.}},
+\bauthor{\bsnm{Brown}, \binits{A.W.}},
+\bauthor{\bsnm{Capers}, \binits{P.L.}},
+\bauthor{\bsnm{Kaiser}, \binits{K.A.}}:
+\batitle{Analysis of the time and workers needed to conduct systematic reviews
+  of medical interventions using data from the prospero registry}.
+\bjtitle{BMJ open}
+\bvolume{7}(\bissue{2}),
+\bfpage{012545}
+(\byear{2017})
+\end{barticle}
+\endbibitem
+
+%%% 8
+\bibitem{cohen2010evidence}
+\begin{bchapter}
+\bauthor{\bsnm{Cohen}, \binits{A.M.}},
+\bauthor{\bsnm{Adams}, \binits{C.E.}},
+\bauthor{\bsnm{Davis}, \binits{J.M.}},
+\bauthor{\bsnm{Yu}, \binits{C.}},
+\bauthor{\bsnm{Yu}, \binits{P.S.}},
+\bauthor{\bsnm{Meng}, \binits{W.}},
+\bauthor{\bsnm{Duggan}, \binits{L.}},
+\bauthor{\bsnm{McDonagh}, \binits{M.}},
+\bauthor{\bsnm{Smalheiser}, \binits{N.R.}}:
+\bctitle{Evidence-based medicine, the essential role of systematic reviews, and
+  the need for automated text mining tools}.
+In: \bbtitle{Proceedings of the 1st ACM International Health Informatics
+  Symposium},
+pp. \bfpage{376}--\blpage{380}
+(\byear{2010})
+\end{bchapter}
+\endbibitem
+
+%%% 9
+\bibitem{bastian2010seventy}
+\begin{barticle}
+\bauthor{\bsnm{Bastian}, \binits{H.}},
+\bauthor{\bsnm{Glasziou}, \binits{P.}},
+\bauthor{\bsnm{Chalmers}, \binits{I.}}:
+\batitle{Seventy-five trials and eleven systematic reviews a day: how will we
+  ever keep up?}
+\bjtitle{PLoS medicine}
+\bvolume{7}(\bissue{9}),
+\bfpage{1000326}
+(\byear{2010})
+\end{barticle}
+\endbibitem
+
+%%% 10
+\bibitem{babar2009systematic}
+\begin{bchapter}
+\bauthor{\bsnm{Babar}, \binits{M.A.}},
+\bauthor{\bsnm{Zhang}, \binits{H.}}:
+\bctitle{Systematic literature reviews in software engineering: Preliminary
+  results from interviews with researchers}.
+In: \bbtitle{2009 3rd International Symposium on Empirical Software Engineering
+  and Measurement},
+pp. \bfpage{346}--\blpage{355}
+(\byear{2009}).
+\bcomment{IEEE}
+\end{bchapter}
+\endbibitem
+
+%%% 11
+\bibitem{bannach2019machine}
+\begin{barticle}
+\bauthor{\bsnm{Bannach-Brown}, \binits{A.}},
+\bauthor{\bsnm{Przyby{\l}a}, \binits{P.}},
+\bauthor{\bsnm{Thomas}, \binits{J.}},
+\bauthor{\bsnm{Rice}, \binits{A.S.}},
+\bauthor{\bsnm{Ananiadou}, \binits{S.}},
+\bauthor{\bsnm{Liao}, \binits{J.}},
+\bauthor{\bsnm{Macleod}, \binits{M.R.}}:
+\batitle{Machine learning algorithms for systematic review: reducing workload
+  in a preclinical review of animal studies and reducing human screening
+  error}.
+\bjtitle{Systematic reviews}
+\bvolume{8}(\bissue{1}),
+\bfpage{1}--\blpage{12}
+(\byear{2019})
+\end{barticle}
+\endbibitem
+
+%%% 12
+\bibitem{tsafnat2014systematic}
+\begin{barticle}
+\bauthor{\bsnm{Tsafnat}, \binits{G.}},
+\bauthor{\bsnm{Glasziou}, \binits{P.}},
+\bauthor{\bsnm{Choong}, \binits{M.K.}},
+\bauthor{\bsnm{Dunn}, \binits{A.}},
+\bauthor{\bsnm{Galgani}, \binits{F.}},
+\bauthor{\bsnm{Coiera}, \binits{E.}}:
+\batitle{Systematic review automation technologies}.
+\bjtitle{Systematic reviews}
+\bvolume{3}(\bissue{1}),
+\bfpage{1}--\blpage{15}
+(\byear{2014})
+\end{barticle}
+\endbibitem
+
+%%% 13
+\bibitem{higgins2019cochrane}
+\begin{bbook}
+\bauthor{\bsnm{Higgins}, \binits{J.P.}},
+\bauthor{\bsnm{Thomas}, \binits{J.}},
+\bauthor{\bsnm{Chandler}, \binits{J.}},
+\bauthor{\bsnm{Cumpston}, \binits{M.}},
+\bauthor{\bsnm{Li}, \binits{T.}},
+\bauthor{\bsnm{Page}, \binits{M.J.}},
+\bauthor{\bsnm{Welch}, \binits{V.A.}}:
+\bbtitle{Cochrane Handbook for Systematic Reviews of Interventions}.
+\bpublisher{John Wiley \& Sons}, \blocation{???}
+(\byear{2019})
+\end{bbook}
+\endbibitem
+
+%%% 14
+\bibitem{lefebvre2011searching}
+\begin{botherref}
+\oauthor{\bsnm{Lefebvre}, \binits{C.}},
+\oauthor{\bsnm{Manheimer}, \binits{E.}},
+\oauthor{\bsnm{Glanville}, \binits{J.}},
+\oauthor{\bsnm{Higgins}, \binits{J.}},
+\oauthor{\bsnm{Green}, \binits{S.}}:
+Searching for studies (chapter 6).
+Cochrane handbook for systematic reviews of interventions version
+\textbf{510}
+(2011)
+\end{botherref}
+\endbibitem
+
+%%% 15
+\bibitem{hammerstrom2010searching}
+\begin{botherref}
+\oauthor{\bsnm{Hammerstr{\o}m}, \binits{K.}},
+\oauthor{\bsnm{Wade}, \binits{A.}},
+\oauthor{\bsnm{J{\o}rgensen}, \binits{A.-M.K.}},
+\oauthor{\bsnm{Hammerstr{\o}m}, \binits{K.}}:
+Searching for studies.
+Education
+\textbf{54}(11.3)
+(2010)
+\end{botherref}
+\endbibitem
+
+%%% 16
+\bibitem{marshall2015systematic}
+\begin{bchapter}
+\bauthor{\bsnm{Marshall}, \binits{I.J.}},
+\bauthor{\bsnm{Wallace}, \binits{B.C.}}:
+\bctitle{Toward systematic review automation: a practical guide to using
+  machine learning tools in research synthesis},
+vol. \bseriesno{8},
+pp. \bfpage{1}--\blpage{10}.
+\bpublisher{Springer}, \blocation{???}
+(\byear{2019})
+\end{bchapter}
+\endbibitem
+
+%%% 17
+\bibitem{beller2013systematic}
+\begin{barticle}
+\bauthor{\bsnm{Beller}, \binits{E.M.}},
+\bauthor{\bsnm{Chen}, \binits{J.K.-H.}},
+\bauthor{\bsnm{Wang}, \binits{U.L.-H.}},
+\bauthor{\bsnm{Glasziou}, \binits{P.P.}}:
+\batitle{Are systematic reviews up-to-date at the time of publication?}
+\bjtitle{Systematic reviews}
+\bvolume{2}(\bissue{1}),
+\bfpage{1}--\blpage{6}
+(\byear{2013})
+\end{barticle}
+\endbibitem
+
+%%% 18
+\bibitem{beller2018making}
+\begin{barticle}
+\bauthor{\bsnm{Beller}, \binits{E.}},
+\bauthor{\bsnm{Clark}, \binits{J.}},
+\bauthor{\bsnm{Tsafnat}, \binits{G.}},
+\bauthor{\bsnm{Adams}, \binits{C.}},
+\bauthor{\bsnm{Diehl}, \binits{H.}},
+\bauthor{\bsnm{Lund}, \binits{H.}},
+\bauthor{\bsnm{Ouzzani}, \binits{M.}},
+\bauthor{\bsnm{Thayer}, \binits{K.}},
+\bauthor{\bsnm{Thomas}, \binits{J.}},
+\bauthor{\bsnm{Turner}, \binits{T.}}, \betal:
+\batitle{Making progress with the automation of systematic reviews: principles
+  of the international collaboration for the automation of systematic reviews
+  (icasr)}.
+\bjtitle{Systematic reviews}
+\bvolume{7}(\bissue{1}),
+\bfpage{1}--\blpage{7}
+(\byear{2018})
+\end{barticle}
+\endbibitem
+
+%%% 19
+\bibitem{ananiadou2006text}
+\begin{bbook}
+\bauthor{\bsnm{Ananiadou}, \binits{S.}},
+\bauthor{\bsnm{McNaught}, \binits{J.}}:
+\bbtitle{Text Mining for Biology and Biomedicine}.
+\bpublisher{Citeseer}, \blocation{???}
+(\byear{2006})
+\end{bbook}
+\endbibitem
+
+%%% 20
+\bibitem{cohen2008getting}
+\begin{barticle}
+\bauthor{\bsnm{Cohen}, \binits{K.B.}},
+\bauthor{\bsnm{Hunter}, \binits{L.}}:
+\batitle{Getting started in text mining}.
+\bjtitle{PLoS computational biology}
+\bvolume{4}(\bissue{1}),
+\bfpage{20}
+(\byear{2008})
+\end{barticle}
+\endbibitem
+
+%%% 21
+\bibitem{ikonomakis2005text}
+\begin{barticle}
+\bauthor{\bsnm{Ikonomakis}, \binits{M.}},
+\bauthor{\bsnm{Kotsiantis}, \binits{S.}},
+\bauthor{\bsnm{Tampakas}, \binits{V.}}:
+\batitle{Text classification using machine learning techniques}.
+\bjtitle{WSEAS transactions on computers}
+\bvolume{4}(\bissue{8}),
+\bfpage{966}--\blpage{974}
+(\byear{2005})
+\end{barticle}
+\endbibitem
+
+%%% 22
+\bibitem{ananiadou2009supporting}
+\begin{barticle}
+\bauthor{\bsnm{Ananiadou}, \binits{S.}},
+\bauthor{\bsnm{Rea}, \binits{B.}},
+\bauthor{\bsnm{Okazaki}, \binits{N.}},
+\bauthor{\bsnm{Procter}, \binits{R.}},
+\bauthor{\bsnm{Thomas}, \binits{J.}}:
+\batitle{Supporting systematic reviews using text mining}.
+\bjtitle{Social Science Computer Review}
+\bvolume{27}(\bissue{4}),
+\bfpage{509}--\blpage{523}
+(\byear{2009})
+\end{barticle}
+\endbibitem
+
+%%% 23
+\bibitem{o2015using}
+\begin{barticle}
+\bauthor{\bsnm{O’Mara-Eves}, \binits{A.}},
+\bauthor{\bsnm{Thomas}, \binits{J.}},
+\bauthor{\bsnm{McNaught}, \binits{J.}},
+\bauthor{\bsnm{Miwa}, \binits{M.}},
+\bauthor{\bsnm{Ananiadou}, \binits{S.}}:
+\batitle{Using text mining for study identification in systematic reviews: a
+  systematic review of current approaches}.
+\bjtitle{Systematic reviews}
+\bvolume{4}(\bissue{1}),
+\bfpage{1}--\blpage{22}
+(\byear{2015})
+\end{barticle}
+\endbibitem
+
+%%% 24
+\bibitem{tsafnat2013automation}
+\begin{botherref}
+\oauthor{\bsnm{Tsafnat}, \binits{G.}},
+\oauthor{\bsnm{Dunn}, \binits{A.}},
+\oauthor{\bsnm{Glasziou}, \binits{P.}},
+\oauthor{\bsnm{Coiera}, \binits{E.}}:
+The automation of systematic reviews.
+British Medical Journal Publishing Group
+(2013)
+\end{botherref}
+\endbibitem
+
+%%% 25
+\bibitem{jonnalagadda2015automating}
+\begin{barticle}
+\bauthor{\bsnm{Jonnalagadda}, \binits{S.R.}},
+\bauthor{\bsnm{Goyal}, \binits{P.}},
+\bauthor{\bsnm{Huffman}, \binits{M.D.}}:
+\batitle{Automating data extraction in systematic reviews: a systematic
+  review}.
+\bjtitle{Systematic reviews}
+\bvolume{4}(\bissue{1}),
+\bfpage{1}--\blpage{16}
+(\byear{2015})
+\end{barticle}
+\endbibitem
+
+%%% 26
+\bibitem{settles2009active}
+\begin{botherref}
+\oauthor{\bsnm{Settles}, \binits{B.}}:
+Active learning literature survey
+(2009)
+\end{botherref}
+\endbibitem
+
+%%% 27
+\bibitem{miwa2014reducing}
+\begin{barticle}
+\bauthor{\bsnm{Miwa}, \binits{M.}},
+\bauthor{\bsnm{Thomas}, \binits{J.}},
+\bauthor{\bsnm{O’Mara-Eves}, \binits{A.}},
+\bauthor{\bsnm{Ananiadou}, \binits{S.}}:
+\batitle{Reducing systematic review workload through certainty-based
+  screening}.
+\bjtitle{Journal of biomedical informatics}
+\bvolume{51},
+\bfpage{242}--\blpage{253}
+(\byear{2014})
+\end{barticle}
+\endbibitem
+
+%%% 28
+\bibitem{newis}
+\begin{botherref}
+\oauthor{\bsnm{Sadaghiani}, \binits{C.}},
+\oauthor{\bsnm{Donker}, \binits{T.}},
+\oauthor{\bsnm{Andrianou}, \binits{X.}},
+\oauthor{\bsnm{Babarczy}, \binits{B.}},
+\oauthor{\bsnm{De~Boer}, \binits{G.}},
+\oauthor{\bsnm{Di~Ruscio}, \binits{F.}},
+\oauthor{\bsnm{Cairns}, \binits{S.}},
+\oauthor{\bsnm{Cr{\'e}pey}, \binits{P.}},
+\oauthor{\bsnm{Fortaleza}, \binits{C.M.}},
+\oauthor{\bsnm{Freyler}, \binits{P.}},
+\oauthor{\bsnm{Gagliotti}, \binits{C.}},
+\oauthor{\bsnm{Liljeros}, \binits{F.}},
+\oauthor{\bsnm{Moro}, \binits{M.L.}},
+\oauthor{\bsnm{Oteo}, \binits{J.}},
+\oauthor{\bsnm{Palos}, \binits{C.}},
+\oauthor{\bsnm{Pilarski}, \binits{G.}},
+\oauthor{\bsnm{Reilly}, \binits{J.}},
+\oauthor{\bsnm{Robotham}, \binits{J.}},
+\oauthor{\bsnm{S{\'a}-Le{\~a}o}, \binits{R.}},
+\oauthor{\bsnm{Simonsen}, \binits{G.S.}},
+\oauthor{\bsnm{Temime}, \binits{L.}},
+\oauthor{\bsnm{Ternhag}, \binits{A.}},
+\oauthor{\bsnm{Grundmann}, \binits{H.}},
+\oauthor{\bsnm{Mutters}, \binits{N.T.}}:
+National Health Care Infrastructures, Health Care Utilization and Patient
+  Movements Between Hospitals - Networks Working to Improve Surveillance: a
+  Systematic Literature Review.
+(2020).
+\url{http://www.crd.york.ac.uk/PROSPERO/display\_record.asp?ID=CRD42020157987}
+\end{botherref}
+\endbibitem
+
+%%% 29
+\bibitem{rstats2021}
+\begin{bbook}
+\bauthor{\bsnm{{R Core Team}}}:
+\bbtitle{R: A Language and Environment for Statistical Computing}.
+\bpublisher{R Foundation for Statistical Computing},
+\blocation{Vienna, Austria}
+(\byear{2021}).
+\bcomment{R Foundation for Statistical Computing}.
+\burl{https://www.R-project.org/}
+\end{bbook}
+\endbibitem
+
+%%% 30
+\bibitem{pubmedUpdate}
+\begin{botherref}
+NCBI Insights : Updated pubmed E-utilities coming in April 2022!
+U.S. National Library of Medicine.
+Accessed on 21.10.2021.
+\url{https://ncbiinsights.ncbi.nlm.nih.gov/2021/10/05/updated-pubmed-api/}
+\end{botherref}
+\endbibitem
+
+%%% 31
+\bibitem{wallace2010active}
+\begin{bchapter}
+\bauthor{\bsnm{Wallace}, \binits{B.C.}},
+\bauthor{\bsnm{Small}, \binits{K.}},
+\bauthor{\bsnm{Brodley}, \binits{C.E.}},
+\bauthor{\bsnm{Trikalinos}, \binits{T.A.}}:
+\bctitle{Active learning for biomedical citation screening}.
+In: \bbtitle{Proceedings of the 16th ACM SIGKDD International Conference on
+  Knowledge Discovery and Data Mining},
+pp. \bfpage{173}--\blpage{182}
+(\byear{2010})
+\end{bchapter}
+\endbibitem
+
+%%% 32
+\bibitem{chawla2004special}
+\begin{barticle}
+\bauthor{\bsnm{Chawla}, \binits{N.V.}},
+\bauthor{\bsnm{Japkowicz}, \binits{N.}},
+\bauthor{\bsnm{Kotcz}, \binits{A.}}:
+\batitle{Special issue on learning from imbalanced data sets}.
+\bjtitle{ACM SIGKDD explorations newsletter}
+\bvolume{6}(\bissue{1}),
+\bfpage{1}--\blpage{6}
+(\byear{2004})
+\end{barticle}
+\endbibitem
+
+%%% 33
+\bibitem{lipscomb2000medical}
+\begin{barticle}
+\bauthor{\bsnm{Lipscomb}, \binits{C.E.}}:
+\batitle{Medical subject headings (mesh)}.
+\bjtitle{Bulletin of the Medical Library Association}
+\bvolume{88}(\bissue{3}),
+\bfpage{265}
+(\byear{2000})
+\end{barticle}
+\endbibitem
+
+%%% 34
+\bibitem{baeza1999modern}
+\begin{bbook}
+\bauthor{\bsnm{Baeza-Yates}, \binits{R.}},
+\bauthor{\bsnm{Ribeiro-Neto}, \binits{B.}}, \betal:
+\bbtitle{Modern Information Retrieval}
+vol. \bseriesno{463}.
+\bpublisher{ACM press New York}, \blocation{???}
+(\byear{1999})
+\end{bbook}
+\endbibitem
+
+%%% 35
+\bibitem{rousseau2015graph}
+\begin{botherref}
+\oauthor{\bsnm{Rousseau}, \binits{F.}}:
+Graph-of-words: mining and retrieving text with networks of features.
+PhD thesis,
+Ph. D. dissertation
+(2015)
+\end{botherref}
+\endbibitem
+
+%%% 36
+\bibitem{eppstein2010listing}
+\begin{bchapter}
+\bauthor{\bsnm{Eppstein}, \binits{D.}},
+\bauthor{\bsnm{L{\"o}ffler}, \binits{M.}},
+\bauthor{\bsnm{Strash}, \binits{D.}}:
+\bctitle{Listing all maximal cliques in sparse graphs in near-optimal time}.
+In: \bbtitle{International Symposium on Algorithms and Computation},
+pp. \bfpage{403}--\blpage{414}
+(\byear{2010}).
+\bcomment{Springer}
+\end{bchapter}
+\endbibitem
+
+%%% 37
+\bibitem{chipman2010bart}
+\begin{barticle}
+\bauthor{\bsnm{Chipman}, \binits{H.A.}},
+\bauthor{\bsnm{George}, \binits{E.I.}},
+\bauthor{\bsnm{McCulloch}, \binits{R.E.}}, \betal:
+\batitle{Bart: Bayesian additive regression trees}.
+\bjtitle{The Annals of Applied Statistics}
+\bvolume{4}(\bissue{1}),
+\bfpage{266}--\blpage{298}
+(\byear{2010})
+\end{barticle}
+\endbibitem
+
+%%% 38
+\bibitem{kapelner2013bartmachine}
+\begin{botherref}
+\oauthor{\bsnm{Kapelner}, \binits{A.}},
+\oauthor{\bsnm{Bleich}, \binits{J.}}:
+bartmachine: Machine learning with bayesian additive regression trees.
+arXiv preprint arXiv:1312.2171
+(2013)
+\end{botherref}
+\endbibitem
+
+%%% 39
+\bibitem{kapelner2015prediction}
+\begin{barticle}
+\bauthor{\bsnm{Kapelner}, \binits{A.}},
+\bauthor{\bsnm{Bleich}, \binits{J.}}:
+\batitle{Prediction with missing data via bayesian additive regression trees}.
+\bjtitle{Canadian Journal of Statistics}
+\bvolume{43}(\bissue{2}),
+\bfpage{224}--\blpage{239}
+(\byear{2015})
+\end{barticle}
+\endbibitem
+
+%%% 40
+\bibitem{batista2004study}
+\begin{barticle}
+\bauthor{\bsnm{Batista}, \binits{G.E.}},
+\bauthor{\bsnm{Prati}, \binits{R.C.}},
+\bauthor{\bsnm{Monard}, \binits{M.C.}}:
+\batitle{A study of the behavior of several methods for balancing machine
+  learning training data}.
+\bjtitle{ACM SIGKDD explorations newsletter}
+\bvolume{6}(\bissue{1}),
+\bfpage{20}--\blpage{29}
+(\byear{2004})
+\end{barticle}
+\endbibitem
+
+%%% 41
+\bibitem{zhou2021ensemble}
+\begin{bchapter}
+\bauthor{\bsnm{Zhou}, \binits{Z.-H.}}:
+\bctitle{Ensemble learning}.
+In: \bbtitle{Machine Learning},
+pp. \bfpage{181}--\blpage{210}.
+\bpublisher{Springer}, \blocation{???}
+(\byear{2021})
+\end{bchapter}
+\endbibitem
+
+%%% 42
+\bibitem{dietterich2000ensemble}
+\begin{bchapter}
+\bauthor{\bsnm{Dietterich}, \binits{T.G.}}:
+\bctitle{Ensemble methods in machine learning}.
+In: \bbtitle{International Workshop on Multiple Classifier Systems},
+pp. \bfpage{1}--\blpage{15}
+(\byear{2000}).
+\bcomment{Springer}
+\end{bchapter}
+\endbibitem
+
+%%% 43
+\bibitem{rpart}
+\begin{botherref}
+\oauthor{\bsnm{Therneau}, \binits{T.}},
+\oauthor{\bsnm{Atkinson}, \binits{B.}}:
+Rpart: Recursive Partitioning and Regression Trees.
+(2019).
+R package version 4.1-15.
+\url{https://CRAN.R-project.org/package=rpart}
+\end{botherref}
+\endbibitem
+
+%%% 44
+\bibitem{gelman2019r}
+\begin{botherref}
+\oauthor{\bsnm{Gelman}, \binits{A.}},
+\oauthor{\bsnm{Goodrich}, \binits{B.}},
+\oauthor{\bsnm{Gabry}, \binits{J.}},
+\oauthor{\bsnm{Vehtari}, \binits{A.}}:
+R-squared for bayesian regression models.
+The American Statistician
+(2019)
+\end{botherref}
+\endbibitem
+
+%%% 45
+\bibitem{chae1993presenting}
+\begin{barticle}
+\bauthor{\bsnm{Chae}, \binits{K.-C.}}:
+\batitle{Presenting the negative hypergeometric distribution to the
+  introductory statistics courses}.
+\bjtitle{International Journal of Mathematical Education in Science and
+  Technology}
+\bvolume{24}(\bissue{4}),
+\bfpage{523}--\blpage{526}
+(\byear{1993})
+\end{barticle}
+\endbibitem
+
+%%% 46
+\bibitem{robert2004monte}
+\begin{bbook}
+\bauthor{\bsnm{Robert}, \binits{C.P.}},
+\bauthor{\bsnm{Casella}, \binits{G.}}:
+\bbtitle{Monte Carlo Statistical Methods}
+vol. \bseriesno{2}.
+\bpublisher{Springer}, \blocation{???}
+(\byear{2004})
+\end{bbook}
+\endbibitem
+
+%%% 47
+\bibitem{breiman1996bagging}
+\begin{barticle}
+\bauthor{\bsnm{Breiman}, \binits{L.}}:
+\batitle{Bagging predictors}.
+\bjtitle{Machine learning}
+\bvolume{24}(\bissue{2}),
+\bfpage{123}--\blpage{140}
+(\byear{1996})
+\end{barticle}
+\endbibitem
+
+%%% 48
+\bibitem{claesen2015hyperparameter}
+\begin{botherref}
+\oauthor{\bsnm{Claesen}, \binits{M.}},
+\oauthor{\bsnm{De~Moor}, \binits{B.}}:
+Hyperparameter search in machine learning.
+arXiv preprint arXiv:1502.02127
+(2015)
+\end{botherref}
+\endbibitem
+
+%%% 49
+\bibitem{yang2020hyperparameter}
+\begin{barticle}
+\bauthor{\bsnm{Yang}, \binits{L.}},
+\bauthor{\bsnm{Shami}, \binits{A.}}:
+\batitle{On hyperparameter optimization of machine learning algorithms: Theory
+  and practice}.
+\bjtitle{Neurocomputing}
+\bvolume{415},
+\bfpage{295}--\blpage{316}
+(\byear{2020})
+\end{barticle}
+\endbibitem
+
+%%% 50
+\bibitem{cohen2006reducing}
+\begin{barticle}
+\bauthor{\bsnm{Cohen}, \binits{A.M.}},
+\bauthor{\bsnm{Hersh}, \binits{W.R.}},
+\bauthor{\bsnm{Peterson}, \binits{K.}},
+\bauthor{\bsnm{Yen}, \binits{P.-Y.}}:
+\batitle{Reducing workload in systematic review preparation using automated
+  citation classification}.
+\bjtitle{Journal of the American Medical Informatics Association}
+\bvolume{13}(\bissue{2}),
+\bfpage{206}--\blpage{219}
+(\byear{2006})
+\end{barticle}
+\endbibitem
+
+%%% 51
+\bibitem{visser2010performing}
+\begin{botherref}
+\oauthor{\bsnm{Visser}, \binits{E.}}:
+Performing systematic literature reviews with researchr: Tool demonstration.
+Technical Report Series TUD-SERG-2010-010
+(2010)
+\end{botherref}
+\endbibitem
+
+%%% 52
+\bibitem{thomas2007eppi}
+\begin{botherref}
+\oauthor{\bsnm{Thomas}, \binits{J.}},
+\oauthor{\bsnm{Brunton}, \binits{J.}}:
+Eppi-reviewer: software for research synthesis
+(2007)
+\end{botherref}
+\endbibitem
+
+%%% 53
+\bibitem{poulter2008mscanner}
+\begin{barticle}
+\bauthor{\bsnm{Poulter}, \binits{G.L.}},
+\bauthor{\bsnm{Rubin}, \binits{D.L.}},
+\bauthor{\bsnm{Altman}, \binits{R.B.}},
+\bauthor{\bsnm{Seoighe}, \binits{C.}}:
+\batitle{Mscanner: a classifier for retrieving medline citations}.
+\bjtitle{BMC bioinformatics}
+\bvolume{9}(\bissue{1}),
+\bfpage{1}--\blpage{12}
+(\byear{2008})
+\end{barticle}
+\endbibitem
+
+%%% 54
+\bibitem{soto2019thalia}
+\begin{barticle}
+\bauthor{\bsnm{Soto}, \binits{A.J.}},
+\bauthor{\bsnm{Przyby{\l}a}, \binits{P.}},
+\bauthor{\bsnm{Ananiadou}, \binits{S.}}:
+\batitle{Thalia: semantic search engine for biomedical abstracts}.
+\bjtitle{Bioinformatics}
+\bvolume{35}(\bissue{10}),
+\bfpage{1799}--\blpage{1801}
+(\byear{2019})
+\end{barticle}
+\endbibitem
+
+%%% 55
+\bibitem{bajpai2011search}
+\begin{botherref}
+\oauthor{\bsnm{Bajpai}, \binits{A.}},
+\oauthor{\bsnm{Davuluri}, \binits{S.}},
+\oauthor{\bsnm{Haridas}, \binits{H.}},
+\oauthor{\bsnm{Kasliwal}, \binits{G.}},
+\oauthor{\bsnm{Deepti}, \binits{H.}},
+\oauthor{\bsnm{Sreelakshmi}, \binits{K.}},
+\oauthor{\bsnm{Chandrashekar}, \binits{D.}},
+\oauthor{\bsnm{Bora}, \binits{P.}},
+\oauthor{\bsnm{Farouk}, \binits{M.}},
+\oauthor{\bsnm{Chitturi}, \binits{N.}}, et al.:
+In search of the right literature search engine (s).
+Nature Precedings,
+1--1
+(2011)
+\end{botherref}
+\endbibitem
+
+%%% 56
+\bibitem{wilkins2005embase}
+\begin{barticle}
+\bauthor{\bsnm{Wilkins}, \binits{T.}},
+\bauthor{\bsnm{Gillies}, \binits{R.A.}},
+\bauthor{\bsnm{Davies}, \binits{K.}}:
+\batitle{Embase versus medline for family medicine searches: can medline
+  searches find the forest or a tree?}
+\bjtitle{Canadian Family Physician}
+\bvolume{51}(\bissue{6}),
+\bfpage{848}--\blpage{849}
+(\byear{2005})
+\end{barticle}
+\endbibitem
+
+%%% 57
+\bibitem{woods1998medline}
+\begin{barticle}
+\bauthor{\bsnm{Woods}, \binits{D.}},
+\bauthor{\bsnm{Trewheellar}, \binits{K.}}:
+\batitle{Medline and embase complement each other in literature searches}.
+\bjtitle{BMJ: British Medical Journal}
+\bvolume{316}(\bissue{7138}),
+\bfpage{1166}
+(\byear{1998})
+\end{barticle}
+\endbibitem
+
+%%% 58
+\bibitem{schonlau2017text}
+\begin{barticle}
+\bauthor{\bsnm{Schonlau}, \binits{M.}},
+\bauthor{\bsnm{Guenther}, \binits{N.}}:
+\batitle{Text mining using n-grams}.
+\bjtitle{Schonlau, M., Guenther, N. Sucholutsky, I. Text mining using n-gram
+  variables. The Stata Journal}
+\bvolume{17}(\bissue{4}),
+\bfpage{866}--\blpage{881}
+(\byear{2017})
+\end{barticle}
+\endbibitem
+
+%%% 59
+\bibitem{violos2016sentiment}
+\begin{bchapter}
+\bauthor{\bsnm{Violos}, \binits{J.}},
+\bauthor{\bsnm{Tserpes}, \binits{K.}},
+\bauthor{\bsnm{Psomakelis}, \binits{E.}},
+\bauthor{\bsnm{Psychas}, \binits{K.}},
+\bauthor{\bsnm{Varvarigou}, \binits{T.}}:
+\bctitle{Sentiment analysis using word-graphs}.
+In: \bbtitle{Proceedings of the 6th International Conference on Web
+  Intelligence, Mining and Semantics},
+pp. \bfpage{1}--\blpage{9}
+(\byear{2016})
+\end{bchapter}
+\endbibitem
+
+%%% 60
+\bibitem{rousseau2015text}
+\begin{bchapter}
+\bauthor{\bsnm{Rousseau}, \binits{F.}},
+\bauthor{\bsnm{Kiagias}, \binits{E.}},
+\bauthor{\bsnm{Vazirgiannis}, \binits{M.}}:
+\bctitle{Text categorization as a graph classification problem}.
+In: \bbtitle{Proceedings of the 53rd Annual Meeting of the Association for
+  Computational Linguistics and the 7th International Joint Conference on
+  Natural Language Processing (Volume 1: Long Papers)},
+pp. \bfpage{1702}--\blpage{1712}
+(\byear{2015})
+\end{bchapter}
+\endbibitem
+
+%%% 61
+\bibitem{ohsawa1998keygraph}
+\begin{bchapter}
+\bauthor{\bsnm{Ohsawa}, \binits{Y.}},
+\bauthor{\bsnm{Benson}, \binits{N.E.}},
+\bauthor{\bsnm{Yachida}, \binits{M.}}:
+\bctitle{Keygraph: Automatic indexing by co-occurrence graph based on building
+  construction metaphor}.
+In: \bbtitle{Proceedings IEEE International Forum on Research and Technology
+  Advances in Digital Libraries-ADL'98-},
+pp. \bfpage{12}--\blpage{18}
+(\byear{1998}).
+\bcomment{IEEE}
+\end{bchapter}
+\endbibitem
+
+%%% 62
+\bibitem{hastie2009boosting}
+\begin{bchapter}
+\bauthor{\bsnm{Hastie}, \binits{T.}},
+\bauthor{\bsnm{Tibshirani}, \binits{R.}},
+\bauthor{\bsnm{Friedman}, \binits{J.}}:
+\bctitle{Boosting and additive trees}.
+In: \bbtitle{The Elements of Statistical Learning},
+pp. \bfpage{337}--\blpage{387}.
+\bpublisher{Springer}, \blocation{???}
+(\byear{2009})
+\end{bchapter}
+\endbibitem
+
+%%% 63
+\bibitem{soria2011belm}
+\begin{barticle}
+\bauthor{\bsnm{Soria-Olivas}, \binits{E.}},
+\bauthor{\bsnm{Gomez-Sanchis}, \binits{J.}},
+\bauthor{\bsnm{Martin}, \binits{J.D.}},
+\bauthor{\bsnm{Vila-Frances}, \binits{J.}},
+\bauthor{\bsnm{Martinez}, \binits{M.}},
+\bauthor{\bsnm{Magdalena}, \binits{J.R.}},
+\bauthor{\bsnm{Serrano}, \binits{A.J.}}:
+\batitle{Belm: Bayesian extreme learning machine}.
+\bjtitle{IEEE transactions on neural networks}
+\bvolume{22}(\bissue{3}),
+\bfpage{505}--\blpage{509}
+(\byear{2011})
+\end{barticle}
+\endbibitem
+
+%%% 64
+\bibitem{joo2020being}
+\begin{bchapter}
+\bauthor{\bsnm{Joo}, \binits{T.}},
+\bauthor{\bsnm{Chung}, \binits{U.}},
+\bauthor{\bsnm{Seo}, \binits{M.-G.}}:
+\bctitle{Being bayesian about categorical probability}.
+In: \bbtitle{International Conference on Machine Learning},
+pp. \bfpage{4950}--\blpage{4961}
+(\byear{2020}).
+\bcomment{PMLR}
+\end{bchapter}
+\endbibitem
+
+%%% 65
+\bibitem{jospin2020hands}
+\begin{botherref}
+\oauthor{\bsnm{Jospin}, \binits{L.V.}},
+\oauthor{\bsnm{Buntine}, \binits{W.}},
+\oauthor{\bsnm{Boussaid}, \binits{F.}},
+\oauthor{\bsnm{Laga}, \binits{H.}},
+\oauthor{\bsnm{Bennamoun}, \binits{M.}}:
+Hands-on bayesian neural networks--a tutorial for deep learning users.
+arXiv preprint arXiv:2007.06823
+(2020)
+\end{botherref}
+\endbibitem
+
+%%% 66
+\bibitem{hansen2000bayesian}
+\begin{bchapter}
+\bauthor{\bsnm{Hansen}, \binits{L.K.}}, \betal:
+\bctitle{Bayesian averaging is well-temperated}.
+In: \bbtitle{Proceedings of NIPS},
+vol. \bseriesno{99},
+pp. \bfpage{265}--\blpage{271}
+(\byear{2000})
+\end{bchapter}
+\endbibitem
+
+%%% 67
+\bibitem{diez2015diversity}
+\begin{barticle}
+\bauthor{\bsnm{D{\'i}ez-Pastor}, \binits{J.F.}},
+\bauthor{\bsnm{Rodr{\'i}guez}, \binits{J.J.}},
+\bauthor{\bsnm{Garc{\'i}a-Osorio}, \binits{C.I.}},
+\bauthor{\bsnm{Kuncheva}, \binits{L.I.}}:
+\batitle{Diversity techniques improve the performance of the best imbalance
+  learning ensembles}.
+\bjtitle{Information Sciences}
+\bvolume{325},
+\bfpage{98}--\blpage{117}
+(\byear{2015})
+\end{barticle}
+\endbibitem
+
+%%% 68
+\bibitem{sampson2011precision}
+\begin{barticle}
+\bauthor{\bsnm{Sampson}, \binits{M.}},
+\bauthor{\bsnm{Tetzlaff}, \binits{J.}},
+\bauthor{\bsnm{Urquhart}, \binits{C.}}:
+\batitle{Precision of healthcare systematic review searches in a
+  cross-sectional sample}.
+\bjtitle{Research Synthesis Methods}
+\bvolume{2}(\bissue{2}),
+\bfpage{119}--\blpage{125}
+(\byear{2011})
+\end{barticle}
+\endbibitem
+
+%%% 69
+\bibitem{wallace2010semi}
+\begin{barticle}
+\bauthor{\bsnm{Wallace}, \binits{B.C.}},
+\bauthor{\bsnm{Trikalinos}, \binits{T.A.}},
+\bauthor{\bsnm{Lau}, \binits{J.}},
+\bauthor{\bsnm{Brodley}, \binits{C.}},
+\bauthor{\bsnm{Schmid}, \binits{C.H.}}:
+\batitle{Semi-automated screening of biomedical citations for systematic
+  reviews}.
+\bjtitle{BMC bioinformatics}
+\bvolume{11}(\bissue{1}),
+\bfpage{1}--\blpage{11}
+(\byear{2010})
+\end{barticle}
+\endbibitem
+
+%%% 70
+\bibitem{khoshgoftaar2010comparing}
+\begin{barticle}
+\bauthor{\bsnm{Khoshgoftaar}, \binits{T.M.}},
+\bauthor{\bsnm{Van~Hulse}, \binits{J.}},
+\bauthor{\bsnm{Napolitano}, \binits{A.}}:
+\batitle{Comparing boosting and bagging techniques with noisy and imbalanced
+  data}.
+\bjtitle{IEEE Transactions on Systems, Man, and Cybernetics-Part A: Systems and
+  Humans}
+\bvolume{41}(\bissue{3}),
+\bfpage{552}--\blpage{568}
+(\byear{2010})
+\end{barticle}
+\endbibitem
+
+%%% 71
+\bibitem{ramezankhani2016impact}
+\begin{barticle}
+\bauthor{\bsnm{Ramezankhani}, \binits{A.}},
+\bauthor{\bsnm{Pournik}, \binits{O.}},
+\bauthor{\bsnm{Shahrabi}, \binits{J.}},
+\bauthor{\bsnm{Azizi}, \binits{F.}},
+\bauthor{\bsnm{Hadaegh}, \binits{F.}},
+\bauthor{\bsnm{Khalili}, \binits{D.}}:
+\batitle{The impact of oversampling with smote on the performance of 3
+  classifiers in prediction of type 2 diabetes}.
+\bjtitle{Medical decision making}
+\bvolume{36}(\bissue{1}),
+\bfpage{137}--\blpage{144}
+(\byear{2016})
+\end{barticle}
+\endbibitem
+
+%%% 72
+\bibitem{abd2013review}
+\begin{barticle}
+\bauthor{\bsnm{Abd~Elrahman}, \binits{S.M.}},
+\bauthor{\bsnm{Abraham}, \binits{A.}}:
+\batitle{A review of class imbalance problem}.
+\bjtitle{Journal of Network and Innovative Computing}
+\bvolume{1}(\bissue{2013}),
+\bfpage{332}--\blpage{340}
+(\byear{2013})
+\end{barticle}
+\endbibitem
+
+%%% 73
+\bibitem{galar2011review}
+\begin{barticle}
+\bauthor{\bsnm{Galar}, \binits{M.}},
+\bauthor{\bsnm{Fernandez}, \binits{A.}},
+\bauthor{\bsnm{Barrenechea}, \binits{E.}},
+\bauthor{\bsnm{Bustince}, \binits{H.}},
+\bauthor{\bsnm{Herrera}, \binits{F.}}:
+\batitle{A review on ensembles for the class imbalance problem: bagging-,
+  boosting-, and hybrid-based approaches}.
+\bjtitle{IEEE Transactions on Systems, Man, and Cybernetics, Part C
+  (Applications and Reviews)}
+\bvolume{42}(\bissue{4}),
+\bfpage{463}--\blpage{484}
+(\byear{2011})
+\end{barticle}
+\endbibitem
+
+%%% 74
+\bibitem{roshan2020improvement}
+\begin{barticle}
+\bauthor{\bsnm{Roshan}, \binits{S.E.}},
+\bauthor{\bsnm{Asadi}, \binits{S.}}:
+\batitle{Improvement of bagging performance for classification of imbalanced
+  datasets using evolutionary multi-objective optimization}.
+\bjtitle{Engineering Applications of Artificial Intelligence}
+\bvolume{87},
+\bfpage{103319}
+(\byear{2020})
+\end{barticle}
+\endbibitem
+
+%%% 75
+\bibitem{laws2008stopping}
+\begin{bchapter}
+\bauthor{\bsnm{Laws}, \binits{F.}},
+\bauthor{\bsnm{Sch{\"u}tze}, \binits{H.}}:
+\bctitle{Stopping criteria for active learning of named entity recognition}.
+In: \bbtitle{Proceedings of the 22nd International Conference on Computational
+  Linguistics (Coling 2008)},
+pp. \bfpage{465}--\blpage{472}
+(\byear{2008})
+\end{bchapter}
+\endbibitem
+
+%%% 76
+\bibitem{zhu2010confidence}
+\begin{barticle}
+\bauthor{\bsnm{Zhu}, \binits{J.}},
+\bauthor{\bsnm{Wang}, \binits{H.}},
+\bauthor{\bsnm{Hovy}, \binits{E.}},
+\bauthor{\bsnm{Ma}, \binits{M.}}:
+\batitle{Confidence-based stopping criteria for active learning for data
+  annotation}.
+\bjtitle{ACM Transactions on Speech and Language Processing (TSLP)}
+\bvolume{6}(\bissue{3}),
+\bfpage{1}--\blpage{24}
+(\byear{2010})
+\end{barticle}
+\endbibitem
+
+%%% 77
+\bibitem{kohavi1995study}
+\begin{bchapter}
+\bauthor{\bsnm{Kohavi}, \binits{R.}}, \betal:
+\bctitle{A study of cross-validation and bootstrap for accuracy estimation and
+  model selection}.
+In: \bbtitle{Ijcai},
+vol. \bseriesno{14},
+pp. \bfpage{1137}--\blpage{1145}
+(\byear{1995}).
+\bcomment{Montreal, Canada}
+\end{bchapter}
+\endbibitem
+
+%%% 78
+\bibitem{james2013introduction}
+\begin{bbook}
+\bauthor{\bsnm{James}, \binits{G.}},
+\bauthor{\bsnm{Witten}, \binits{D.}},
+\bauthor{\bsnm{Hastie}, \binits{T.}},
+\bauthor{\bsnm{Tibshirani}, \binits{R.}}:
+\bbtitle{An Introduction to Statistical Learning}
+vol. \bseriesno{112}.
+\bpublisher{Springer}, \blocation{???}
+(\byear{2013})
+\end{bbook}
+\endbibitem
+
+%%% 79
+\bibitem{tashman2000out}
+\begin{barticle}
+\bauthor{\bsnm{Tashman}, \binits{L.J.}}:
+\batitle{Out-of-sample tests of forecasting accuracy: an analysis and review}.
+\bjtitle{International journal of forecasting}
+\bvolume{16}(\bissue{4}),
+\bfpage{437}--\blpage{450}
+(\byear{2000})
+\end{barticle}
+\endbibitem
+
+%%% 80
+\bibitem{harremoes2001maximum}
+\begin{barticle}
+\bauthor{\bsnm{Harremo{\"e}s}, \binits{P.}},
+\bauthor{\bsnm{Tops{\o}e}, \binits{F.}}:
+\batitle{Maximum entropy fundamentals}.
+\bjtitle{Entropy}
+\bvolume{3}(\bissue{3}),
+\bfpage{191}--\blpage{226}
+(\byear{2001})
+\end{barticle}
+\endbibitem
+
+%%% 81
+\bibitem{edwards2002identification}
+\begin{barticle}
+\bauthor{\bsnm{Edwards}, \binits{P.}},
+\bauthor{\bsnm{Clarke}, \binits{M.}},
+\bauthor{\bsnm{DiGuiseppi}, \binits{C.}},
+\bauthor{\bsnm{Pratap}, \binits{S.}},
+\bauthor{\bsnm{Roberts}, \binits{I.}},
+\bauthor{\bsnm{Wentz}, \binits{R.}}:
+\batitle{Identification of randomized controlled trials in systematic reviews:
+  accuracy and reliability of screening records}.
+\bjtitle{Statistics in medicine}
+\bvolume{21}(\bissue{11}),
+\bfpage{1635}--\blpage{1640}
+(\byear{2002})
+\end{barticle}
+\endbibitem
+
+%%% 82
+\bibitem{frunza2010building}
+\begin{bchapter}
+\bauthor{\bsnm{Frunza}, \binits{O.}},
+\bauthor{\bsnm{Inkpen}, \binits{D.}},
+\bauthor{\bsnm{Matwin}, \binits{S.}}:
+\bctitle{Building systematic reviews using automatic text classification
+  techniques}.
+In: \bbtitle{Coling 2010: Posters},
+pp. \bfpage{303}--\blpage{311}
+(\byear{2010})
+\end{bchapter}
+\endbibitem
+
+%%% 83
+\bibitem{bekhuis2012screening}
+\begin{barticle}
+\bauthor{\bsnm{Bekhuis}, \binits{T.}},
+\bauthor{\bsnm{Demner-Fushman}, \binits{D.}}:
+\batitle{Screening nonrandomized studies for medical systematic reviews: a
+  comparative study of classifiers}.
+\bjtitle{Artificial intelligence in medicine}
+\bvolume{55}(\bissue{3}),
+\bfpage{197}--\blpage{207}
+(\byear{2012})
+\end{barticle}
+\endbibitem
+
+%%% 84
+\bibitem{bekhuis2010towards}
+\begin{botherref}
+\oauthor{\bsnm{Bekhuis}, \binits{T.}},
+\oauthor{\bsnm{Demner-Fushman}, \binits{D.}}:
+Towards automating the initial screening phase of a systematic review.
+MEDINFO 2010,
+146--150
+(2010)
+\end{botherref}
+\endbibitem
+
+%%% 85
+\bibitem{olorisade2016critical}
+\begin{bchapter}
+\bauthor{\bsnm{Olorisade}, \binits{B.K.}},
+\bauthor{\bparticle{de} \bsnm{Quincey}, \binits{E.}},
+\bauthor{\bsnm{Brereton}, \binits{P.}},
+\bauthor{\bsnm{Andras}, \binits{P.}}:
+\bctitle{A critical analysis of studies that address the use of text mining for
+  citation screening in systematic reviews}.
+In: \bbtitle{Proceedings of the 20th International Conference on Evaluation and
+  Assessment in Software Engineering},
+pp. \bfpage{1}--\blpage{11}
+(\byear{2016})
+\end{bchapter}
+\endbibitem
+
+%%% 86
+\bibitem{blanco2019machine}
+\begin{bchapter}
+\bauthor{\bsnm{Blanco-Justicia}, \binits{A.}},
+\bauthor{\bsnm{Domingo-Ferrer}, \binits{J.}}:
+\bctitle{Machine learning explainability through comprehensible decision
+  trees}.
+In: \bbtitle{International Cross-Domain Conference for Machine Learning and
+  Knowledge Extraction},
+pp. \bfpage{15}--\blpage{26}
+(\byear{2019}).
+\bcomment{Springer}
+\end{bchapter}
+\endbibitem
+
+%%% 87
+\bibitem{moore2018transparent}
+\begin{bchapter}
+\bauthor{\bsnm{Moore}, \binits{A.}},
+\bauthor{\bsnm{Murdock}, \binits{V.}},
+\bauthor{\bsnm{Cai}, \binits{Y.}},
+\bauthor{\bsnm{Jones}, \binits{K.}}:
+\bctitle{Transparent tree ensembles}.
+In: \bbtitle{The 41st International ACM SIGIR Conference on Research \&
+  Development in Information Retrieval},
+pp. \bfpage{1241}--\blpage{1244}
+(\byear{2018})
+\end{bchapter}
+\endbibitem
+
+%%% 88
+\bibitem{bhatt2020machine}
+\begin{botherref}
+\oauthor{\bsnm{Bhatt}, \binits{U.}},
+\oauthor{\bsnm{Andrus}, \binits{M.}},
+\oauthor{\bsnm{Weller}, \binits{A.}},
+\oauthor{\bsnm{Xiang}, \binits{A.}}:
+Machine learning explainability for external stakeholders.
+arXiv preprint arXiv:2007.05408
+(2020)
+\end{botherref}
+\endbibitem
+
+%%% 89
+\bibitem{burkart2021survey}
+\begin{barticle}
+\bauthor{\bsnm{Burkart}, \binits{N.}},
+\bauthor{\bsnm{Huber}, \binits{M.F.}}:
+\batitle{A survey on the explainability of supervised machine learning}.
+\bjtitle{Journal of Artificial Intelligence Research}
+\bvolume{70},
+\bfpage{245}--\blpage{317}
+(\byear{2021})
+\end{barticle}
+\endbibitem
+
+%%% 90
+\bibitem{malhi2020explainable}
+\begin{bchapter}
+\bauthor{\bsnm{Malhi}, \binits{A.}},
+\bauthor{\bsnm{Knapic}, \binits{S.}},
+\bauthor{\bsnm{Fr{\"a}mling}, \binits{K.}}:
+\bctitle{Explainable agents for less bias in human-agent decision making}.
+In: \bbtitle{International Workshop on Explainable, Transparent Autonomous
+  Agents and Multi-Agent Systems},
+pp. \bfpage{129}--\blpage{146}
+(\byear{2020}).
+\bcomment{Springer}
+\end{bchapter}
+\endbibitem
+
+%%% 91
+\bibitem{bibal2021legal}
+\begin{barticle}
+\bauthor{\bsnm{Bibal}, \binits{A.}},
+\bauthor{\bsnm{Lognoul}, \binits{M.}},
+\bauthor{\bsnm{De~Streel}, \binits{A.}},
+\bauthor{\bsnm{Fr{\'e}nay}, \binits{B.}}:
+\batitle{Legal requirements on explainability in machine learning}.
+\bjtitle{Artificial Intelligence and Law}
+\bvolume{29}(\bissue{2}),
+\bfpage{149}--\blpage{169}
+(\byear{2021})
+\end{barticle}
+\endbibitem
+
+%%% 92
+\bibitem{bibal2020impact}
+\begin{botherref}
+\oauthor{\bsnm{Bibal}, \binits{A.}},
+\oauthor{\bsnm{Lognoul}, \binits{M.}},
+\oauthor{\bparticle{de} \bsnm{Streel}, \binits{A.}},
+\oauthor{\bsnm{Fr{\'e}nay}, \binits{B.}}:
+Impact of legal requirements on explainability in machine learning.
+arXiv preprint arXiv:2007.05479
+(2020)
+\end{botherref}
+\endbibitem
+
+%%% 93
+\bibitem{turian2010word}
+\begin{bchapter}
+\bauthor{\bsnm{Turian}, \binits{J.}},
+\bauthor{\bsnm{Ratinov}, \binits{L.}},
+\bauthor{\bsnm{Bengio}, \binits{Y.}}:
+\bctitle{Word representations: a simple and general method for semi-supervised
+  learning}.
+In: \bbtitle{Proceedings of the 48th Annual Meeting of the Association for
+  Computational Linguistics},
+pp. \bfpage{384}--\blpage{394}
+(\byear{2010})
+\end{bchapter}
+\endbibitem
+
+%%% 94
+\bibitem{bollegala2015embedding}
+\begin{bchapter}
+\bauthor{\bsnm{Bollegala}, \binits{D.}},
+\bauthor{\bsnm{Maehara}, \binits{T.}},
+\bauthor{\bsnm{Kawarabayashi}, \binits{K.-i.}}:
+\bctitle{Embedding semantic relations into word representations}.
+In: \bbtitle{Twenty-fourth International Joint Conference on Artificial
+  Intelligence}
+(\byear{2015})
+\end{bchapter}
+\endbibitem
+
+%%% 95
+\bibitem{minaee2021deep}
+\begin{barticle}
+\bauthor{\bsnm{Minaee}, \binits{S.}},
+\bauthor{\bsnm{Kalchbrenner}, \binits{N.}},
+\bauthor{\bsnm{Cambria}, \binits{E.}},
+\bauthor{\bsnm{Nikzad}, \binits{N.}},
+\bauthor{\bsnm{Chenaghlu}, \binits{M.}},
+\bauthor{\bsnm{Gao}, \binits{J.}}:
+\batitle{Deep learning--based text classification: A comprehensive review}.
+\bjtitle{ACM Computing Surveys (CSUR)}
+\bvolume{54}(\bissue{3}),
+\bfpage{1}--\blpage{40}
+(\byear{2021})
+\end{barticle}
+\endbibitem
+
+%%% 96
+\bibitem{pavlinek2017text}
+\begin{barticle}
+\bauthor{\bsnm{Pavlinek}, \binits{M.}},
+\bauthor{\bsnm{Podgorelec}, \binits{V.}}:
+\batitle{Text classification method based on self-training and lda topic
+  models}.
+\bjtitle{Expert Systems with Applications}
+\bvolume{80},
+\bfpage{83}--\blpage{93}
+(\byear{2017})
+\end{barticle}
+\endbibitem
+
+%%% 97
+\bibitem{chen2016short}
+\begin{bchapter}
+\bauthor{\bsnm{Chen}, \binits{Q.}},
+\bauthor{\bsnm{Yao}, \binits{L.}},
+\bauthor{\bsnm{Yang}, \binits{J.}}:
+\bctitle{Short text classification based on lda topic model}.
+In: \bbtitle{2016 International Conference on Audio, Language and Image
+  Processing (ICALIP)},
+pp. \bfpage{749}--\blpage{753}
+(\byear{2016}).
+\bcomment{IEEE}
+\end{bchapter}
+\endbibitem
+
+%%% 98
+\bibitem{landauer1998introduction}
+\begin{barticle}
+\bauthor{\bsnm{Landauer}, \binits{T.K.}},
+\bauthor{\bsnm{Foltz}, \binits{P.W.}},
+\bauthor{\bsnm{Laham}, \binits{D.}}:
+\batitle{An introduction to latent semantic analysis}.
+\bjtitle{Discourse processes}
+\bvolume{25}(\bissue{2-3}),
+\bfpage{259}--\blpage{284}
+(\byear{1998})
+\end{barticle}
+\endbibitem
+
+%%% 99
+\bibitem{jayashree2020evaluation}
+\begin{bchapter}
+\bauthor{\bsnm{Jayashree}, \binits{P.}},
+\bauthor{\bsnm{Srijith}, \binits{P.}}:
+\bctitle{Evaluation of deep gaussian processes for text classification}.
+In: \bbtitle{Proceedings of the 12th Language Resources and Evaluation
+  Conference},
+pp. \bfpage{1485}--\blpage{1491}
+(\byear{2020})
+\end{bchapter}
+\endbibitem
+
+%%% 100
+\bibitem{chen2015gaussian}
+\begin{bchapter}
+\bauthor{\bsnm{Chen}, \binits{S.-H.}},
+\bauthor{\bsnm{Lee}, \binits{Y.-S.}},
+\bauthor{\bsnm{Tai}, \binits{T.-C.}},
+\bauthor{\bsnm{Wang}, \binits{J.-C.}}:
+\bctitle{Gaussian process based text categorization for healthy information}.
+In: \bbtitle{2015 International Conference on Orange Technologies (ICOT)},
+pp. \bfpage{30}--\blpage{33}
+(\byear{2015}).
+doi:\doiurl{10.1109/ICOT.2015.7498487}
+\end{bchapter}
+\endbibitem
+
+%%% 101
+\bibitem{cheng2019document}
+\begin{barticle}
+\bauthor{\bsnm{Cheng}, \binits{Y.}},
+\bauthor{\bsnm{Ye}, \binits{Z.}},
+\bauthor{\bsnm{Wang}, \binits{M.}},
+\bauthor{\bsnm{Zhang}, \binits{Q.}}:
+\batitle{Document classification based on convolutional neural network and
+  hierarchical attention network}.
+\bjtitle{Neural Network World}
+\bvolume{29}(\bissue{2}),
+\bfpage{83}--\blpage{98}
+(\byear{2019})
+\end{barticle}
+\endbibitem
+
+%%% 102
+\bibitem{li2020survey}
+\begin{botherref}
+\oauthor{\bsnm{Li}, \binits{Q.}},
+\oauthor{\bsnm{Peng}, \binits{H.}},
+\oauthor{\bsnm{Li}, \binits{J.}},
+\oauthor{\bsnm{Xia}, \binits{C.}},
+\oauthor{\bsnm{Yang}, \binits{R.}},
+\oauthor{\bsnm{Sun}, \binits{L.}},
+\oauthor{\bsnm{Yu}, \binits{P.S.}},
+\oauthor{\bsnm{He}, \binits{L.}}:
+A survey on text classification: From shallow to deep learning.
+arXiv preprint arXiv:2008.00364
+(2020)
+\end{botherref}
+\endbibitem
+
+%%% 103
+\bibitem{yang2020survey}
+\begin{bchapter}
+\bauthor{\bsnm{Yang}, \binits{J.}},
+\bauthor{\bsnm{Bai}, \binits{L.}},
+\bauthor{\bsnm{Guo}, \binits{Y.}}:
+\bctitle{A survey of text classification models}.
+In: \bbtitle{Proceedings of the 2020 2nd International Conference on Robotics,
+  Intelligent Control and Artificial Intelligence},
+pp. \bfpage{327}--\blpage{334}
+(\byear{2020})
+\end{bchapter}
+\endbibitem
+
+%%% 104
+\bibitem{lai2015recurrent}
+\begin{bchapter}
+\bauthor{\bsnm{Lai}, \binits{S.}},
+\bauthor{\bsnm{Xu}, \binits{L.}},
+\bauthor{\bsnm{Liu}, \binits{K.}},
+\bauthor{\bsnm{Zhao}, \binits{J.}}:
+\bctitle{Recurrent convolutional neural networks for text classification}.
+In: \bbtitle{Twenty-ninth AAAI Conference on Artificial Intelligence}
+(\byear{2015})
+\end{bchapter}
+\endbibitem
+
+%%% 105
+\bibitem{farkas1995document}
+\begin{bchapter}
+\bauthor{\bsnm{Farkas}, \binits{J.}}:
+\bctitle{Document classification and recurrent neural networks}.
+In: \bbtitle{Proceedings of the 1995 Conference of the Centre for Advanced
+  Studies on Collaborative Research},
+p. \bfpage{21}
+(\byear{1995})
+\end{bchapter}
+\endbibitem
+
+%%% 106
+\bibitem{chen2018approximate}
+\begin{bchapter}
+\bauthor{\bsnm{Chen}, \binits{C.}},
+\bauthor{\bsnm{Lin}, \binits{X.}},
+\bauthor{\bsnm{Terejanu}, \binits{G.}}:
+\bctitle{An approximate bayesian long short-term memory algorithm for outlier
+  detection}.
+In: \bbtitle{2018 24th International Conference on Pattern Recognition (ICPR)},
+pp. \bfpage{201}--\blpage{206}
+(\byear{2018}).
+\bcomment{IEEE}
+\end{bchapter}
+\endbibitem
+
+%%% 107
+\bibitem{d2022open}
+\begin{botherref}
+\oauthor{\bsnm{D'Ambrosio}, \binits{A.}},
+\oauthor{\bsnm{Grundmann}, \binits{H.}},
+\oauthor{\bsnm{Donker}, \binits{T.}}:
+An open-source integrated framework for the automation of citation collection
+  and screening in systematic reviews.
+arXiv preprint arXiv:2202.10033
+(2022)
+\end{botherref}
+\endbibitem
+
+%%% 108
+\bibitem{zenododata}
+\begin{botherref}
+\oauthor{\bsnm{D'Ambrosio}, \binits{A.}}:
+Dataset related to the manuscript: "An open-source integrated framework for the
+  automation of citation collection and screening in systematic reviews".
+Zenodo
+(2022).
+doi:\doiurl{10.5281/zenodo.6323361}
+\end{botherref}
+\endbibitem
+
+\end{thebibliography}
+
+\newcommand{\BMCxmlcomment}[1]{}
+
+\BMCxmlcomment{
+
+<refgrp>
+
+<bibl id="B1">
+  <title><p>The rate of growth in scientific publication and the decline in
+  coverage provided by Science Citation Index</p></title>
+  <aug>
+    <au><snm>Larsen</snm><fnm>P</fnm></au>
+    <au><snm>Von Ins</snm><fnm>M</fnm></au>
+  </aug>
+  <source>Scientometrics</source>
+  <publisher>Akad{\'e}miai Kiad{\'o}, co-published with Springer Science+
+  Business Media BV~…</publisher>
+  <pubdate>2010</pubdate>
+  <volume>84</volume>
+  <issue>3</issue>
+  <fpage>575</fpage>
+  <lpage>-603</lpage>
+</bibl>
+
+<bibl id="B2">
+  <title><p>Growth rates of modern science: A bibliometric analysis based on
+  the number of publications and cited references</p></title>
+  <aug>
+    <au><snm>Bornmann</snm><fnm>L</fnm></au>
+    <au><snm>Mutz</snm><fnm>R</fnm></au>
+  </aug>
+  <source>Journal of the Association for Information Science and
+  Technology</source>
+  <publisher>Wiley Online Library</publisher>
+  <pubdate>2015</pubdate>
+  <volume>66</volume>
+  <issue>11</issue>
+  <fpage>2215</fpage>
+  <lpage>-2222</lpage>
+</bibl>
+
+<bibl id="B3">
+  <title><p>Publication patterns’ changes due to the COVID-19 pandemic: A
+  longitudinal and short-term scientometric analysis</p></title>
+  <aug>
+    <au><snm>Aviv Reuven</snm><fnm>S</fnm></au>
+    <au><snm>Rosenfeld</snm><fnm>A</fnm></au>
+  </aug>
+  <source>Scientometrics</source>
+  <publisher>Springer</publisher>
+  <pubdate>2021</pubdate>
+  <fpage>1</fpage>
+  <lpage>-24</lpage>
+</bibl>
+
+<bibl id="B4">
+  <title><p>Pandemic publishing: Medical journals strongly speed up their
+  publication process for COVID-19</p></title>
+  <aug>
+    <au><snm>Horbach</snm><fnm>SP</fnm></au>
+  </aug>
+  <source>Quantitative Science Studies</source>
+  <publisher>MIT Press One Rogers Street, Cambridge, MA 02142-1209, USA
+  journals-info~…</publisher>
+  <pubdate>2020</pubdate>
+  <volume>1</volume>
+  <issue>3</issue>
+  <fpage>1056</fpage>
+  <lpage>-1067</lpage>
+</bibl>
+
+<bibl id="B5">
+  <title><p>Rise of the Rxivs: How preprint servers are changing the publishing
+  process</p></title>
+  <aug>
+    <au><snm>Hoy</snm><fnm>MB</fnm></au>
+  </aug>
+  <source>Medical reference services quarterly</source>
+  <publisher>Taylor \& Francis</publisher>
+  <pubdate>2020</pubdate>
+  <volume>39</volume>
+  <issue>1</issue>
+  <fpage>84</fpage>
+  <lpage>-89</lpage>
+</bibl>
+
+<bibl id="B6">
+  <title><p>Estimating time to conduct a meta-analysis from number of citations
+  retrieved</p></title>
+  <aug>
+    <au><snm>Allen</snm><fnm>IE</fnm></au>
+    <au><snm>Olkin</snm><fnm>I</fnm></au>
+  </aug>
+  <source>Jama</source>
+  <publisher>American Medical Association</publisher>
+  <pubdate>1999</pubdate>
+  <volume>282</volume>
+  <issue>7</issue>
+  <fpage>634</fpage>
+  <lpage>-635</lpage>
+</bibl>
+
+<bibl id="B7">
+  <title><p>Analysis of the time and workers needed to conduct systematic
+  reviews of medical interventions using data from the PROSPERO
+  registry</p></title>
+  <aug>
+    <au><snm>Borah</snm><fnm>R</fnm></au>
+    <au><snm>Brown</snm><fnm>AW</fnm></au>
+    <au><snm>Capers</snm><fnm>PL</fnm></au>
+    <au><snm>Kaiser</snm><fnm>KA</fnm></au>
+  </aug>
+  <source>BMJ open</source>
+  <publisher>British Medical Journal Publishing Group</publisher>
+  <pubdate>2017</pubdate>
+  <volume>7</volume>
+  <issue>2</issue>
+  <fpage>e012545</fpage>
+</bibl>
+
+<bibl id="B8">
+  <title><p>Evidence-based medicine, the essential role of systematic reviews,
+  and the need for automated text mining tools</p></title>
+  <aug>
+    <au><snm>Cohen</snm><fnm>AM</fnm></au>
+    <au><snm>Adams</snm><fnm>CE</fnm></au>
+    <au><snm>Davis</snm><fnm>JM</fnm></au>
+    <au><snm>Yu</snm><fnm>C</fnm></au>
+    <au><snm>Yu</snm><fnm>PS</fnm></au>
+    <au><snm>Meng</snm><fnm>W</fnm></au>
+    <au><snm>Duggan</snm><fnm>L</fnm></au>
+    <au><snm>McDonagh</snm><fnm>M</fnm></au>
+    <au><snm>Smalheiser</snm><fnm>NR</fnm></au>
+  </aug>
+  <source>Proceedings of the 1st ACM international Health Informatics
+  Symposium</source>
+  <pubdate>2010</pubdate>
+  <fpage>376</fpage>
+  <lpage>-380</lpage>
+</bibl>
+
+<bibl id="B9">
+  <title><p>Seventy-five trials and eleven systematic reviews a day: how will
+  we ever keep up?</p></title>
+  <aug>
+    <au><snm>Bastian</snm><fnm>H</fnm></au>
+    <au><snm>Glasziou</snm><fnm>P</fnm></au>
+    <au><snm>Chalmers</snm><fnm>I</fnm></au>
+  </aug>
+  <source>PLoS medicine</source>
+  <publisher>Public Library of Science San Francisco, USA</publisher>
+  <pubdate>2010</pubdate>
+  <volume>7</volume>
+  <issue>9</issue>
+  <fpage>e1000326</fpage>
+</bibl>
+
+<bibl id="B10">
+  <title><p>Systematic literature reviews in software engineering: Preliminary
+  results from interviews with researchers</p></title>
+  <aug>
+    <au><snm>Babar</snm><fnm>MA</fnm></au>
+    <au><snm>Zhang</snm><fnm>H</fnm></au>
+  </aug>
+  <source>2009 3rd International Symposium on Empirical Software Engineering
+  and Measurement</source>
+  <pubdate>2009</pubdate>
+  <fpage>346</fpage>
+  <lpage>-355</lpage>
+</bibl>
+
+<bibl id="B11">
+  <title><p>Machine learning algorithms for systematic review: reducing
+  workload in a preclinical review of animal studies and reducing human
+  screening error</p></title>
+  <aug>
+    <au><snm>Bannach Brown</snm><fnm>A</fnm></au>
+    <au><snm>Przyby{\l}a</snm><fnm>P</fnm></au>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+    <au><snm>Rice</snm><fnm>AS</fnm></au>
+    <au><snm>Ananiadou</snm><fnm>S</fnm></au>
+    <au><snm>Liao</snm><fnm>J</fnm></au>
+    <au><snm>Macleod</snm><fnm>MR</fnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>BioMed Central</publisher>
+  <pubdate>2019</pubdate>
+  <volume>8</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-12</lpage>
+</bibl>
+
+<bibl id="B12">
+  <title><p>Systematic review automation technologies</p></title>
+  <aug>
+    <au><snm>Tsafnat</snm><fnm>G</fnm></au>
+    <au><snm>Glasziou</snm><fnm>P</fnm></au>
+    <au><snm>Choong</snm><fnm>MK</fnm></au>
+    <au><snm>Dunn</snm><fnm>A</fnm></au>
+    <au><snm>Galgani</snm><fnm>F</fnm></au>
+    <au><snm>Coiera</snm><fnm>E</fnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>Springer</publisher>
+  <pubdate>2014</pubdate>
+  <volume>3</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-15</lpage>
+</bibl>
+
+<bibl id="B13">
+  <title><p>Cochrane handbook for systematic reviews of
+  interventions</p></title>
+  <aug>
+    <au><snm>Higgins</snm><fnm>JP</fnm></au>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+    <au><snm>Chandler</snm><fnm>J</fnm></au>
+    <au><snm>Cumpston</snm><fnm>M</fnm></au>
+    <au><snm>Li</snm><fnm>T</fnm></au>
+    <au><snm>Page</snm><fnm>MJ</fnm></au>
+    <au><snm>Welch</snm><fnm>VA</fnm></au>
+  </aug>
+  <publisher>John Wiley \& Sons</publisher>
+  <pubdate>2019</pubdate>
+</bibl>
+
+<bibl id="B14">
+  <title><p>Searching for studies (chapter 6)</p></title>
+  <aug>
+    <au><snm>Lefebvre</snm><fnm>C</fnm></au>
+    <au><snm>Manheimer</snm><fnm>E</fnm></au>
+    <au><snm>Glanville</snm><fnm>J</fnm></au>
+    <au><snm>Higgins</snm><fnm>J</fnm></au>
+    <au><snm>Green</snm><fnm>S</fnm></au>
+  </aug>
+  <source>Cochrane handbook for systematic reviews of interventions
+  version</source>
+  <pubdate>2011</pubdate>
+  <volume>510</volume>
+</bibl>
+
+<bibl id="B15">
+  <title><p>Searching for studies</p></title>
+  <aug>
+    <au><snm>Hammerstr{\o}m</snm><fnm>K</fnm></au>
+    <au><snm>Wade</snm><fnm>A</fnm></au>
+    <au><snm>J{\o}rgensen</snm><fnm>AMK</fnm></au>
+    <au><snm>Hammerstr{\o}m</snm><fnm>K</fnm></au>
+  </aug>
+  <source>Education</source>
+  <publisher>Citeseer</publisher>
+  <pubdate>2010</pubdate>
+  <volume>54</volume>
+  <issue>11.3</issue>
+</bibl>
+
+<bibl id="B16">
+  <title><p>Toward systematic review automation: a practical guide to using
+  machine learning tools in research synthesis</p></title>
+  <aug>
+    <au><snm>Marshall</snm><fnm>IJ</fnm></au>
+    <au><snm>Wallace</snm><fnm>BC</fnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>Springer</publisher>
+  <pubdate>2019</pubdate>
+  <volume>8</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-10</lpage>
+</bibl>
+
+<bibl id="B17">
+  <title><p>Are systematic reviews up-to-date at the time of
+  publication?</p></title>
+  <aug>
+    <au><snm>Beller</snm><fnm>EM</fnm></au>
+    <au><snm>Chen</snm><fnm>JKH</fnm></au>
+    <au><snm>Wang</snm><fnm>ULH</fnm></au>
+    <au><snm>Glasziou</snm><fnm>PP</fnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>BioMed Central</publisher>
+  <pubdate>2013</pubdate>
+  <volume>2</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-6</lpage>
+</bibl>
+
+<bibl id="B18">
+  <title><p>Making progress with the automation of systematic reviews:
+  principles of the International Collaboration for the Automation of
+  Systematic Reviews (ICASR)</p></title>
+  <aug>
+    <au><snm>Beller</snm><fnm>E</fnm></au>
+    <au><snm>Clark</snm><fnm>J</fnm></au>
+    <au><snm>Tsafnat</snm><fnm>G</fnm></au>
+    <au><snm>Adams</snm><fnm>C</fnm></au>
+    <au><snm>Diehl</snm><fnm>H</fnm></au>
+    <au><snm>Lund</snm><fnm>H</fnm></au>
+    <au><snm>Ouzzani</snm><fnm>M</fnm></au>
+    <au><snm>Thayer</snm><fnm>K</fnm></au>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+    <au><snm>Turner</snm><fnm>T</fnm></au>
+    <au><cnm>others</cnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>BioMed Central</publisher>
+  <pubdate>2018</pubdate>
+  <volume>7</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-7</lpage>
+</bibl>
+
+<bibl id="B19">
+  <title><p>Text mining for biology and biomedicine</p></title>
+  <aug>
+    <au><snm>Ananiadou</snm><fnm>S</fnm></au>
+    <au><snm>McNaught</snm><fnm>J</fnm></au>
+  </aug>
+  <publisher>Citeseer</publisher>
+  <pubdate>2006</pubdate>
+</bibl>
+
+<bibl id="B20">
+  <title><p>Getting started in text mining</p></title>
+  <aug>
+    <au><snm>Cohen</snm><fnm>KB</fnm></au>
+    <au><snm>Hunter</snm><fnm>L</fnm></au>
+  </aug>
+  <source>PLoS computational biology</source>
+  <publisher>Public Library of Science San Francisco, USA</publisher>
+  <pubdate>2008</pubdate>
+  <volume>4</volume>
+  <issue>1</issue>
+  <fpage>e20</fpage>
+</bibl>
+
+<bibl id="B21">
+  <title><p>Text classification using machine learning techniques</p></title>
+  <aug>
+    <au><snm>Ikonomakis</snm><fnm>M</fnm></au>
+    <au><snm>Kotsiantis</snm><fnm>S</fnm></au>
+    <au><snm>Tampakas</snm><fnm>V</fnm></au>
+  </aug>
+  <source>WSEAS transactions on computers</source>
+  <publisher>Citeseer</publisher>
+  <pubdate>2005</pubdate>
+  <volume>4</volume>
+  <issue>8</issue>
+  <fpage>966</fpage>
+  <lpage>-974</lpage>
+</bibl>
+
+<bibl id="B22">
+  <title><p>Supporting systematic reviews using text mining</p></title>
+  <aug>
+    <au><snm>Ananiadou</snm><fnm>S</fnm></au>
+    <au><snm>Rea</snm><fnm>B</fnm></au>
+    <au><snm>Okazaki</snm><fnm>N</fnm></au>
+    <au><snm>Procter</snm><fnm>R</fnm></au>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+  </aug>
+  <source>Social Science Computer Review</source>
+  <publisher>Sage Publications Sage CA: Los Angeles, CA</publisher>
+  <pubdate>2009</pubdate>
+  <volume>27</volume>
+  <issue>4</issue>
+  <fpage>509</fpage>
+  <lpage>-523</lpage>
+</bibl>
+
+<bibl id="B23">
+  <title><p>Using text mining for study identification in systematic reviews: a
+  systematic review of current approaches</p></title>
+  <aug>
+    <au><snm>O’Mara Eves</snm><fnm>A</fnm></au>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+    <au><snm>McNaught</snm><fnm>J</fnm></au>
+    <au><snm>Miwa</snm><fnm>M</fnm></au>
+    <au><snm>Ananiadou</snm><fnm>S</fnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>BioMed Central</publisher>
+  <pubdate>2015</pubdate>
+  <volume>4</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-22</lpage>
+</bibl>
+
+<bibl id="B24">
+  <title><p>The automation of systematic reviews</p></title>
+  <aug>
+    <au><snm>Tsafnat</snm><fnm>G</fnm></au>
+    <au><snm>Dunn</snm><fnm>A</fnm></au>
+    <au><snm>Glasziou</snm><fnm>P</fnm></au>
+    <au><snm>Coiera</snm><fnm>E</fnm></au>
+  </aug>
+  <publisher>British Medical Journal Publishing Group</publisher>
+  <pubdate>2013</pubdate>
+</bibl>
+
+<bibl id="B25">
+  <title><p>Automating data extraction in systematic reviews: a systematic
+  review</p></title>
+  <aug>
+    <au><snm>Jonnalagadda</snm><fnm>SR</fnm></au>
+    <au><snm>Goyal</snm><fnm>P</fnm></au>
+    <au><snm>Huffman</snm><fnm>MD</fnm></au>
+  </aug>
+  <source>Systematic reviews</source>
+  <publisher>BioMed Central</publisher>
+  <pubdate>2015</pubdate>
+  <volume>4</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-16</lpage>
+</bibl>
+
+<bibl id="B26">
+  <title><p>Active learning literature survey</p></title>
+  <aug>
+    <au><snm>Settles</snm><fnm>B</fnm></au>
+  </aug>
+  <publisher>University of Wisconsin-Madison Department of Computer
+  Sciences</publisher>
+  <pubdate>2009</pubdate>
+</bibl>
+
+<bibl id="B27">
+  <title><p>Reducing systematic review workload through certainty-based
+  screening</p></title>
+  <aug>
+    <au><snm>Miwa</snm><fnm>M</fnm></au>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+    <au><snm>O’Mara Eves</snm><fnm>A</fnm></au>
+    <au><snm>Ananiadou</snm><fnm>S</fnm></au>
+  </aug>
+  <source>Journal of biomedical informatics</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2014</pubdate>
+  <volume>51</volume>
+  <fpage>242</fpage>
+  <lpage>-253</lpage>
+</bibl>
+
+<bibl id="B28">
+  <title><p>National health care infrastructures, health care utilization and
+  patient movements between hospitals - networks working to improve
+  surveillance: a systematic literature review</p></title>
+  <aug>
+    <au><snm>Sadaghiani</snm><fnm>C</fnm></au>
+    <au><snm>Donker</snm><fnm>T</fnm></au>
+    <au><snm>Andrianou</snm><fnm>X</fnm></au>
+    <au><snm>Babarczy</snm><fnm>B</fnm></au>
+    <au><snm>De Boer</snm><fnm>G</fnm></au>
+    <au><snm>Di Ruscio</snm><fnm>F</fnm></au>
+    <au><snm>Cairns</snm><fnm>S</fnm></au>
+    <au><snm>Cr{\'e}pey</snm><fnm>P</fnm></au>
+    <au><snm>Fortaleza</snm><fnm>CM</fnm></au>
+    <au><snm>Freyler</snm><fnm>P</fnm></au>
+    <au><snm>Gagliotti</snm><fnm>C</fnm></au>
+    <au><snm>Liljeros</snm><fnm>F</fnm></au>
+    <au><snm>Moro</snm><fnm>ML</fnm></au>
+    <au><snm>Oteo</snm><fnm>J</fnm></au>
+    <au><snm>Palos</snm><fnm>C</fnm></au>
+    <au><snm>Pilarski</snm><fnm>G</fnm></au>
+    <au><snm>Reilly</snm><fnm>J</fnm></au>
+    <au><snm>Robotham</snm><fnm>J</fnm></au>
+    <au><snm>S{\'a} Le{\~a}o</snm><fnm>R</fnm></au>
+    <au><snm>Simonsen</snm><fnm>GS</fnm></au>
+    <au><snm>Temime</snm><fnm>L</fnm></au>
+    <au><snm>Ternhag</snm><fnm>A</fnm></au>
+    <au><snm>Grundmann</snm><fnm>H</fnm></au>
+    <au><snm>Mutters</snm><fnm>NT</fnm></au>
+  </aug>
+  <publisher>PROSPERO</publisher>
+  <pubdate>2020</pubdate>
+  <url>http://www.crd.york.ac.uk/PROSPERO/display\_record.asp?ID=CRD42020157987</url>
+</bibl>
+
+<bibl id="B29">
+  <title><p>R: A Language and Environment for Statistical Computing</p></title>
+  <aug>
+    <au><cnm>{R Core Team}</cnm></au>
+  </aug>
+  <publisher>Vienna, Austria</publisher>
+  <pubdate>2021</pubdate>
+  <url>https://www.R-project.org/</url>
+</bibl>
+
+<bibl id="B30">
+  <title><p>NCBI Insights : Updated pubmed E-utilities coming in April
+  2022!</p></title>
+  <publisher>U.S. National Library of Medicine</publisher>
+  <url>https://ncbiinsights.ncbi.nlm.nih.gov/2021/10/05/updated-pubmed-api/</url>
+  <note>Accessed on 21.10.2021</note>
+</bibl>
+
+<bibl id="B31">
+  <title><p>Active learning for biomedical citation screening</p></title>
+  <aug>
+    <au><snm>Wallace</snm><fnm>BC</fnm></au>
+    <au><snm>Small</snm><fnm>K</fnm></au>
+    <au><snm>Brodley</snm><fnm>CE</fnm></au>
+    <au><snm>Trikalinos</snm><fnm>TA</fnm></au>
+  </aug>
+  <source>Proceedings of the 16th ACM SIGKDD international conference on
+  Knowledge discovery and data mining</source>
+  <pubdate>2010</pubdate>
+  <fpage>173</fpage>
+  <lpage>-182</lpage>
+</bibl>
+
+<bibl id="B32">
+  <title><p>Special issue on learning from imbalanced data sets</p></title>
+  <aug>
+    <au><snm>Chawla</snm><fnm>NV</fnm></au>
+    <au><snm>Japkowicz</snm><fnm>N</fnm></au>
+    <au><snm>Kotcz</snm><fnm>A</fnm></au>
+  </aug>
+  <source>ACM SIGKDD explorations newsletter</source>
+  <publisher>ACM New York, NY, USA</publisher>
+  <pubdate>2004</pubdate>
+  <volume>6</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-6</lpage>
+</bibl>
+
+<bibl id="B33">
+  <title><p>Medical subject headings (MeSH)</p></title>
+  <aug>
+    <au><snm>Lipscomb</snm><fnm>CE</fnm></au>
+  </aug>
+  <source>Bulletin of the Medical Library Association</source>
+  <publisher>Medical Library Association</publisher>
+  <pubdate>2000</pubdate>
+  <volume>88</volume>
+  <issue>3</issue>
+  <fpage>265</fpage>
+</bibl>
+
+<bibl id="B34">
+  <title><p>Modern information retrieval</p></title>
+  <aug>
+    <au><snm>Baeza Yates</snm><fnm>R</fnm></au>
+    <au><snm>Ribeiro Neto</snm><fnm>B</fnm></au>
+    <au><cnm>others</cnm></au>
+  </aug>
+  <publisher>ACM press New York</publisher>
+  <pubdate>1999</pubdate>
+  <volume>463</volume>
+</bibl>
+
+<bibl id="B35">
+  <title><p>Graph-of-words: mining and retrieving text with networks of
+  features</p></title>
+  <aug>
+    <au><snm>Rousseau</snm><fnm>F</fnm></au>
+  </aug>
+  <source>PhD thesis</source>
+  <publisher>Ph. D. dissertation</publisher>
+  <pubdate>2015</pubdate>
+</bibl>
+
+<bibl id="B36">
+  <title><p>Listing all maximal cliques in sparse graphs in near-optimal
+  time</p></title>
+  <aug>
+    <au><snm>Eppstein</snm><fnm>D</fnm></au>
+    <au><snm>L{\"o}ffler</snm><fnm>M</fnm></au>
+    <au><snm>Strash</snm><fnm>D</fnm></au>
+  </aug>
+  <source>International Symposium on Algorithms and Computation</source>
+  <pubdate>2010</pubdate>
+  <fpage>403</fpage>
+  <lpage>-414</lpage>
+</bibl>
+
+<bibl id="B37">
+  <title><p>BART: Bayesian additive regression trees</p></title>
+  <aug>
+    <au><snm>Chipman</snm><fnm>HA</fnm></au>
+    <au><snm>George</snm><fnm>EI</fnm></au>
+    <au><snm>McCulloch</snm><fnm>RE</fnm></au>
+    <au><cnm>others</cnm></au>
+  </aug>
+  <source>The Annals of Applied Statistics</source>
+  <publisher>Institute of Mathematical Statistics</publisher>
+  <pubdate>2010</pubdate>
+  <volume>4</volume>
+  <issue>1</issue>
+  <fpage>266</fpage>
+  <lpage>-298</lpage>
+</bibl>
+
+<bibl id="B38">
+  <title><p>bartMachine: Machine learning with Bayesian additive regression
+  trees</p></title>
+  <aug>
+    <au><snm>Kapelner</snm><fnm>A</fnm></au>
+    <au><snm>Bleich</snm><fnm>J</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:1312.2171</source>
+  <pubdate>2013</pubdate>
+</bibl>
+
+<bibl id="B39">
+  <title><p>Prediction with missing data via Bayesian additive regression
+  trees</p></title>
+  <aug>
+    <au><snm>Kapelner</snm><fnm>A</fnm></au>
+    <au><snm>Bleich</snm><fnm>J</fnm></au>
+  </aug>
+  <source>Canadian Journal of Statistics</source>
+  <publisher>Wiley Online Library</publisher>
+  <pubdate>2015</pubdate>
+  <volume>43</volume>
+  <issue>2</issue>
+  <fpage>224</fpage>
+  <lpage>-239</lpage>
+</bibl>
+
+<bibl id="B40">
+  <title><p>A study of the behavior of several methods for balancing machine
+  learning training data</p></title>
+  <aug>
+    <au><snm>Batista</snm><fnm>GE</fnm></au>
+    <au><snm>Prati</snm><fnm>RC</fnm></au>
+    <au><snm>Monard</snm><fnm>MC</fnm></au>
+  </aug>
+  <source>ACM SIGKDD explorations newsletter</source>
+  <publisher>ACM New York, NY, USA</publisher>
+  <pubdate>2004</pubdate>
+  <volume>6</volume>
+  <issue>1</issue>
+  <fpage>20</fpage>
+  <lpage>-29</lpage>
+</bibl>
+
+<bibl id="B41">
+  <title><p>Ensemble learning</p></title>
+  <aug>
+    <au><snm>Zhou</snm><fnm>ZH</fnm></au>
+  </aug>
+  <source>Machine Learning</source>
+  <publisher>Springer</publisher>
+  <pubdate>2021</pubdate>
+  <fpage>181</fpage>
+  <lpage>-210</lpage>
+</bibl>
+
+<bibl id="B42">
+  <title><p>Ensemble methods in machine learning</p></title>
+  <aug>
+    <au><snm>Dietterich</snm><fnm>TG</fnm></au>
+  </aug>
+  <source>International workshop on multiple classifier systems</source>
+  <pubdate>2000</pubdate>
+  <fpage>1</fpage>
+  <lpage>-15</lpage>
+</bibl>
+
+<bibl id="B43">
+  <title><p>rpart: Recursive Partitioning and Regression Trees</p></title>
+  <aug>
+    <au><snm>Therneau</snm><fnm>T</fnm></au>
+    <au><snm>Atkinson</snm><fnm>B</fnm></au>
+  </aug>
+  <pubdate>2019</pubdate>
+  <url>https://CRAN.R-project.org/package=rpart</url>
+  <note>R package version 4.1-15</note>
+</bibl>
+
+<bibl id="B44">
+  <title><p>R-squared for Bayesian regression models</p></title>
+  <aug>
+    <au><snm>Gelman</snm><fnm>A</fnm></au>
+    <au><snm>Goodrich</snm><fnm>B</fnm></au>
+    <au><snm>Gabry</snm><fnm>J</fnm></au>
+    <au><snm>Vehtari</snm><fnm>A</fnm></au>
+  </aug>
+  <source>The American Statistician</source>
+  <publisher>Taylor \& Francis</publisher>
+  <pubdate>2019</pubdate>
+</bibl>
+
+<bibl id="B45">
+  <title><p>Presenting the negative hypergeometric distribution to the
+  introductory statistics courses</p></title>
+  <aug>
+    <au><snm>Chae</snm><fnm>KC</fnm></au>
+  </aug>
+  <source>International Journal of Mathematical Education in Science and
+  Technology</source>
+  <publisher>Taylor \& Francis</publisher>
+  <pubdate>1993</pubdate>
+  <volume>24</volume>
+  <issue>4</issue>
+  <fpage>523</fpage>
+  <lpage>-526</lpage>
+</bibl>
+
+<bibl id="B46">
+  <title><p>Monte Carlo statistical methods</p></title>
+  <aug>
+    <au><snm>Robert</snm><fnm>CP</fnm></au>
+    <au><snm>Casella</snm><fnm>G</fnm></au>
+  </aug>
+  <publisher>Springer</publisher>
+  <pubdate>2004</pubdate>
+  <volume>2</volume>
+</bibl>
+
+<bibl id="B47">
+  <title><p>Bagging predictors</p></title>
+  <aug>
+    <au><snm>Breiman</snm><fnm>L</fnm></au>
+  </aug>
+  <source>Machine learning</source>
+  <publisher>Springer</publisher>
+  <pubdate>1996</pubdate>
+  <volume>24</volume>
+  <issue>2</issue>
+  <fpage>123</fpage>
+  <lpage>-140</lpage>
+</bibl>
+
+<bibl id="B48">
+  <title><p>Hyperparameter search in machine learning</p></title>
+  <aug>
+    <au><snm>Claesen</snm><fnm>M</fnm></au>
+    <au><snm>De Moor</snm><fnm>B</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:1502.02127</source>
+  <pubdate>2015</pubdate>
+</bibl>
+
+<bibl id="B49">
+  <title><p>On hyperparameter optimization of machine learning algorithms:
+  Theory and practice</p></title>
+  <aug>
+    <au><snm>Yang</snm><fnm>L</fnm></au>
+    <au><snm>Shami</snm><fnm>A</fnm></au>
+  </aug>
+  <source>Neurocomputing</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2020</pubdate>
+  <volume>415</volume>
+  <fpage>295</fpage>
+  <lpage>-316</lpage>
+</bibl>
+
+<bibl id="B50">
+  <title><p>Reducing workload in systematic review preparation using automated
+  citation classification</p></title>
+  <aug>
+    <au><snm>Cohen</snm><fnm>AM</fnm></au>
+    <au><snm>Hersh</snm><fnm>WR</fnm></au>
+    <au><snm>Peterson</snm><fnm>K</fnm></au>
+    <au><snm>Yen</snm><fnm>PY</fnm></au>
+  </aug>
+  <source>Journal of the American Medical Informatics Association</source>
+  <publisher>BMJ Group BMA House, Tavistock Square, London, WC1H
+  9JR</publisher>
+  <pubdate>2006</pubdate>
+  <volume>13</volume>
+  <issue>2</issue>
+  <fpage>206</fpage>
+  <lpage>-219</lpage>
+</bibl>
+
+<bibl id="B51">
+  <title><p>Performing systematic literature reviews with Researchr: Tool
+  demonstration</p></title>
+  <aug>
+    <au><snm>Visser</snm><fnm>E</fnm></au>
+  </aug>
+  <source>Technical Report Series TUD-SERG-2010-010</source>
+  <publisher>Delft University of Technology, Software Engineering Research
+  Group</publisher>
+  <pubdate>2010</pubdate>
+</bibl>
+
+<bibl id="B52">
+  <title><p>EPPI-Reviewer: software for research synthesis</p></title>
+  <aug>
+    <au><snm>Thomas</snm><fnm>J</fnm></au>
+    <au><snm>Brunton</snm><fnm>J</fnm></au>
+  </aug>
+  <pubdate>2007</pubdate>
+</bibl>
+
+<bibl id="B53">
+  <title><p>MScanner: a classifier for retrieving Medline citations</p></title>
+  <aug>
+    <au><snm>Poulter</snm><fnm>GL</fnm></au>
+    <au><snm>Rubin</snm><fnm>DL</fnm></au>
+    <au><snm>Altman</snm><fnm>RB</fnm></au>
+    <au><snm>Seoighe</snm><fnm>C</fnm></au>
+  </aug>
+  <source>BMC bioinformatics</source>
+  <publisher>Springer</publisher>
+  <pubdate>2008</pubdate>
+  <volume>9</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-12</lpage>
+</bibl>
+
+<bibl id="B54">
+  <title><p>Thalia: semantic search engine for biomedical abstracts</p></title>
+  <aug>
+    <au><snm>Soto</snm><fnm>AJ</fnm></au>
+    <au><snm>Przyby{\l}a</snm><fnm>P</fnm></au>
+    <au><snm>Ananiadou</snm><fnm>S</fnm></au>
+  </aug>
+  <source>Bioinformatics</source>
+  <publisher>Oxford University Press</publisher>
+  <pubdate>2019</pubdate>
+  <volume>35</volume>
+  <issue>10</issue>
+  <fpage>1799</fpage>
+  <lpage>-1801</lpage>
+</bibl>
+
+<bibl id="B55">
+  <title><p>In search of the right literature search engine (s)</p></title>
+  <aug>
+    <au><snm>Bajpai</snm><fnm>A</fnm></au>
+    <au><snm>Davuluri</snm><fnm>S</fnm></au>
+    <au><snm>Haridas</snm><fnm>H</fnm></au>
+    <au><snm>Kasliwal</snm><fnm>G</fnm></au>
+    <au><snm>Deepti</snm><fnm>H</fnm></au>
+    <au><snm>Sreelakshmi</snm><fnm>KS</fnm></au>
+    <au><snm>Chandrashekar</snm><fnm>D</fnm></au>
+    <au><snm>Bora</snm><fnm>P</fnm></au>
+    <au><snm>Farouk</snm><fnm>M</fnm></au>
+    <au><snm>Chitturi</snm><fnm>N</fnm></au>
+    <au><cnm>others</cnm></au>
+  </aug>
+  <source>Nature Precedings</source>
+  <publisher>Nature Publishing Group</publisher>
+  <pubdate>2011</pubdate>
+  <fpage>1</fpage>
+  <lpage>-1</lpage>
+</bibl>
+
+<bibl id="B56">
+  <title><p>EMBASE versus MEDLINE for family medicine searches: can MEDLINE
+  searches find the forest or a tree?</p></title>
+  <aug>
+    <au><snm>Wilkins</snm><fnm>T</fnm></au>
+    <au><snm>Gillies</snm><fnm>RA</fnm></au>
+    <au><snm>Davies</snm><fnm>K</fnm></au>
+  </aug>
+  <source>Canadian Family Physician</source>
+  <publisher>The College of Family Physicians of Canada</publisher>
+  <pubdate>2005</pubdate>
+  <volume>51</volume>
+  <issue>6</issue>
+  <fpage>848</fpage>
+  <lpage>-849</lpage>
+</bibl>
+
+<bibl id="B57">
+  <title><p>Medline and Embase complement each other in literature
+  searches</p></title>
+  <aug>
+    <au><snm>Woods</snm><fnm>D</fnm></au>
+    <au><snm>Trewheellar</snm><fnm>K</fnm></au>
+  </aug>
+  <source>BMJ: British Medical Journal</source>
+  <publisher>BMJ Publishing Group LTD</publisher>
+  <pubdate>1998</pubdate>
+  <volume>316</volume>
+  <issue>7138</issue>
+  <fpage>1166</fpage>
+</bibl>
+
+<bibl id="B58">
+  <title><p>Text mining using n-grams</p></title>
+  <aug>
+    <au><snm>Schonlau</snm><fnm>M</fnm></au>
+    <au><snm>Guenther</snm><fnm>N</fnm></au>
+  </aug>
+  <source>Schonlau, M., Guenther, N. Sucholutsky, I. Text mining using n-gram
+  variables. The Stata Journal</source>
+  <pubdate>2017</pubdate>
+  <volume>17</volume>
+  <issue>4</issue>
+  <fpage>866</fpage>
+  <lpage>-881</lpage>
+</bibl>
+
+<bibl id="B59">
+  <title><p>Sentiment analysis using word-graphs</p></title>
+  <aug>
+    <au><snm>Violos</snm><fnm>J</fnm></au>
+    <au><snm>Tserpes</snm><fnm>K</fnm></au>
+    <au><snm>Psomakelis</snm><fnm>E</fnm></au>
+    <au><snm>Psychas</snm><fnm>K</fnm></au>
+    <au><snm>Varvarigou</snm><fnm>T</fnm></au>
+  </aug>
+  <source>Proceedings of the 6th International Conference on Web Intelligence,
+  Mining and Semantics</source>
+  <pubdate>2016</pubdate>
+  <fpage>1</fpage>
+  <lpage>-9</lpage>
+</bibl>
+
+<bibl id="B60">
+  <title><p>Text categorization as a graph classification problem</p></title>
+  <aug>
+    <au><snm>Rousseau</snm><fnm>F</fnm></au>
+    <au><snm>Kiagias</snm><fnm>E</fnm></au>
+    <au><snm>Vazirgiannis</snm><fnm>M</fnm></au>
+  </aug>
+  <source>Proceedings of the 53rd Annual Meeting of the Association for
+  Computational Linguistics and the 7th International Joint Conference on
+  Natural Language Processing (Volume 1: Long Papers)</source>
+  <pubdate>2015</pubdate>
+  <fpage>1702</fpage>
+  <lpage>-1712</lpage>
+</bibl>
+
+<bibl id="B61">
+  <title><p>KeyGraph: Automatic indexing by co-occurrence graph based on
+  building construction metaphor</p></title>
+  <aug>
+    <au><snm>Ohsawa</snm><fnm>Y</fnm></au>
+    <au><snm>Benson</snm><fnm>NE</fnm></au>
+    <au><snm>Yachida</snm><fnm>M</fnm></au>
+  </aug>
+  <source>Proceedings IEEE International Forum on Research and Technology
+  Advances in Digital Libraries-ADL'98-</source>
+  <pubdate>1998</pubdate>
+  <fpage>12</fpage>
+  <lpage>-18</lpage>
+</bibl>
+
+<bibl id="B62">
+  <title><p>Boosting and additive trees</p></title>
+  <aug>
+    <au><snm>Hastie</snm><fnm>T</fnm></au>
+    <au><snm>Tibshirani</snm><fnm>R</fnm></au>
+    <au><snm>Friedman</snm><fnm>J</fnm></au>
+  </aug>
+  <source>The elements of statistical learning</source>
+  <publisher>Springer</publisher>
+  <pubdate>2009</pubdate>
+  <fpage>337</fpage>
+  <lpage>-387</lpage>
+</bibl>
+
+<bibl id="B63">
+  <title><p>BELM: Bayesian extreme learning machine</p></title>
+  <aug>
+    <au><snm>Soria Olivas</snm><fnm>E</fnm></au>
+    <au><snm>Gomez Sanchis</snm><fnm>J</fnm></au>
+    <au><snm>Martin</snm><fnm>JD</fnm></au>
+    <au><snm>Vila Frances</snm><fnm>J</fnm></au>
+    <au><snm>Martinez</snm><fnm>M</fnm></au>
+    <au><snm>Magdalena</snm><fnm>JR</fnm></au>
+    <au><snm>Serrano</snm><fnm>AJ</fnm></au>
+  </aug>
+  <source>IEEE transactions on neural networks</source>
+  <publisher>IEEE</publisher>
+  <pubdate>2011</pubdate>
+  <volume>22</volume>
+  <issue>3</issue>
+  <fpage>505</fpage>
+  <lpage>-509</lpage>
+</bibl>
+
+<bibl id="B64">
+  <title><p>Being Bayesian about categorical probability</p></title>
+  <aug>
+    <au><snm>Joo</snm><fnm>T</fnm></au>
+    <au><snm>Chung</snm><fnm>U</fnm></au>
+    <au><snm>Seo</snm><fnm>MG</fnm></au>
+  </aug>
+  <source>International Conference on Machine Learning</source>
+  <pubdate>2020</pubdate>
+  <fpage>4950</fpage>
+  <lpage>-4961</lpage>
+</bibl>
+
+<bibl id="B65">
+  <title><p>Hands-on Bayesian Neural Networks--a Tutorial for Deep Learning
+  Users</p></title>
+  <aug>
+    <au><snm>Jospin</snm><fnm>LV</fnm></au>
+    <au><snm>Buntine</snm><fnm>W</fnm></au>
+    <au><snm>Boussaid</snm><fnm>F</fnm></au>
+    <au><snm>Laga</snm><fnm>H</fnm></au>
+    <au><snm>Bennamoun</snm><fnm>M</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:2007.06823</source>
+  <pubdate>2020</pubdate>
+</bibl>
+
+<bibl id="B66">
+  <title><p>Bayesian averaging is well-temperated</p></title>
+  <aug>
+    <au><snm>Hansen</snm><fnm>LK</fnm></au>
+    <au><cnm>others</cnm></au>
+  </aug>
+  <source>Proceedings of NIPS</source>
+  <pubdate>2000</pubdate>
+  <volume>99</volume>
+  <fpage>265</fpage>
+  <lpage>-271</lpage>
+</bibl>
+
+<bibl id="B67">
+  <title><p>Diversity techniques improve the performance of the best imbalance
+  learning ensembles</p></title>
+  <aug>
+    <au><snm>D{\'i}ez Pastor</snm><fnm>JF</fnm></au>
+    <au><snm>Rodr{\'i}guez</snm><fnm>JJ</fnm></au>
+    <au><snm>Garc{\'i}a Osorio</snm><fnm>CI</fnm></au>
+    <au><snm>Kuncheva</snm><fnm>LI</fnm></au>
+  </aug>
+  <source>Information Sciences</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2015</pubdate>
+  <volume>325</volume>
+  <fpage>98</fpage>
+  <lpage>-117</lpage>
+</bibl>
+
+<bibl id="B68">
+  <title><p>Precision of healthcare systematic review searches in a
+  cross-sectional sample</p></title>
+  <aug>
+    <au><snm>Sampson</snm><fnm>M</fnm></au>
+    <au><snm>Tetzlaff</snm><fnm>J</fnm></au>
+    <au><snm>Urquhart</snm><fnm>C</fnm></au>
+  </aug>
+  <source>Research Synthesis Methods</source>
+  <publisher>Wiley Online Library</publisher>
+  <pubdate>2011</pubdate>
+  <volume>2</volume>
+  <issue>2</issue>
+  <fpage>119</fpage>
+  <lpage>-125</lpage>
+</bibl>
+
+<bibl id="B69">
+  <title><p>Semi-automated screening of biomedical citations for systematic
+  reviews</p></title>
+  <aug>
+    <au><snm>Wallace</snm><fnm>BC</fnm></au>
+    <au><snm>Trikalinos</snm><fnm>TA</fnm></au>
+    <au><snm>Lau</snm><fnm>J</fnm></au>
+    <au><snm>Brodley</snm><fnm>C</fnm></au>
+    <au><snm>Schmid</snm><fnm>CH</fnm></au>
+  </aug>
+  <source>BMC bioinformatics</source>
+  <publisher>BioMed Central</publisher>
+  <pubdate>2010</pubdate>
+  <volume>11</volume>
+  <issue>1</issue>
+  <fpage>1</fpage>
+  <lpage>-11</lpage>
+</bibl>
+
+<bibl id="B70">
+  <title><p>Comparing boosting and bagging techniques with noisy and imbalanced
+  data</p></title>
+  <aug>
+    <au><snm>Khoshgoftaar</snm><fnm>TM</fnm></au>
+    <au><snm>Van Hulse</snm><fnm>J</fnm></au>
+    <au><snm>Napolitano</snm><fnm>A</fnm></au>
+  </aug>
+  <source>IEEE Transactions on Systems, Man, and Cybernetics-Part A: Systems
+  and Humans</source>
+  <publisher>IEEE</publisher>
+  <pubdate>2010</pubdate>
+  <volume>41</volume>
+  <issue>3</issue>
+  <fpage>552</fpage>
+  <lpage>-568</lpage>
+</bibl>
+
+<bibl id="B71">
+  <title><p>The impact of oversampling with SMOTE on the performance of 3
+  classifiers in prediction of type 2 diabetes</p></title>
+  <aug>
+    <au><snm>Ramezankhani</snm><fnm>A</fnm></au>
+    <au><snm>Pournik</snm><fnm>O</fnm></au>
+    <au><snm>Shahrabi</snm><fnm>J</fnm></au>
+    <au><snm>Azizi</snm><fnm>F</fnm></au>
+    <au><snm>Hadaegh</snm><fnm>F</fnm></au>
+    <au><snm>Khalili</snm><fnm>D</fnm></au>
+  </aug>
+  <source>Medical decision making</source>
+  <publisher>SAGE Publications Sage CA: Los Angeles, CA</publisher>
+  <pubdate>2016</pubdate>
+  <volume>36</volume>
+  <issue>1</issue>
+  <fpage>137</fpage>
+  <lpage>-144</lpage>
+</bibl>
+
+<bibl id="B72">
+  <title><p>A review of class imbalance problem</p></title>
+  <aug>
+    <au><snm>Abd Elrahman</snm><fnm>SM</fnm></au>
+    <au><snm>Abraham</snm><fnm>A</fnm></au>
+  </aug>
+  <source>Journal of Network and Innovative Computing</source>
+  <pubdate>2013</pubdate>
+  <volume>1</volume>
+  <issue>2013</issue>
+  <fpage>332</fpage>
+  <lpage>-340</lpage>
+</bibl>
+
+<bibl id="B73">
+  <title><p>A review on ensembles for the class imbalance problem: bagging-,
+  boosting-, and hybrid-based approaches</p></title>
+  <aug>
+    <au><snm>Galar</snm><fnm>M</fnm></au>
+    <au><snm>Fernandez</snm><fnm>A</fnm></au>
+    <au><snm>Barrenechea</snm><fnm>E</fnm></au>
+    <au><snm>Bustince</snm><fnm>H</fnm></au>
+    <au><snm>Herrera</snm><fnm>F</fnm></au>
+  </aug>
+  <source>IEEE Transactions on Systems, Man, and Cybernetics, Part C
+  (Applications and Reviews)</source>
+  <publisher>IEEE</publisher>
+  <pubdate>2011</pubdate>
+  <volume>42</volume>
+  <issue>4</issue>
+  <fpage>463</fpage>
+  <lpage>-484</lpage>
+</bibl>
+
+<bibl id="B74">
+  <title><p>Improvement of Bagging performance for classification of imbalanced
+  datasets using evolutionary multi-objective optimization</p></title>
+  <aug>
+    <au><snm>Roshan</snm><fnm>SE</fnm></au>
+    <au><snm>Asadi</snm><fnm>S</fnm></au>
+  </aug>
+  <source>Engineering Applications of Artificial Intelligence</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2020</pubdate>
+  <volume>87</volume>
+  <fpage>103319</fpage>
+</bibl>
+
+<bibl id="B75">
+  <title><p>Stopping criteria for active learning of named entity
+  recognition</p></title>
+  <aug>
+    <au><snm>Laws</snm><fnm>F</fnm></au>
+    <au><snm>Sch{\"u}tze</snm><fnm>H</fnm></au>
+  </aug>
+  <source>Proceedings of the 22nd International Conference on Computational
+  Linguistics (Coling 2008)</source>
+  <pubdate>2008</pubdate>
+  <fpage>465</fpage>
+  <lpage>-472</lpage>
+</bibl>
+
+<bibl id="B76">
+  <title><p>Confidence-based stopping criteria for active learning for data
+  annotation</p></title>
+  <aug>
+    <au><snm>Zhu</snm><fnm>J</fnm></au>
+    <au><snm>Wang</snm><fnm>H</fnm></au>
+    <au><snm>Hovy</snm><fnm>E</fnm></au>
+    <au><snm>Ma</snm><fnm>M</fnm></au>
+  </aug>
+  <source>ACM Transactions on Speech and Language Processing (TSLP)</source>
+  <publisher>ACM New York, NY, USA</publisher>
+  <pubdate>2010</pubdate>
+  <volume>6</volume>
+  <issue>3</issue>
+  <fpage>1</fpage>
+  <lpage>-24</lpage>
+</bibl>
+
+<bibl id="B77">
+  <title><p>A study of cross-validation and bootstrap for accuracy estimation
+  and model selection</p></title>
+  <aug>
+    <au><snm>Kohavi</snm><fnm>R</fnm></au>
+    <au><cnm>others</cnm></au>
+  </aug>
+  <source>Ijcai</source>
+  <pubdate>1995</pubdate>
+  <volume>14</volume>
+  <issue>2</issue>
+  <fpage>1137</fpage>
+  <lpage>-1145</lpage>
+</bibl>
+
+<bibl id="B78">
+  <title><p>An introduction to statistical learning</p></title>
+  <aug>
+    <au><snm>James</snm><fnm>G</fnm></au>
+    <au><snm>Witten</snm><fnm>D</fnm></au>
+    <au><snm>Hastie</snm><fnm>T</fnm></au>
+    <au><snm>Tibshirani</snm><fnm>R</fnm></au>
+  </aug>
+  <publisher>Springer</publisher>
+  <pubdate>2013</pubdate>
+  <volume>112</volume>
+</bibl>
+
+<bibl id="B79">
+  <title><p>Out-of-sample tests of forecasting accuracy: an analysis and
+  review</p></title>
+  <aug>
+    <au><snm>Tashman</snm><fnm>LJ</fnm></au>
+  </aug>
+  <source>International journal of forecasting</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2000</pubdate>
+  <volume>16</volume>
+  <issue>4</issue>
+  <fpage>437</fpage>
+  <lpage>-450</lpage>
+</bibl>
+
+<bibl id="B80">
+  <title><p>Maximum entropy fundamentals</p></title>
+  <aug>
+    <au><snm>Harremo{\"e}s</snm><fnm>P</fnm></au>
+    <au><snm>Tops{\o}e</snm><fnm>F</fnm></au>
+  </aug>
+  <source>Entropy</source>
+  <publisher>Molecular Diversity Preservation International</publisher>
+  <pubdate>2001</pubdate>
+  <volume>3</volume>
+  <issue>3</issue>
+  <fpage>191</fpage>
+  <lpage>-226</lpage>
+</bibl>
+
+<bibl id="B81">
+  <title><p>Identification of randomized controlled trials in systematic
+  reviews: accuracy and reliability of screening records</p></title>
+  <aug>
+    <au><snm>Edwards</snm><fnm>P</fnm></au>
+    <au><snm>Clarke</snm><fnm>M</fnm></au>
+    <au><snm>DiGuiseppi</snm><fnm>C</fnm></au>
+    <au><snm>Pratap</snm><fnm>S</fnm></au>
+    <au><snm>Roberts</snm><fnm>I</fnm></au>
+    <au><snm>Wentz</snm><fnm>R</fnm></au>
+  </aug>
+  <source>Statistics in medicine</source>
+  <publisher>Wiley Online Library</publisher>
+  <pubdate>2002</pubdate>
+  <volume>21</volume>
+  <issue>11</issue>
+  <fpage>1635</fpage>
+  <lpage>-1640</lpage>
+</bibl>
+
+<bibl id="B82">
+  <title><p>Building systematic reviews using automatic text classification
+  techniques</p></title>
+  <aug>
+    <au><snm>Frunza</snm><fnm>O</fnm></au>
+    <au><snm>Inkpen</snm><fnm>D</fnm></au>
+    <au><snm>Matwin</snm><fnm>S</fnm></au>
+  </aug>
+  <source>Coling 2010: Posters</source>
+  <pubdate>2010</pubdate>
+  <fpage>303</fpage>
+  <lpage>-311</lpage>
+</bibl>
+
+<bibl id="B83">
+  <title><p>Screening nonrandomized studies for medical systematic reviews: a
+  comparative study of classifiers</p></title>
+  <aug>
+    <au><snm>Bekhuis</snm><fnm>T</fnm></au>
+    <au><snm>Demner Fushman</snm><fnm>D</fnm></au>
+  </aug>
+  <source>Artificial intelligence in medicine</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2012</pubdate>
+  <volume>55</volume>
+  <issue>3</issue>
+  <fpage>197</fpage>
+  <lpage>-207</lpage>
+</bibl>
+
+<bibl id="B84">
+  <title><p>Towards automating the initial screening phase of a systematic
+  review</p></title>
+  <aug>
+    <au><snm>Bekhuis</snm><fnm>T</fnm></au>
+    <au><snm>Demner Fushman</snm><fnm>D</fnm></au>
+  </aug>
+  <source>MEDINFO 2010</source>
+  <publisher>IOS Press</publisher>
+  <pubdate>2010</pubdate>
+  <fpage>146</fpage>
+  <lpage>-150</lpage>
+</bibl>
+
+<bibl id="B85">
+  <title><p>A critical analysis of studies that address the use of text mining
+  for citation screening in systematic reviews</p></title>
+  <aug>
+    <au><snm>Olorisade</snm><fnm>BK</fnm></au>
+    <au><snm>Quincey</snm><fnm>E</fnm></au>
+    <au><snm>Brereton</snm><fnm>P</fnm></au>
+    <au><snm>Andras</snm><fnm>P</fnm></au>
+  </aug>
+  <source>Proceedings of the 20th international conference on evaluation and
+  assessment in software engineering</source>
+  <pubdate>2016</pubdate>
+  <fpage>1</fpage>
+  <lpage>-11</lpage>
+</bibl>
+
+<bibl id="B86">
+  <title><p>Machine learning explainability through comprehensible decision
+  trees</p></title>
+  <aug>
+    <au><snm>Blanco Justicia</snm><fnm>A</fnm></au>
+    <au><snm>Domingo Ferrer</snm><fnm>J</fnm></au>
+  </aug>
+  <source>International Cross-Domain Conference for Machine Learning and
+  Knowledge Extraction</source>
+  <pubdate>2019</pubdate>
+  <fpage>15</fpage>
+  <lpage>-26</lpage>
+</bibl>
+
+<bibl id="B87">
+  <title><p>Transparent tree ensembles</p></title>
+  <aug>
+    <au><snm>Moore</snm><fnm>A</fnm></au>
+    <au><snm>Murdock</snm><fnm>V</fnm></au>
+    <au><snm>Cai</snm><fnm>Y</fnm></au>
+    <au><snm>Jones</snm><fnm>K</fnm></au>
+  </aug>
+  <source>The 41st International ACM SIGIR Conference on Research \&
+  Development in Information Retrieval</source>
+  <pubdate>2018</pubdate>
+  <fpage>1241</fpage>
+  <lpage>-1244</lpage>
+</bibl>
+
+<bibl id="B88">
+  <title><p>Machine learning explainability for external
+  stakeholders</p></title>
+  <aug>
+    <au><snm>Bhatt</snm><fnm>U</fnm></au>
+    <au><snm>Andrus</snm><fnm>M</fnm></au>
+    <au><snm>Weller</snm><fnm>A</fnm></au>
+    <au><snm>Xiang</snm><fnm>A</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:2007.05408</source>
+  <pubdate>2020</pubdate>
+</bibl>
+
+<bibl id="B89">
+  <title><p>A survey on the explainability of supervised machine
+  learning</p></title>
+  <aug>
+    <au><snm>Burkart</snm><fnm>N</fnm></au>
+    <au><snm>Huber</snm><fnm>MF</fnm></au>
+  </aug>
+  <source>Journal of Artificial Intelligence Research</source>
+  <pubdate>2021</pubdate>
+  <volume>70</volume>
+  <fpage>245</fpage>
+  <lpage>-317</lpage>
+</bibl>
+
+<bibl id="B90">
+  <title><p>Explainable agents for less bias in human-agent decision
+  making</p></title>
+  <aug>
+    <au><snm>Malhi</snm><fnm>A</fnm></au>
+    <au><snm>Knapic</snm><fnm>S</fnm></au>
+    <au><snm>Fr{\"a}mling</snm><fnm>K</fnm></au>
+  </aug>
+  <source>International Workshop on Explainable, Transparent Autonomous Agents
+  and Multi-Agent Systems</source>
+  <pubdate>2020</pubdate>
+  <fpage>129</fpage>
+  <lpage>-146</lpage>
+</bibl>
+
+<bibl id="B91">
+  <title><p>Legal requirements on explainability in machine
+  learning</p></title>
+  <aug>
+    <au><snm>Bibal</snm><fnm>A</fnm></au>
+    <au><snm>Lognoul</snm><fnm>M</fnm></au>
+    <au><snm>De Streel</snm><fnm>A</fnm></au>
+    <au><snm>Fr{\'e}nay</snm><fnm>B</fnm></au>
+  </aug>
+  <source>Artificial Intelligence and Law</source>
+  <publisher>Springer</publisher>
+  <pubdate>2021</pubdate>
+  <volume>29</volume>
+  <issue>2</issue>
+  <fpage>149</fpage>
+  <lpage>-169</lpage>
+</bibl>
+
+<bibl id="B92">
+  <title><p>Impact of legal requirements on explainability in machine
+  learning</p></title>
+  <aug>
+    <au><snm>Bibal</snm><fnm>A</fnm></au>
+    <au><snm>Lognoul</snm><fnm>M</fnm></au>
+    <au><snm>Streel</snm><fnm>A</fnm></au>
+    <au><snm>Fr{\'e}nay</snm><fnm>B</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:2007.05479</source>
+  <pubdate>2020</pubdate>
+</bibl>
+
+<bibl id="B93">
+  <title><p>Word representations: a simple and general method for
+  semi-supervised learning</p></title>
+  <aug>
+    <au><snm>Turian</snm><fnm>J</fnm></au>
+    <au><snm>Ratinov</snm><fnm>L</fnm></au>
+    <au><snm>Bengio</snm><fnm>Y</fnm></au>
+  </aug>
+  <source>Proceedings of the 48th annual meeting of the association for
+  computational linguistics</source>
+  <pubdate>2010</pubdate>
+  <fpage>384</fpage>
+  <lpage>-394</lpage>
+</bibl>
+
+<bibl id="B94">
+  <title><p>Embedding semantic relations into word representations</p></title>
+  <aug>
+    <au><snm>Bollegala</snm><fnm>D</fnm></au>
+    <au><snm>Maehara</snm><fnm>T</fnm></au>
+    <au><snm>Kawarabayashi</snm><fnm>Ki</fnm></au>
+  </aug>
+  <source>Twenty-fourth international joint conference on artificial
+  intelligence</source>
+  <pubdate>2015</pubdate>
+</bibl>
+
+<bibl id="B95">
+  <title><p>Deep Learning--based Text Classification: A Comprehensive
+  Review</p></title>
+  <aug>
+    <au><snm>Minaee</snm><fnm>S</fnm></au>
+    <au><snm>Kalchbrenner</snm><fnm>N</fnm></au>
+    <au><snm>Cambria</snm><fnm>E</fnm></au>
+    <au><snm>Nikzad</snm><fnm>N</fnm></au>
+    <au><snm>Chenaghlu</snm><fnm>M</fnm></au>
+    <au><snm>Gao</snm><fnm>J</fnm></au>
+  </aug>
+  <source>ACM Computing Surveys (CSUR)</source>
+  <publisher>ACM New York, NY, USA</publisher>
+  <pubdate>2021</pubdate>
+  <volume>54</volume>
+  <issue>3</issue>
+  <fpage>1</fpage>
+  <lpage>-40</lpage>
+</bibl>
+
+<bibl id="B96">
+  <title><p>Text classification method based on self-training and LDA topic
+  models</p></title>
+  <aug>
+    <au><snm>Pavlinek</snm><fnm>M</fnm></au>
+    <au><snm>Podgorelec</snm><fnm>V</fnm></au>
+  </aug>
+  <source>Expert Systems with Applications</source>
+  <publisher>Elsevier</publisher>
+  <pubdate>2017</pubdate>
+  <volume>80</volume>
+  <fpage>83</fpage>
+  <lpage>-93</lpage>
+</bibl>
+
+<bibl id="B97">
+  <title><p>Short text classification based on LDA topic model</p></title>
+  <aug>
+    <au><snm>Chen</snm><fnm>Q</fnm></au>
+    <au><snm>Yao</snm><fnm>L</fnm></au>
+    <au><snm>Yang</snm><fnm>J</fnm></au>
+  </aug>
+  <source>2016 International Conference on Audio, Language and Image Processing
+  (ICALIP)</source>
+  <pubdate>2016</pubdate>
+  <fpage>749</fpage>
+  <lpage>-753</lpage>
+</bibl>
+
+<bibl id="B98">
+  <title><p>An introduction to latent semantic analysis</p></title>
+  <aug>
+    <au><snm>Landauer</snm><fnm>TK</fnm></au>
+    <au><snm>Foltz</snm><fnm>PW</fnm></au>
+    <au><snm>Laham</snm><fnm>D</fnm></au>
+  </aug>
+  <source>Discourse processes</source>
+  <publisher>Taylor \& Francis</publisher>
+  <pubdate>1998</pubdate>
+  <volume>25</volume>
+  <issue>2-3</issue>
+  <fpage>259</fpage>
+  <lpage>-284</lpage>
+</bibl>
+
+<bibl id="B99">
+  <title><p>Evaluation of Deep Gaussian Processes for Text
+  Classification</p></title>
+  <aug>
+    <au><snm>Jayashree</snm><fnm>P</fnm></au>
+    <au><snm>Srijith</snm><fnm>PK</fnm></au>
+  </aug>
+  <source>Proceedings of the 12th Language Resources and Evaluation
+  Conference</source>
+  <pubdate>2020</pubdate>
+  <fpage>1485</fpage>
+  <lpage>-1491</lpage>
+</bibl>
+
+<bibl id="B100">
+  <title><p>Gaussian process based text categorization for healthy
+  information</p></title>
+  <aug>
+    <au><snm>Chen</snm><fnm>SH</fnm></au>
+    <au><snm>Lee</snm><fnm>YS</fnm></au>
+    <au><snm>Tai</snm><fnm>TC</fnm></au>
+    <au><snm>Wang</snm><fnm>JC</fnm></au>
+  </aug>
+  <source>2015 International Conference on Orange Technologies (ICOT)</source>
+  <pubdate>2015</pubdate>
+  <fpage>30</fpage>
+  <lpage>33</lpage>
+</bibl>
+
+<bibl id="B101">
+  <title><p>Document classification based on convolutional neural network and
+  hierarchical attention network</p></title>
+  <aug>
+    <au><snm>Cheng</snm><fnm>Y</fnm></au>
+    <au><snm>Ye</snm><fnm>Z</fnm></au>
+    <au><snm>Wang</snm><fnm>M</fnm></au>
+    <au><snm>Zhang</snm><fnm>Q</fnm></au>
+  </aug>
+  <source>Neural Network World</source>
+  <publisher>Czech Technical University in Prague, Faculty of Transportation
+  Sciences</publisher>
+  <pubdate>2019</pubdate>
+  <volume>29</volume>
+  <issue>2</issue>
+  <fpage>83</fpage>
+  <lpage>-98</lpage>
+</bibl>
+
+<bibl id="B102">
+  <title><p>A survey on text classification: From shallow to deep
+  learning</p></title>
+  <aug>
+    <au><snm>Li</snm><fnm>Q</fnm></au>
+    <au><snm>Peng</snm><fnm>H</fnm></au>
+    <au><snm>Li</snm><fnm>J</fnm></au>
+    <au><snm>Xia</snm><fnm>C</fnm></au>
+    <au><snm>Yang</snm><fnm>R</fnm></au>
+    <au><snm>Sun</snm><fnm>L</fnm></au>
+    <au><snm>Yu</snm><fnm>PS</fnm></au>
+    <au><snm>He</snm><fnm>L</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:2008.00364</source>
+  <pubdate>2020</pubdate>
+</bibl>
+
+<bibl id="B103">
+  <title><p>A survey of text classification models</p></title>
+  <aug>
+    <au><snm>Yang</snm><fnm>J</fnm></au>
+    <au><snm>Bai</snm><fnm>L</fnm></au>
+    <au><snm>Guo</snm><fnm>Y</fnm></au>
+  </aug>
+  <source>Proceedings of the 2020 2nd International Conference on Robotics,
+  Intelligent Control and Artificial Intelligence</source>
+  <pubdate>2020</pubdate>
+  <fpage>327</fpage>
+  <lpage>-334</lpage>
+</bibl>
+
+<bibl id="B104">
+  <title><p>Recurrent convolutional neural networks for text
+  classification</p></title>
+  <aug>
+    <au><snm>Lai</snm><fnm>S</fnm></au>
+    <au><snm>Xu</snm><fnm>L</fnm></au>
+    <au><snm>Liu</snm><fnm>K</fnm></au>
+    <au><snm>Zhao</snm><fnm>J</fnm></au>
+  </aug>
+  <source>Twenty-ninth AAAI conference on artificial intelligence</source>
+  <pubdate>2015</pubdate>
+</bibl>
+
+<bibl id="B105">
+  <title><p>Document classification and recurrent neural networks</p></title>
+  <aug>
+    <au><snm>Farkas</snm><fnm>J</fnm></au>
+  </aug>
+  <source>Proceedings of the 1995 conference of the Centre for Advanced Studies
+  on Collaborative research</source>
+  <pubdate>1995</pubdate>
+  <fpage>21</fpage>
+</bibl>
+
+<bibl id="B106">
+  <title><p>An approximate bayesian long short-term memory algorithm for
+  outlier detection</p></title>
+  <aug>
+    <au><snm>Chen</snm><fnm>C</fnm></au>
+    <au><snm>Lin</snm><fnm>X</fnm></au>
+    <au><snm>Terejanu</snm><fnm>G</fnm></au>
+  </aug>
+  <source>2018 24th International Conference on Pattern Recognition
+  (ICPR)</source>
+  <pubdate>2018</pubdate>
+  <fpage>201</fpage>
+  <lpage>-206</lpage>
+</bibl>
+
+<bibl id="B107">
+  <title><p>An open-source integrated framework for the automation of citation
+  collection and screening in systematic reviews</p></title>
+  <aug>
+    <au><snm>D'Ambrosio</snm><fnm>A</fnm></au>
+    <au><snm>Grundmann</snm><fnm>H</fnm></au>
+    <au><snm>Donker</snm><fnm>T</fnm></au>
+  </aug>
+  <source>arXiv preprint arXiv:2202.10033</source>
+  <pubdate>2022</pubdate>
+</bibl>
+
+<bibl id="B108">
+  <title><p>Dataset related to the manuscript: "An open-source integrated
+  framework for the automation of citation collection and screening in
+  systematic reviews"</p></title>
+  <aug>
+    <au><snm>D'Ambrosio</snm><fnm>A</fnm></au>
+  </aug>
+  <publisher>Zenodo</publisher>
+  <pubdate>2022</pubdate>
+</bibl>
+
+</refgrp>
+} % end of \BMCxmlcomment

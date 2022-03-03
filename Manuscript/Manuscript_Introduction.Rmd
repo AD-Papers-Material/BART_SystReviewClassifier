@@ -10,7 +10,7 @@ output:
   github_document: default
 ---
 
-# Introduction
+# Background
 
 Scientific production has experienced continuous exponential growth in the last decades [@larsen2010rate; @bornmann2015growth].
 This is especially true for biomedical research, a trend further accelerated by the COVID-19 pandemic, thanks to faster article processing time by publishers and the greater use of preprint databases [@aviv2021publication; @horbach2020pandemic; @hoy2020rise].

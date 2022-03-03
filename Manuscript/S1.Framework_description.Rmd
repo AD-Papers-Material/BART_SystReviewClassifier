@@ -1,5 +1,5 @@
 ---
-title: "Study protocol"
+title: "Framework description and usage"
 date: "`r lubridate::today()`"
 output:
   pdf_document:
@@ -25,11 +25,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Research Protocol
+# Framework usage instructions
 
 This document will guide the reader along the steps to utilise the framework and reproduce our results.
 
-To use the framework clone it from https://github.com/AD-Papers-Material/BART_SystReviewClassifier and run the R project in the repository.
+To use the framework, clone it from https://github.com/AD-Papers-Material/BART_SystReviewClassifier and run the R project in the repository.
 
 The first step is loading the code base using:
 
@@ -204,13 +204,13 @@ Once the initial training set is prepared, the function `enrich_annotation_file(
 `enrich_annotation_file()` comprises two steps.
 The first step is the creation of a **Document Term Matrix** (DTM):
 
-- The framework extracts **features** from text data (i.e., title and abstract) of the records, authors, keywords and MESH terms (see Methods for more info).
+- The framework extracts **features** from text data (i.e., title and abstract) of the records, authors, keywords and MeSH terms (see Methods for more info).
 Before features extraction, text data terms are lemmatised, stop-words are removed, and only nouns, adjectives, verbs and untagged terms are retained.
-Authors, keywords, and MESH are kept unmodified.
+Authors, keywords, and MeSH are kept unmodified.
 Co-occurrent features (non-consecutive ngrams, **nc-grams**) are identified and **redundant features** (i.e. terms always appearing together) are joined to decrease the feature space noise.
 - For each term, a 0/1 label specifies if it is present in each record.
 - Positive records are oversampled **10x** to improve sensitivity;
-- An extra feature is added for each record field (title, abstract, authors, keywords, MESH terms), reporting the number of terms in each.
+- An extra feature is added for each record field (title, abstract, authors, keywords, MeSH terms), reporting the number of terms in each.
 
 The second step is the modelling of the labelling pattern and the predictions of the relevancy/positivity probability:
 
@@ -283,7 +283,7 @@ The general query generation mechanism is the following:
 
 - We fit a partition tree between the DTM and 800 samples from the PPD;
 if a term is present multiple times in the DTM (e.g., both title and abstract), they are counted just one, and field term count features are removed.
-This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
+This step generates a list of rules composed by $AND$/$NOT$ "conditions" made of terms/authors/keywords/MeSH tokens, which together identify a group of records.
 - For each rule, negative conditions (i.e., $NOT$ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
 - The extended set of rules is sorted by positive-negative record difference in descending order.
 The cumulative number of unique positive records is computed and used to group the rules.

@@ -12,7 +12,7 @@ output:
 
 ## General description
 
-We built an R [@rstat] based framework to simplify two aspects of systematic literature review:
+We built an R [@rstats2021] based framework to simplify two aspects of systematic literature review:
 record acquisition and classification.
 The code used to generate the results is available at https://github.com/AD-Papers-Material/BART_SystReviewClassifier, while an updated and ready to use version of the framework is distributed as an R package at https://github.com/bakaburg1/BaySREn.
 The framework includes several modules that communicate through intermediate outputs stored in standard formats, making it possible for users to extend the framework or easily integrate it with other tools in their pipeline.
@@ -21,8 +21,8 @@ The tasks carried out by the framework are grouped into "sessions", which compri
 The initial search query should be built using domain knowledge, trying to achieve a high relevant/non-relevant record ratio.\
 The framework can then generate a new data-driven query from this labelled set to perform a new session to find records possibly missed by the first query.\
 
-```{r method_diagram, fig.cap = "Figure 1. Framework's visual representation.", echo = FALSE, out.width = "100%"}
-knitr::include_graphics("methods_diagram.png", auto_pdf = T)
+```{r figure1.method_diagram, fig.cap = "Figure 1. Framework's visual representation.", echo = FALSE, out.width = "100%"}
+knitr::include_graphics(file.path("Figures", "methods_diagram.png"), auto_pdf = T)
 ```
 
 <!-- ![Figure 1. Framework visual depiction.](methods_diagram.png) -->
@@ -45,10 +45,10 @@ Simple query ordering increases the positivity rate in the initial training set 
 ## Text feature extraction
 
 The framework models the relevance of a record based on the following fields in the citation data:
-title, abstract, authors, keywords, MESH terms [@lipscomb2000medical].
+title, abstract, authors, keywords, MeSH terms [@lipscomb2000medical].
 A range of Natural Language Processing (NLP) techniques [@baeza1999modern; @marshall2015systematic; @ananiadou2006text] are employed to convert the textual information in these fields into features for machine learning through a bag-of-words approach [@marshall2015systematic].
 Processing of free text fields (title, abstract) includes: tokenisation (i.e., extracting the terms), removal of common stopwords (i.e., sentence components having no semantic value), part-of-speech filtering (only nouns, adjectives, verbs and untagged terms are retained), and lemmatisation of terms (i.e., reduction to their base grammatical form).
-Text processing for authors, keywords and MESH terms identifies logical units (e.g., authors' full names, composite keywords) and extracts them.\
+Text processing for authors, keywords and MeSH terms identifies logical units (e.g., authors' full names, composite keywords) and extracts them.\
 Terms appearing in less than 5% of the labelled documents are removed from negative records.
 All terms in the positive set are kept to increase sensitivity at the cost of specificity.\
 Some terms tend to co-appear in records (non-consecutive ngrams, nc-ngrams), often carrying a particular meaning when they do co-occur.
@@ -68,7 +68,7 @@ We used a Bayesian Additive Regression Trees (BART) machine learning "classifica
 We set up the BART model to use 2,000 MCMC iterations (after 250 burn-in iterations) and 50 trees;
 we used a $k$ value of 2 to regularise extreme prediction and let the model use missing fields in the DTM as features [@kapelner2015prediction].
 Positive records are oversampled ten times to increase sensitivity [@batista2004study].\
-The output is a posterior predictive distribution (PPD) for each record describing the probability of it being relevant (i.e., a positive match).
+The output is the expected value posterior predictive distribution for each record (PPD in brief) describing the probability of it being relevant (i.e., a positive match).
 An ensemble of ten models was fitted to improve prediction stability by averaging the PPD between models [@zhou2021ensemble; @dietterich2000ensemble].\
 
 To assign the labels, we employed an "active learning" approach [@settles2009active; @miwa2014reducing], where a human reviews a specific subset of predictions made by the machine, which is then retrained on the manually reviewed dataset.
@@ -76,7 +76,7 @@ This process is carried out iteratively to reduce prediction uncertainty.\
 Label assignment is done through identification of an "uncertainty zone", the construction of which is possible thanks to the Bayesian nature of BART, which provides full PPDs instead of point-wise predictions for each record.\
 To describe the process formally, we define:
 
-$$\pi_i = \frac{1}{M}\sum_{j=1}^M Pr(L_i = \text{1}|DTM,m_j)$$
+$$\pi_i = \frac{1}{M}\sum_{j=1}^M Pr(L_i = \text{1}|DTM,m_j) \tag{Eq. 1}$$
 
 as the PPD of a record $D_i$ being relevant (i.e, having a positive label, $L_i = 1$), averaging the PPDs of the ensemble of $M=10$ models $m$, and:
 
@@ -85,26 +85,27 @@ $$
 \pi_{i,l} = \{\pi_i : Pr(\pi_i) = 1\%\}\\
 \pi_{i,u} = \{\pi_i : Pr(\pi_i) = 99\%\}
 \end{aligned}
+\tag{Eq. 2}
 $$
 
 respectively as the lower and upper boundaries of the 98% quantile interval of $\pi_i$ (98% Predictive Interval, 98% PrI).\
 Then we identify the "uncertainty zone" as:
 
-$$U_\pi=[\max\vec{\pi}_{u}^-, \min\vec{\pi}_{l}^+]$$
+$$U_\pi=[\max\vec{\pi}_{u}^-, \min\vec{\pi}_{l}^+] \tag{Eq. 3}$$
 
 with $\vec{\pi}_{u}^-$ being the vector of $\pi_{i,u}$ with a negative label and $\vec{\pi}_{l}^+$ the vector of $\pi_{i,l}$ with a positive label.
 That is, $U_\pi$ defines a range of values between the smallest $\pi_{i,l}$ in the set of already labelled positive records $L_p$ and the largest $pi_{i,u}$ related to the negative ones $L_n$, noting that the two limits can appear in any order.\
 Consequently, a record $D_i$ will be labelled as positive if:
 
-$$\pi_{i,l} > \max_{\pi \in U_\pi} \pi$$
+$$\pi_{i,l} > \max_{\pi \in U_\pi} \pi \tag{Eq. 4}$$
 
 that is, the record lower 98% PrI boundary should be higher than every value in the uncertainty zone.
 In other words, for a record to be labelled positive, its PPD should be within the range of the mixture of PPD of the records previously labelled positive and should not cross the distributions of the negative records.\
 Conversely, a record is labelled as negative if:
 
-$$\pi_{i,u} < \min_{\pi \in U_\pi} \pi$$
+$$\pi_{i,u} < \min_{\pi \in U_\pi} \pi \tag{Eq. 5}$$
 
-All other records are labelled as "uncertain".
+The remaining records are labelled as "uncertain".
 
 Manual review is then necessary for: 1) uncertain records, 2) positive records (to avoid false positives), and 3) records whose predicted label differs from the existing manual one.
 The last case helps identify human errors or inconsistent labelling criteria.
@@ -126,7 +127,7 @@ The algorithm is composed of the following steps:
 
 - A partition tree [@rpart] is built between the DTM and 800 samples from the PPD;
 if a term is present multiple times in the DTM (e.g., both in the title and abstract), it is counted just once, and field term count features are removed.
-This step generates a list of rules composed by _AND_/_NOT_ "conditions" made of terms/authors/keywords/MESH tokens, which together identify a group of records.
+This step generates a list of rules composed by _AND_/_NOT_ "conditions" made of terms/authors/keywords/MeSH tokens, which together identify a group of records.
 - For each rule, negative conditions (i.e., _NOT_ statements) are added iteratively, starting from the most specific one, until no conditions are found that would not also remove positive records.
 - The extended set of rules is sorted by positive-negative record difference in descending order.
 The cumulative number of unique positive records is computed and used to group the rules.
@@ -161,7 +162,7 @@ Our classification algorithm has a limited number of hyperparameters:
 
 - Size of the initial training set: 50, 100, 250, 500 records;
 - Number of models in the ensemble: 1, 5, 10, 20, 40, 60 repetitions;
-- Oversampling rate of positive records: (1x (i.e., no oversampling), 10x, 20x;
+- Oversampling rate of positive records: 1x (i.e., no oversampling), 10x, 20x;
 - PrI quantiles for building the uncertainty zone: 80%, 90%, 98%;
 - Source of randomness between models in the ensemble: MCMC sampling only [@robert2004monte], MCMC plus data bootstrapping [@breiman1996bagging] of the training set.
 
@@ -170,3 +171,6 @@ Each hyperparameter combination was tested until four CR iterations were complet
 For each combination, a performance score was computed as the product of "Efficiency" (1 minus the ratio of records that required reviewing over the total number of records) and "Sensitivity" (number of positive records found over the total number of positive records).
 We then used a partition tree [@rpart] to identify homogeneous "performance clusters" of scores given hyperparameter values.
 For the rest of the study, we used the best hyperparameter set in terms of sensitivity followed by efficiency from the cluster with the highest average score.\
+
+## Software and data
+The framework is built with R v4.0.4 [@rstats2021]. The R packages required by the framework are listed at https://github.com/bakaburg1/BaySREn/blob/main/DESCRIPTION. All relevant data necessary to replicate the results is available at https://doi.org/10.5281/zenodo.6323360.
