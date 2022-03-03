@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 This repo is the companion to the paper "An open-source integrated framework for the automation of citation collection and screening in systematic reviews" published as preprint at https://arxiv.org/abs/2202.10033. The following instructions are taken from the Supplemental Material S1.
 
-The R package inspired by the manuscript is available at https://github.com/bakaburg1/BaySREn.
+An updated and ready to use version of the framework is available as R package at https://github.com/bakaburg1/BaySREn.
 
-```{r child = file.path("Manuscript", "S1.Protocol.Rmd")}
+```{r child = file.path("Manuscript", "S1.Framework_description.Rmd")}
 ```

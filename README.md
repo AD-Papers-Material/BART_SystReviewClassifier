@@ -1,4 +1,4 @@
-BART_SystReviewClassifier
+BART\_SystReviewClassifier
 ================
 
 ## Description
@@ -9,15 +9,15 @@ systematic reviews” published as preprint at
 <https://arxiv.org/abs/2202.10033>. The following instructions are taken
 from the Supplemental Material S1.
 
-The R package inspired by the manuscript is available at
-<https://github.com/bakaburg1/BaySREn>.
+An updated and ready to use version of the framework is available as R
+package at <https://github.com/bakaburg1/BaySREn>.
 
-# Research Protocol
+# Framework usage instructions
 
 This document will guide the reader along the steps to utilise the
 framework and reproduce our results.
 
-To use the framework clone it from
+To use the framework, clone it from
 <https://github.com/AD-Papers-Material/BART_SystReviewClassifier> and
 run the R project in the repository.
 
@@ -244,10 +244,10 @@ unlabelled records.
 creation of a **Document Term Matrix** (DTM):
 
 -   The framework extracts **features** from text data (i.e., title and
-    abstract) of the records, authors, keywords and MESH terms (see
+    abstract) of the records, authors, keywords and MeSH terms (see
     Methods for more info). Before features extraction, text data terms
     are lemmatised, stop-words are removed, and only nouns, adjectives,
-    verbs and untagged terms are retained. Authors, keywords, and MESH
+    verbs and untagged terms are retained. Authors, keywords, and MeSH
     are kept unmodified. Co-occurrent features (non-consecutive ngrams,
     **nc-grams**) are identified and **redundant features** (i.e. terms
     always appearing together) are joined to decrease the feature space
@@ -256,7 +256,7 @@ creation of a **Document Term Matrix** (DTM):
     record.
 -   Positive records are oversampled **10x** to improve sensitivity;
 -   An extra feature is added for each record field (title, abstract,
-    authors, keywords, MESH terms), reporting the number of terms in
+    authors, keywords, MeSH terms), reporting the number of terms in
     each.
 
 The second step is the modelling of the labelling pattern and the
@@ -299,8 +299,8 @@ New_annotations <- enrich_annotation_file("Session1")
 This function will produce a new file which is stored in the Annotations
 folder of the session; the file will contain a column called
 `Rev_prediction_new` where the user will find records that require
-manual review marked by “\*“. These are records with uncertain labelling
-(”unk”), but also positive predictions and “y”/“n” predictions that
+manual review marked by "\*“. These are records with uncertain labelling
+(”unk“), but also positive predictions and”y“/”n" predictions that
 contradict previous manually input labels (labelled as “check”). This
 approach increases the accuracy of the predictions since the machine
 learning system is set up to favour sensitivity at the expense of
@@ -342,10 +342,10 @@ Once the manual review of the generated annotation file is completed,
 the user can **rerun exactly the same function**. The last reviewed
 annotation file will be automatically picked up and used for a new CR
 iteration. If the number of records requiring manual review is
-excessively high (e.g. > 250), the function needs to be called with the
-`stop_on_unreviewed` argument set to `FALSE` to allow the classification
-to proceed even in the presence of unreviewed records in the
-`Rev_prediction_new` column.
+excessively high (e.g. &gt; 250), the function needs to be called with
+the `stop_on_unreviewed` argument set to `FALSE` to allow the
+classification to proceed even in the presence of unreviewed records in
+the `Rev_prediction_new` column.
 
 If there are no positive results (after manual review) in a CR
 iteration, the framework records the next iteration as a
@@ -388,7 +388,7 @@ following:
     title and abstract), they are counted just one, and field term count
     features are removed. This step generates a list of rules composed
     by *A**N**D*/*N**O**T* “conditions” made of
-    terms/authors/keywords/MESH tokens, which together identify a group
+    terms/authors/keywords/MeSH tokens, which together identify a group
     of records.
 -   For each rule, negative conditions (i.e., *N**O**T* statements) are
     added iteratively, starting from the most specific one, until no
@@ -655,14 +655,14 @@ The hyperparameters are the following:
 
 -   resample: whether to use bootstrapping to increase variability
     between the ensemble models;
--   n_init: number of initially labelled records to train the machine
+-   n\_init: number of initially labelled records to train the machine
     learning model on;
--   n_models: the number of models to fit and then average to decrease
+-   n\_models: the number of models to fit and then average to decrease
     the variance due to random sampling in the MCMC algorithm. It
     reduces the likelihood of extreme predictions;
--   pos_mult: the oversampling rate of positive records. Useful to
+-   pos\_mult: the oversampling rate of positive records. Useful to
     improve sensitivity;
--   pred_quants: the distribution quantiles of each PPD, used to define
+-   pred\_quants: the distribution quantiles of each PPD, used to define
     the uncertainty zone and identify records to review.
 
 Once the grid search is performed, the function `analyse_grid_search()`
