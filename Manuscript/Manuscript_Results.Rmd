@@ -2,10 +2,12 @@
 title: "Results"
 date: "`r lubridate::today()`"
 output:
+  html_document:
+    df_print: paged
+  github_document: default
   pdf_document:
     includes:
       in_header: header.tex
-  github_document: default
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE, error = FALSE}
@@ -26,7 +28,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   dpi = 400,
   cache = TRUE,
-  fig.path = "Figures/",
   cache.rebuild = FALSE
 )
 ```
@@ -93,7 +94,7 @@ var_importance <- extract_var_imp("Session1") %>%
 
 The initial search query for the example topic was:\
 
-*`r first_query`*\
+*`r first_query`*
 
 selecting only results between 2010 and 2020 (included).
 Results were collected from Pubmed, WOS, IEEE, EMBASE and SCOPUS, using the framework tools as described in the Methods and Supplemental Material S1.
@@ -115,9 +116,9 @@ it can be seen how the distribution of uncertain records shrinks (i.e., it becom
 `r print_table(annotation_results, caption = "**Table 2**. Results of the automatic classification and manual review rounds. The cumulative numbers of positives and negative records and their sum (Total labelled) and percentage over total are shown for each iteration. Also, the number of changes after review and their description is reported.\"Unlab.\" indicates unlabelled records marked for review. For each iteration, the number of features used by the engine is also reported. The first row reports the results of the initial manual labelling of records, which served as input for the automatic classification in Iteration 1. In Session 2, the engine uses the labels at the end of Session 1 to classify the newly added records.", label = "Table 2")`
 
 We extracted the 15 more relevant terms for the classification model, described as:
-Term (citation part): Inclusion Rate (Inclusion Stability) [linear Relative Risk, Statistic]:\
+Term (citation part): Inclusion Rate (Inclusion Stability) [linear Relative Risk, Statistic].
 
-`r var_importance`.\
+`r var_importance`.
 
 The "&" indicates nc-ngrams, i.e., terms strongly co-occurrent in the documents.\
 The engine was able to pick up the central concept of the research topic, i.e., "patient transport" or "transfer" through a "network" of "facility"ies that facilitates the "spread" of infections, and even one of the authors of this study (Donker T.) as well as the region of interest ("Orange County") of another research group active on the topic of pathogen spreading over hospital networks.
@@ -158,7 +159,7 @@ n_review_rounds <- nrow(session_summary) - 1
 
 The results of the first classification session were used to create a second, data-driven query to perform a more extensive search to find records that may have been missed during the first search session. The resulting query was as follows:\
 
-*`r new_query`*\
+*`r new_query`*
 
 The final piece *AND ((antimicrobial resistance) OR (healthcare infection)* was added manually to define the search domain better since the algorithm was trained on documents that were all more or less related to these topics.\
 The generated query also provides a more nuanced understanding of the engine's internal classification logic, and this is helpful to spot possible biases in the model.\
@@ -240,7 +241,7 @@ To ensure no obvious positive matches were missed, we evaluated 100 non-reviewed
 
 `r print_table(perf_table, caption = "**Table 3**. Estimated performance summary. The table reports for each session, the number of reviewed records and the percentage over the total. Also, the posterior expected number of positive records, sensitivity and efficiency (as WSoR) are reported, with their 90% PrI truncated to the observed realisation in the dataset [trunc. PrI] (see. methods). Finally, the logistic model's median Bayesian $R^2$ [90% CrI] is reported. PrI: Predictive Intervals; CrI: Credibility Intervals.", allow_math = TRUE, label = "Table 3")`
 
-```{r figure2.performance_plot, cache = FALSE, fig.width=7.5, fig.height=4.5, fig.cap="**Figure 2**. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the Bayesian logistic model is shown as a shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). A darker blue line represents the median of the PrI."}
+```{r performance_plot, cache = FALSE, fig.width=7.5, fig.height=4.5, fig.cap="**Figure 2**. Observed cumulative number of positive matches (red dots) sorted by simple query ordering. The [trunc. 90% PrI] of the cumulative positive matches estimated by the Bayesian logistic model is shown as a shaded area delimited by the 95% quantile of the PrI and by the observed number of positive matches (light blue lines). A darker blue line represents the median of the PrI."}
 
 Performance$s1$plot +
   guides(color = "none", fill = "none") +

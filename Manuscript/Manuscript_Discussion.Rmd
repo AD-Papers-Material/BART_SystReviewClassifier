@@ -16,7 +16,7 @@ We propose a new integrated framework to help researchers collect and screen sci
 This framework joins the joining the growing field of systematic review automation (SRA) and helpers (SRH) tools [@cohen2006reducing; @cohen2010evidence; @ananiadou2009supporting; @o2015using].
 This framework implements standard approaches and uses ad-hoc solutions to common SRA issues.
 By freely sharing the tool as an open-source R package and by following a modular design, we sought to adopt some of the so-called Vienna Principles advocated by the International Collaboration for the Automation of Systematic Reviews (ICASR) [@beller2018making].\
-The framework consists of four main components: 1) an integrated query-based citation search and management engine, 2) a Bayesian active machine learning-based citation classifier, and 3) a data-driven search query generation algorithm.\
+The framework consists of three main components: 1) an integrated query-based citation search and management engine, 2) a Bayesian active machine learning-based citation classifier, and 3) a data-driven search query generation algorithm.\
 
 The search engine module used by the framework can automatically collect citation data from three well-known scientific databases (i.e., Pubmed, Web of Science, and the Institute of Electrical and Electronics Engineers) and process manually downloaded results from two more sources (SCOPUS, EMBASE).
 In comparison, most commercial or free SRH tools rely on internal databases (e.g., Mendeley https://www.mendeley.com/) sometimes focusing only on a particular topic [@visser2010performing] or a single external data source [@thomas2007eppi; @poulter2008mscanner; @soto2019thalia].\
